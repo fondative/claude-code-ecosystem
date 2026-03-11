@@ -3,7 +3,8 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Claude Code Ecosystem',
   lastUpdated: true,
-  base: '/claude-code-wiki/',  // nom du repo
+  appearance: 'dark',
+  base: '/claude-code-ecosystem/',  // nom du repo
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
