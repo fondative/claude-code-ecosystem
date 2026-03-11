@@ -1,0 +1,30 @@
+name: Deploy Wiki
+on:
+  push:
+    branches: [main]
+    paths: ['wiki-claude-code/**']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+        working-directory: wiki-claude-code
+      - run: npm run docs:build
+        working-directory: wiki-claude-code
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: wiki-claude-code/docs/.vitepress/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
