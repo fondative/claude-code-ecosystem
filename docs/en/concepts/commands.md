@@ -6,7 +6,7 @@
 |--------|--------|
 | **What** | Actions invocable by the user via `/name` |
 | **Where** | `.claude/commands/` (project) or `~/.claude/commands/` (personal) |
-| **Status** | Merged with skills — commands continue to work, skills recommended for new workflows |
+| **Status** | Merged with [skills](/en/concepts/skills) — commands continue to work, skills recommended for new workflows |
 | **Priority** | A command and a skill with the same name → the skill wins |
 | **Arguments** | Via `$ARGUMENTS`, `$0`, `$1`, `${CLAUDE_SESSION_ID}`, `${CLAUDE_SKILL_DIR}` |
 
@@ -69,9 +69,9 @@ Commands support **all** skill frontmatter fields:
 | `user-invocable` | `false` = invisible in the `/` menu |
 | `allowed-tools` | Tools allowed without confirmation |
 | `model` | Model to use |
-| `context` | `fork` to execute in an isolated subagent |
-| `agent` | Subagent type if `context: fork` |
-| `hooks` | Hooks scoped to the command lifecycle |
+| `context` | `fork` to execute in an isolated [subagent](/en/concepts/agents) |
+| `agent` | [Subagent](/en/concepts/agents) type if `context: fork` |
+| `hooks` | [Hooks](/en/concepts/hooks) scoped to the command lifecycle |
 
 ### Substitution Variables
 
@@ -129,8 +129,13 @@ Subfolders become namespaces:
 │   ├── php-test.md      # → /dev/php-test
 │   └── php-lint.md      # → /dev/php-lint
 └── review/
-    └── symfony-review.md # → /review/symfony-review
+    ├── symfony-review.md  # → /review/symfony-review
+    └── frontend-review.md # → /review/frontend-review
 ```
+
+::: tip Hierarchical parent:child pattern
+For [plugins](/en/concepts/plugins), the namespace uses `:` instead of `/`: `/plugin-name:skill-name`. This isolates plugin commands from project commands.
+:::
 
 ---
 
@@ -140,14 +145,14 @@ Subfolders become namespaces:
 
 ```
 Need support files (references, scripts)?
-├── YES → SKILL (only format that supports it)
+├── YES → [SKILL](/en/concepts/skills) (only format that supports it)
 └── NO
     Need automatic loading by Claude?
-    ├── YES → SKILL (with description)
+    ├── YES → [SKILL](/en/concepts/skills) (with description)
     └── NO
         Existing command that works?
         ├── YES → Keep the command (no urgent migration)
-        └── NO → Create a SKILL (modern format)
+        └── NO → Create a [SKILL](/en/concepts/skills) (modern format)
 ```
 
 ### When to Migrate to Skill
@@ -159,40 +164,65 @@ Migrate a command to a skill when:
 - Need for `hooks` scoped to lifecycle
 - Creating a new workflow
 
-### Mistakes to Avoid
+### Warnings
 
-#### Pitfall 1: Command and Skill with the same name
+#### ⚠️ `WARN-001`: Command and Skill with the same name
 
+Having a command and a skill with the same name creates a silent conflict: the skill always wins.
+
+::: danger Problem
 ```
 # ❌ — Name conflict
 .claude/commands/review.md
 .claude/skills/review/SKILL.md
 # → The skill takes priority, the command is ignored
 ```
+The command is silently ignored with no warning.
+:::
 
-> Choose one or the other, not both.
+::: info Solution
+Choose one or the other, not both. If both exist, delete the command or rename it.
+:::
 
-#### Pitfall 2: Forgetting Docker flags
+---
 
+#### ⚠️ `WARN-002`: Forgetting Docker flags
+
+Without the `-T` and `2>&1 | cat` flags, Docker commands lose output and return incorrect error codes.
+
+::: danger Problem
 ```bash
 # ❌ — TTY + lost output
 docker compose exec app php bin/phpunit
 ```
+The interactive TTY blocks or truncates output in a non-interactive context.
+:::
 
+::: info Solution
 ```bash
 # ✅ — Correct flags
 docker compose exec -T app php bin/phpunit 2>&1 | cat
 ```
+`-T` disables TTY, `2>&1 | cat` captures both stderr and stdout.
+:::
 
-#### Pitfall 3: Command without description
+---
 
+#### ⚠️ `WARN-003`: Command without description
+
+A command without a description doesn't appear correctly in autocompletion and cannot be automatically delegated.
+
+::: danger Problem
 ```yaml
 # ❌ — Autocompletion shows nothing useful
 ---
 name: test
 ---
 ```
+The user has no idea what this command does without opening the file.
+:::
 
+::: info Solution
 ```yaml
 # ✅ — Clear description
 ---
@@ -201,28 +231,46 @@ description: Run backend tests via Docker Compose
 argument-hint: "[unit|integration|functional]"
 ---
 ```
+The description guides autocompletion and automatic delegation.
+:::
 
-#### Pitfall 4: Logic too complex
+---
 
+#### ⚠️ `WARN-004`: Logic too complex
+
+A command with branching, conditions, and hundreds of lines becomes unmanageable and hard to maintain.
+
+::: danger Problem
 ```markdown
 # ❌ — Branching, conditions, 200 lines of instructions
 ```
+Growing complexity makes the command fragile and hard to debug.
+:::
 
+::: info Solution
 ```markdown
 # ✅ — Extract complex logic into a skill with support files
 ```
+A command = a single file. If the logic overflows, it's a skill.
+:::
 
-> A command = a single file. If the logic overflows, it's a skill.
+---
 
-#### Pitfall 5: Hidden dependencies
+#### ⚠️ `WARN-005`: Hidden dependencies
 
+A command that requires external tools without documenting them fails silently depending on the environment.
+
+::: danger Problem
 ```yaml
 # ❌ — Requires gh CLI + Docker but doesn't say so
 ---
 name: deploy
 ---
 ```
+The user discovers missing dependencies at runtime.
+:::
 
+::: info Solution
 ```yaml
 # ✅ — Prerequisites documented
 ---
@@ -230,6 +278,8 @@ name: deploy
 description: Deploy via Docker (requires gh CLI and Docker)
 ---
 ```
+Prerequisites documented in the description prevent surprise errors.
+:::
 
 ---
 

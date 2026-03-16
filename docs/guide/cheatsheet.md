@@ -31,6 +31,8 @@ Aide-mémoire rapide — tout ce qu'il faut en 2 minutes.
 | `/mcp` | Statut des serveurs MCP et authentification OAuth |
 | `/status` | Voir les settings actifs et leur source |
 | `/hooks` | Statut des hooks configurés |
+| `/agents` | Lister les agents disponibles (built-in + custom) |
+| `/btw <question>` | Question rapide sans outils (réponse jetée de l'historique) |
 
 ## Modes de permission
 
@@ -90,7 +92,7 @@ Lancer les tests apres implementation.
 1. /plan          → Explorer, comprendre le contexte
 2. Implementer    → Code avec conventions (skills)
 3. Tester         → /dev/php-test ou npm test
-4. Reviewer       → /review/symfony-review
+4. Reviewer       → /review/symfony-review ou /review/frontend-review
 5. /dev/commit    → Conventional Commits
 ```
 

@@ -1,8 +1,8 @@
 # Frontmatter Reference
 
-## Agents
+## [Agents](/en/concepts/agents)
 
-Agents use YAML frontmatter at the beginning of `.claude/agents/<name>.md` files:
+[Agents](/en/concepts/agents) use YAML frontmatter at the beginning of `.claude/agents/<name>.md` files:
 
 ```yaml
 ---
@@ -22,17 +22,18 @@ skills:
 |-------|----------|------|-------------|
 | `name` | Yes | string | Unique agent identifier |
 | `description` | Yes | string | What the agent does (1-2 lines). Used by Claude for auto-delegation |
-| `tools` | Yes | string (CSV) | Authorized tools: `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash` |
-| `model` | Yes | string | Model: `opus`, `sonnet`, `haiku` |
+| `tools` | No | string (CSV) | Authorized tools: `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash`, `Agent(type)`. Default: all |
+| `model` | No | string | Model: `opus`, `sonnet`, `haiku`. Default: inherits from parent |
 | `skills` | No | list | Inherited skills (folder names in `.claude/skills/`) |
 | `allowed-tools` | No | string (CSV) | Tools allowed without confirmation (e.g.: `Bash(docker *)`) |
-| `disable-model-invocation` | No | boolean | `true` = only the user can spawn this agent |
-| `user-invocable` | No | boolean | `false` = invisible in menu, Claude delegation only |
-| `context` | No | string | `fork` = execute in an isolated sub-agent |
-| `agent` | No | string | Sub-agent type if `context: fork` (default: `general-purpose`) |
-| `argument-hint` | No | string | Autocompletion hint (e.g.: `[feature-name]`) |
+| `disallowedTools` | No | list | Tools forbidden for this agent |
+| `permissionMode` | No | string | Permission mode: `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
+| `maxTurns` | No | number | Max number of turns (tool/response exchanges) |
+| `mcpServers` | No | object | MCP servers specific to this agent |
+| `memory` | No | string | Persistent memory: `user`, `project`, `local` |
+| `background` | No | boolean | Run the agent in the background |
+| `isolation` | No | string | `worktree` to execute in an isolated git worktree |
 | `hooks` | No | object | Agent lifecycle-specific hooks |
-| `run_in_background` | No | boolean | Run the agent in the background |
 
 ### Model Values
 
@@ -55,9 +56,9 @@ skills:
 
 ---
 
-## Skills
+## [Skills](/en/concepts/skills)
 
-Skills use YAML frontmatter at the beginning of `SKILL.md`:
+[Skills](/en/concepts/skills) use YAML frontmatter at the beginning of `SKILL.md`:
 
 ```yaml
 ---
@@ -122,9 +123,9 @@ The command between `` !` `` and `` ` `` is executed before sending to the model
 
 ---
 
-## Rules
+## [Rules](/en/concepts/rules)
 
-Rules use minimal YAML frontmatter:
+[Rules](/en/concepts/rules) use minimal YAML frontmatter:
 
 ```yaml
 ---
@@ -152,9 +153,9 @@ paths:
 
 ---
 
-## Commands
+## [Commands](/en/concepts/commands)
 
-Commands support the same frontmatter as skills:
+[Commands](/en/concepts/commands) support the same frontmatter as [skills](/en/concepts/skills):
 
 ```yaml
 ---

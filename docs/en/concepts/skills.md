@@ -104,17 +104,21 @@ Keep `SKILL.md` under 500 lines. Move details into reference files. Claude will 
 
 | Location | Scope | Priority |
 |----------|-------|----------|
-| Enterprise (managed settings) | All organization users | 1 (highest) |
+| Enterprise ([managed settings](/en/concepts/settings)) | All organization users | 1 (highest) |
 | `~/.claude/skills/<name>/SKILL.md` | Personal (all projects) | 2 |
 | `.claude/skills/<name>/SKILL.md` | Project (versionable in git) | 3 |
-| Plugin `skills/` | Namespace `plugin:skill`, no conflict | 4 (lowest) |
+| [Plugin](/en/concepts/plugins) `skills/` | Namespace `plugin:skill`, no conflict | 4 (lowest) |
 
-::: info Commands compatibility
-Files in `.claude/commands/deploy.md` continue to work — they create the same `/deploy` as a skill. Skills are the **recommended format** because they support reference files, full frontmatter, and `context: fork`. If a skill and a command share the same name, the skill takes priority.
+::: info [Commands](/en/concepts/commands) compatibility
+Files in `.claude/commands/deploy.md` continue to work — they create the same `/deploy` as a skill. Skills are the **recommended format** because they support reference files, full [frontmatter](/en/reference/frontmatter), and `context: fork`. If a skill and a command share the same name, the skill takes priority.
 :::
 
 ::: details Automatic discovery in monorepo
 Claude Code also discovers skills in subdirectories. If you edit a file in `packages/frontend/`, skills from `packages/frontend/.claude/skills/` are also loaded. Skills added via `--add-dir` are detected in real-time (no restart needed).
+:::
+
+::: details Agent Skills Standard vs Claude Code
+In the [Agent Skills standard](https://agentskills.io), `name` and `description` are **required**. In Claude Code, they are **optional**: `name` defaults to the folder name, `description` to the first paragraph. Claude Code also adds exclusive fields: `disable-model-invocation`, `user-invocable`, `context`, `agent`, `argument-hint`, `hooks`, `model`.
 :::
 
 ### Full Frontmatter
@@ -130,7 +134,7 @@ model: sonnet                      # Forced model
 context: fork                      # Execution in an isolated sub-agent
 agent: Explore                     # Sub-agent type (if context: fork)
 argument-hint: "[feature-name]"    # Autocompletion hint
-hooks:                             # Lifecycle hooks
+hooks:                             # [Lifecycle hooks](/en/concepts/hooks)
   PreToolUse:
     - matcher: Bash
       hooks:
@@ -164,6 +168,18 @@ With `context: fork`, **you** write the task in the skill and choose an agent to
 Including the word **`ultrathink`** in a skill's content activates [extended thinking](https://code.claude.com/docs/en/common-workflows#use-extended-thinking-thinking-mode) mode for deeper reasoning.
 :::
 
+### Visual Output Pattern
+
+A skill can bundle scripts that generate interactive HTML files (trees, graphs, dashboards). The script lives in `scripts/`, the skill invokes it via Bash, and the result is a standalone HTML file openable in the browser.
+
+### Loading Budget
+
+By default, skill content is limited to approximately 2% of the context window (~16,000 characters). To increase this limit:
+
+```bash
+SLASH_COMMAND_TOOL_CHAR_BUDGET=50000 claude
+```
+
 ---
 
 ## Practical Guide: Designing Your Skills
@@ -175,10 +191,10 @@ Including the word **`ultrathink`** in a skill's content activates [extended thi
 | Need | Component | Why |
 |------|-----------|-----|
 | Code conventions (style, architecture, naming) | **Passive skill** | Loaded automatically, supports references |
-| Short contextual reminder (< 30 lines) | **Rule** | Lighter, injection by glob |
-| Multi-step workflow (migration, deploy) | **Launcher skill** | Orchestrates agents, invocable by `/name` |
-| Atomic task execution | **Agent** | Isolated context, dedicated model |
-| One-off action (commit, test) | **Command** or launcher skill | Commands still work, skills recommended |
+| Short contextual reminder (< 30 lines) | **[Rule](/en/concepts/rules)** | Lighter, injection by glob |
+| Multi-step workflow (migration, deploy) | **Launcher skill** | Orchestrates [agents](/en/concepts/agents), invocable by `/name` |
+| Atomic task execution | **[Agent](/en/concepts/agents)** | Isolated context, dedicated model |
+| One-off action (commit, test) | **[Command](/en/concepts/commands)** or launcher skill | Commands still work, skills recommended |
 
 #### Passive vs Launcher
 
@@ -212,9 +228,11 @@ Does the skill contain EXECUTION INSTRUCTIONS?
 ├── modernization/              # By workflow
 │   ├── analyze-legacy/
 │   ├── migrate-feature/
+│   ├── conformity-conventions/ # Scoring and reports
 │   └── generate-docs/
 ├── frontend/                  # By framework
 │   ├── app-conventions/
+│   ├── design-conventions/    # Figma design conventions
 │   └── testing-conventions/
 ```
 
@@ -232,10 +250,13 @@ skills:
 
 The agent receives the **full** content of each skill at startup — not just the description. Different from automatic loading in a normal session.
 
-### Mistakes to Avoid
+### Warnings
 
-#### Pitfall 1: Skill too long
+#### ⚠️ `WARN-001`: Skill too long
 
+Beyond 500 lines, `SKILL.md` saturates the context on every invocation — even for parts that are not relevant.
+
+::: danger Problem
 ```yaml
 # ❌ BAD — 2000 lines in SKILL.md
 ---
@@ -245,7 +266,10 @@ name: api-conventions
 ## Entities (300 lines...)
 ## DTOs (400 lines...)
 ```
+2000 lines loaded in full every time, even when only the architecture section is needed.
+:::
 
+::: info Solution
 ```yaml
 # ✅ GOOD — Short SKILL.md + references
 ---
@@ -257,18 +281,26 @@ Controller → Service → Repository → Entity
 - [create-entity.md](references/create-entity.md)
 - [create-dto.md](references/create-dto.md)
 ```
+Claude loads reference files on demand, only when the context requires it.
+:::
 
-> **Why?** Beyond 500 lines, SKILL.md saturates the context.
+---
 
-#### Pitfall 2: Vague or missing description
+#### ⚠️ `WARN-002`: Vague or missing description
 
+Claude uses the `description` to automatically decide when to load a passive skill — without a precise description, the skill is never triggered.
+
+::: danger Problem
 ```yaml
 # ❌ BAD — Claude doesn't know when to load
 ---
 name: helper
 ---
 ```
+Without a description, Claude cannot associate the skill with any usage context.
+:::
 
+::: info Solution
 ```yaml
 # ✅ GOOD — Precise keywords
 ---
@@ -277,11 +309,16 @@ description: Backend Symfony conventions. REST architecture, DTOs,
   repositories with filtering, exception handling.
 ---
 ```
+Precise keywords allow Claude to load the skill as soon as the context matches.
+:::
 
-> **Why?** Claude uses the description to decide WHEN to load the skill.
+---
 
-#### Pitfall 3: Launcher without protection
+#### ⚠️ `WARN-003`: Launcher without protection
 
+Without `disable-model-invocation: true`, Claude can trigger a launcher skill autonomously — including actions with side effects.
+
+::: danger Problem
 ```yaml
 # ❌ DANGEROUS — Claude can deploy on its own
 ---
@@ -289,7 +326,10 @@ name: deploy
 description: Deploy to production
 ---
 ```
+Claude can decide to deploy because "the code looks ready", without any human action.
+:::
 
+::: info Solution
 ```yaml
 # ✅ SECURE — Human control mandatory
 ---
@@ -298,35 +338,45 @@ description: Deploy to production
 disable-model-invocation: true
 ---
 ```
+With `disable-model-invocation: true`, the skill can only be invoked explicitly by the user.
+:::
 
-> **Why?** Without protection, Claude can deploy because "the code looks ready".
+---
 
-#### Pitfall 4: Skill / rule duplication
+#### ⚠️ `WARN-004`: Skill / [rule](/en/concepts/rules) duplication
 
+Maintaining the same content in both a [rule](/en/concepts/rules) and a skill creates two sources of truth that diverge during updates.
+
+::: danger Problem
 ```yaml
 # ❌ BAD — Same content in 2 places
 # rules/backend.md → PSR-12, camelCase...
 # skills/api-conventions/SKILL.md → PSR-12, camelCase...
 ```
+An update in one is not reflected in the other — desynchronization is guaranteed.
+:::
 
+::: info Solution
 ```yaml
 # ✅ GOOD — Rule delegates, skill details
 # rules/backend.md
 # → "Load the skill api-conventions. Reminders: Docker, TDD."
 # skills/api-conventions/SKILL.md → (full detail)
 ```
+The rule points to the skill. One single place to maintain for detailed content.
+:::
 
-> **Why?** Two sources = desynchronization during updates.
+---
 
-#### Pitfall 5: Context budget exceeded
+#### ⚠️ `WARN-005`: Context budget exceeded
 
+When too many skills are present, some are silently excluded from automatic loading.
+
+::: warning
 **Symptom**: `⚠️ Some skills were excluded due to context budget limits`
 
-**Solutions**:
-1. Check with `/context` which skills are excluded
-2. Switch some skills to `disable-model-invocation: true`
-3. Shorten descriptions
-4. Increase via `SLASH_COMMAND_TOOL_CHAR_BUDGET`
+See [Claude doesn't see all skills](#claude-doesn-t-see-all-skills) for solutions.
+:::
 
 ---
 
@@ -336,7 +386,7 @@ disable-model-invocation: true
 
 Three levels of control over which skills Claude can invoke:
 
-**Disable all skills** — add `Skill` to deny rules in `/permissions`.
+**Disable all skills** — add `Skill` to deny rules in [permissions](/en/concepts/settings).
 
 **Allow/block specific skills**:
 
@@ -447,6 +497,10 @@ Run in PARALLEL:
 
 ## Step 4: Conformity
 Run `conformity-reporter`. NEVER overwrite — create V2, V3...
+
+## Step 5: Quality loop (max 2 iterations)
+If score < 80/100: re-run executor + conformity-reporter (V2).
+If V2 < 80/100: STOP — human intervention required.
 ```
 
 ::: warning disable-model-invocation: true
@@ -508,7 +562,7 @@ The script generates `codebase-map.html` and opens it in the browser.
 
 ### Project coherence
 
-- [ ] No duplication with an existing rule ([pitfall 4](#pitfall-4-skill-rule-duplication))
+- [ ] No duplication with an existing [rule](/en/concepts/rules) (see [WARN-004](#warn-004-skill--rule-duplication))
 - [ ] Coherent namespace (`framework/`, `workflow/`)
 - [ ] Skills listed in agents that need them (`skills:`)
 
@@ -516,7 +570,7 @@ The script generates `codebase-map.html` and opens it in the browser.
 
 - [ ] `allowed-tools` limited to strict necessities
 - [ ] `context: fork` if the skill needs to run in isolation
-- [ ] Deny permissions configured if needed (`Skill(name *)`)
+- [ ] Deny [permissions](/en/concepts/settings) configured if needed (`Skill(name *)`)
 
 ### Validation
 

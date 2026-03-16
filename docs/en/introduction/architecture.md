@@ -1,6 +1,6 @@
 # .claude/ Directory Architecture
 
-The `.claude/` directory is the heart of the project configuration. It contains all the components that extend Claude's capabilities for a specific project.
+The `.claude/` directory is the heart of the project configuration. It contains all the components that extend Claude's capabilities for a specific project: [settings](/en/concepts/settings), [agents](/en/concepts/agents), [skills](/en/concepts/skills), [rules](/en/concepts/rules), [commands](/en/concepts/commands), [hooks](/en/concepts/hooks) and [MCP](/en/concepts/mcp).
 
 ## Typical Structure
 
@@ -25,15 +25,24 @@ The `.claude/` directory is the heart of the project configuration. It contains 
 │   ├── modernization/
 │   │   ├── migrate-feature/
 │   │   │   └── SKILL.md
+│   │   ├── conformity-conventions/
+│   │   │   ├── SKILL.md
+│   │   │   └── references/
 │   │   └── ...
-│   └── frontend-dev-conventions/
-│       └── SKILL.md
+│   └── frontend/
+│       ├── app-conventions/
+│       │   ├── SKILL.md
+│       │   └── references/
+│       ├── design-conventions/
+│       │   └── SKILL.md
+│       └── testing-conventions/
+│           ├── SKILL.md
+│           └── references/
 ├── rules/                 # Contextual injection
 │   ├── legacy-readonly.md
 │   ├── symfony-api.md
 │   ├── git.md
 │   └── ...
-├── settings.local.json    # Personal preferences (gitignored)
 └── commands/              # Slash commands (merged with skills)
     ├── dev/
     │   ├── commit.md
@@ -77,11 +86,11 @@ A legacy modernization project typically uses:
 
 | Component | Count | Distribution |
 |-----------|-------|-------------|
-| Agents | 13 | 3 analysis, 5 implementation, 2 planning, 3 reporting |
-| Skills | 8 | 4 launchers + 3 passive + 1 framework |
+| Agents | 12 | 5 analysis, 2 implementation, 2 planning, 2 reporting, 1 diagnostic |
+| Skills | 11 | 4 launchers + 6 passive + 1 framework |
 | Rules | 7 | 1 global + 6 path-targeted |
-| Commands | 4 | 2 dev + 1 lint + 1 review |
-| References | 20 | 14 backend + 3 testing + 3 framework |
+| Commands | 5 | 3 dev + 2 review |
+| References | 34 | 15 backend + 3 testing + 9 frontend + 3 testing-fe + 4 conformity |
 
 ## Resources
 

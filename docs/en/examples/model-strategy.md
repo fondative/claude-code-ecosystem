@@ -32,7 +32,7 @@ model: opus
 
 **Why Opus?** These tasks require understanding an entire codebase without documentation, deducing architecture, patterns and implicit business rules. Sonnet doesn't produce the same depth of analysis.
 
-### Sonnet — Implementation and Planning (8 agents)
+### Sonnet — Implementation and Planning (7 agents)
 
 ```yaml
 # backend-tasks-planner.md / frontend-tasks-planner.md
@@ -44,6 +44,7 @@ model: sonnet
 model: sonnet
 # Justification: TDD with clear conventions (skills)
 # Skills provide patterns — Sonnet applies
+# Note: frontend-tasks-executor also handles Figma design (conditional step)
 
 # conformity-reporter.md
 model: sonnet
@@ -57,6 +58,7 @@ model: sonnet
 # legacy-functional-analyzer.md
 model: sonnet
 # Justification: structured inventory with known patterns
+# Moved from Opus to Sonnet as it reads already-generated documentation, not raw code
 ```
 
 **Why Sonnet?** These agents have clear context (specifications, conventions, analyses) and apply defined patterns. Opus's creative reasoning isn't necessary.
@@ -127,6 +129,8 @@ Signals that a Sonnet agent should be Opus:
 - Specifications missing edge cases
 - Poor deduction of implicit architecture
 
-## Lesson Learned
+## Lessons Learned
 
 > **The refiner was upgraded from Haiku to Sonnet** after finding that Haiku produced overly superficial refinements. Specification refinement requires understanding business context, not just rephrasing.
+
+> **The functional-analyzer was downgraded from Opus to Sonnet** as it reads already-generated documentation (technical report), not raw code. Documentary synthesis doesn't require Opus's deep reasoning.

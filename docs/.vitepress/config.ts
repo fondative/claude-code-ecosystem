@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'Claude Code Ecosystem',
   lastUpdated: true,
   appearance: 'dark',
-  base: '/claude-code-ecosystem/',  // nom du repo
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
@@ -21,8 +21,9 @@ export default defineConfig({
         nav: [
           { text: 'Accueil', link: '/' },
           { text: 'Concepts', link: '/concepts/claude-md' },
+          { text: 'Cas d\'usage réel', link: '/examples/' },
           { text: 'Guide', link: '/guide/getting-started' },
-          { text: 'Exemples', link: '/examples/' },
+          { text: 'AI-Driven Modernisation', link: '/guide/methodology' },
           { text: 'Référence', link: '/reference/glossary' }
         ],
         sidebar: {
@@ -46,7 +47,8 @@ export default defineConfig({
                 { text: 'Agents', link: '/concepts/agents' },
                 { text: 'Commands', link: '/concepts/commands' },
                 { text: 'Hooks', link: '/concepts/hooks' },
-                { text: 'MCP', link: '/concepts/mcp' }
+                { text: 'MCP', link: '/concepts/mcp' },
+                { text: 'Plugins', link: '/concepts/plugins' }
               ]
             }
           ],
@@ -61,7 +63,8 @@ export default defineConfig({
                 { text: 'Menaces de sécurité', link: '/guide/security-threats' },
                 { text: 'Diagrammes', link: '/guide/diagrams' },
                 { text: 'Cheatsheet', link: '/guide/cheatsheet' },
-                { text: 'Workflow Boris Tane', link: '/guide/workflow-boris-tane' }
+                { text: 'Workflow Boris Tane', link: '/guide/workflow-boris-tane' },
+                { text: 'AI-Driven Modernisation', link: '/guide/methodology' }
               ]
             }
           ],
@@ -114,8 +117,9 @@ export default defineConfig({
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Concepts', link: '/en/concepts/claude-md' },
+          { text: 'Real-world Use Cases', link: '/en/examples/' },
           { text: 'Guide', link: '/en/guide/getting-started' },
-          { text: 'Examples', link: '/en/examples/' },
+          { text: 'AI-Driven Modernisation', link: '/en/guide/methodology' },
           { text: 'Reference', link: '/en/reference/glossary' }
         ],
         sidebar: {
@@ -139,7 +143,8 @@ export default defineConfig({
                 { text: 'Agents', link: '/en/concepts/agents' },
                 { text: 'Commands', link: '/en/concepts/commands' },
                 { text: 'Hooks', link: '/en/concepts/hooks' },
-                { text: 'MCP', link: '/en/concepts/mcp' }
+                { text: 'MCP', link: '/en/concepts/mcp' },
+                { text: 'Plugins', link: '/en/concepts/plugins' }
               ]
             }
           ],
@@ -154,7 +159,8 @@ export default defineConfig({
                 { text: 'Security Threats', link: '/en/guide/security-threats' },
                 { text: 'Diagrams', link: '/en/guide/diagrams' },
                 { text: 'Cheatsheet', link: '/en/guide/cheatsheet' },
-                { text: 'Boris Tane Workflow', link: '/en/guide/workflow-boris-tane' }
+                { text: 'Boris Tane Workflow', link: '/en/guide/workflow-boris-tane' },
+                { text: 'AI-Driven Modernisation', link: '/en/guide/methodology' }
               ]
             }
           ],
@@ -260,5 +266,53 @@ export default defineConfig({
         }
       }
     }
-  }
-})
+  },
+
+  // Mermaid global config — Hall of Legacy dark palette
+  mermaid: {
+    theme: 'base',
+    themeVariables: {
+      // Primary nodes: dark slate + neon green border
+      primaryColor: '#0f172a',
+      primaryTextColor: '#f1f5f9',
+      primaryBorderColor: '#39ff14',
+      // Secondary nodes: dark teal + yellow border
+      secondaryColor: '#0d3b3b',
+      secondaryTextColor: '#f1f5f9',
+      secondaryBorderColor: '#ddff00',
+      // Tertiary nodes: dark blue
+      tertiaryColor: '#1e3a5f',
+      tertiaryTextColor: '#f1f5f9',
+      tertiaryBorderColor: '#64748b',
+      // Lines & labels
+      lineColor: '#22c55e',
+      textColor: '#f1f5f9',
+      // Fonts
+      fontFamily: 'Montserrat, system-ui, sans-serif',
+      fontSize: '16px',
+      // Subgraphs
+      clusterBkg: '#131d35',
+      clusterBorder: '#22c55e',
+      // Nodes
+      nodeBorder: '#39ff14',
+      mainBkg: '#0f172a',
+      nodeTextColor: '#f1f5f9',
+      // Edge labels
+      edgeLabelBackground: '#1e3a5f',
+    },
+    flowchart: {
+      padding: 24,
+      nodeSpacing: 40,
+      rankSpacing: 60,
+      htmlLabels: true,
+      useMaxWidth: true,
+      wrappingWidth: 200,
+    },
+    block: {
+      padding: 20,
+    },
+  },
+  mermaidPlugin: {
+    class: 'mermaid-zoom',
+  },
+}))

@@ -23,6 +23,7 @@ Claude Code includes built-in agents used automatically. They require no configu
 | **General-purpose** | Inherit | All | Complex multi-step tasks (exploration + modification) |
 | **Bash** | Inherit | Terminal | Shell commands in a separate context |
 | **Claude Code Guide** | Haiku | Read-only | Questions about Claude Code features |
+| **statusline-setup** | Sonnet | Read, Edit | Status line configuration (`/statusline`) |
 
 ::: tip Agent management
 - `/agents`: interactive interface to create, edit, delete agents
@@ -123,7 +124,7 @@ skills:
 
 | Method | Trigger | Example |
 |--------|---------|---------|
-| Launcher skill | `/modernization/migrate-feature X` | The skill orchestrates agents |
+| [Launcher skill](/en/concepts/skills) | `/modernization/migrate-feature X` | The skill orchestrates agents |
 | Agent tool | Claude decides to delegate | `Agent(subagent_type: "Explore")` |
 
 ::: warning No nesting
@@ -139,7 +140,7 @@ Agents can be defined at multiple levels. In case of name conflict, the highest 
 | `--agents '{JSON}'` (CLI) | Current session only | 1 (highest) |
 | `.claude/agents/` | Project (versionable in git) | 2 |
 | `~/.claude/agents/` | User (all projects) | 3 |
-| Plugin `agents/` | Projects where the plugin is active | 4 (lowest) |
+| [Plugin](/en/concepts/plugins) `agents/` | Projects where the plugin is active | 4 (lowest) |
 
 ```bash
 # Ephemeral agent via CLI (not saved to disk)
@@ -248,12 +249,11 @@ Opus (2 agents) ─────────────────────�
 ├── legacy-technical-analyzer    # Complete reverse engineering
 └── legacy-feature-analyzer      # 12-section specification
 
-Sonnet (8 agents) ───────────────────────────── $$
+Sonnet (7 agents) ───────────────────────────── $$
 ├── backend-tasks-planner        # Task decomposition
-├── backend-tasks-executor       # TDD implementation
+├── backend-tasks-executor       # TDD implementation (acceptEdits)
 ├── frontend-tasks-planner       # Frontend planning
-├── frontend-tasks-executor      # Frontend implementation
-├── frontend-design-executor     # With Figma design
+├── frontend-tasks-executor      # Frontend implementation + design (acceptEdits)
 ├── legacy-feature-analyzer-refiner
 ├── legacy-functional-analyzer
 └── conformity-reporter          # Scoring
@@ -261,13 +261,16 @@ Sonnet (8 agents) ────────────────────�
 Haiku (3 agents) ────────────────────────────── $
 ├── legacy-functional-analyzer-auditor
 ├── documentation-generator      # VitePress
-└── health-check                 # Diagnostics
+└── health-check                 # Diagnostics (plan)
 ```
 
-### Mistakes to Avoid
+### Warnings
 
-#### Pitfall 1: Catch-all agent
+#### ⚠️ `WARN-001`: Catch-all agent
 
+An agent that does everything loses focus and costs more tokens.
+
+::: danger Problem
 ```yaml
 # ❌ BAD — Analysis + implementation + documentation
 ---
@@ -276,7 +279,10 @@ description: Does everything
 model: opus
 ---
 ```
+Too many responsibilities in a single agent.
+:::
 
+::: info Solution
 ```yaml
 # ✅ GOOD — Single responsibility
 ---
@@ -285,52 +291,76 @@ description: Backend Test First implementation
 model: sonnet
 ---
 ```
+Each agent has one clear responsibility.
+:::
 
-> A catch-all agent loses focus and costs more.
+---
 
-#### Pitfall 2: Too many tools
+#### ⚠️ `WARN-002`: Too many tools
 
+Giving an agent too many tools increases the risk of unexpected or destructive actions.
+
+::: danger Problem
 ```yaml
 # ❌ — Analysis agent with Write/Edit
 tools: Read, Glob, Grep, Write, Edit, Bash
 ```
+An analysis agent has no reason to write files.
+:::
 
+::: info Solution
 ```yaml
 # ✅ — Read-only for analysis
 tools: Read, Glob, Grep
 ```
+Limiting tools prevents unexpected actions.
+:::
 
-> Limiting tools prevents unexpected actions.
+---
 
-#### Pitfall 3: Opus everywhere
+#### ⚠️ `WARN-003`: Opus everywhere
 
+Using Opus for every task multiplies costs with no quality gain on structured tasks.
+
+::: danger Problem
 ```yaml
 # ❌ EXPENSIVE — Opus for documentation
 model: opus
 ```
+Opus costs ~10x more than Haiku for identical results on templated tasks.
+:::
 
+::: info Solution
 ```yaml
 # ✅ ECONOMICAL — Haiku is sufficient
 model: haiku
 ```
+Haiku is ~10x cheaper for structured tasks.
+:::
 
-> Haiku is ~10x cheaper for structured tasks.
+---
 
-#### Pitfall 4: No checkpoint
+#### ⚠️ `WARN-004`: No checkpoint
 
+Without verification between steps, a failure upstream causes downstream agents to run idle.
+
+::: danger Problem
 ```yaml
 # ❌ — The executor runs idle if analysis failed
 Step 1: analyzer → Step 2: executor
 ```
+Without a checkpoint, a failure propagates silently.
+:::
 
+::: info Solution
 ```yaml
 # ✅ — Verification before continuing
 Step 1: analyzer
 Checkpoint: output/analysis.md exists?
 Step 2: executor
 ```
-
-> Without checkpoint, a failure propagates silently.
+The pipeline stops cleanly if a step fails.
+:::
 
 ### Orchestration Patterns
 
@@ -421,9 +451,32 @@ Before each review, consult your memory for previously identified patterns.
 After each review, update your memory with new discoveries.
 ```
 
+### Auto-compaction
+
+Subagents support auto-compaction: when the context reaches 95% capacity, the transcript is automatically compressed to allow continued work.
+
+| Aspect | Detail |
+|--------|--------|
+| Default threshold | 95% of the context window |
+| Override | Environment variable `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` |
+| Transcripts | Stored in `~/.claude/projects/{project}/{sessionId}/subagents/agent-{agentId}.jsonl` |
+
+### Restricting Spawnable Subagents
+
+The `tools` field supports the `Agent(type)` syntax to limit which subagents an agent can spawn:
+
+```yaml
+---
+name: orchestrator
+tools: Read, Glob, Grep, Agent(worker, researcher)
+---
+```
+
+In this example, the orchestrator can only spawn `worker` and `researcher` agents, not others.
+
 ### Disabling an Agent
 
-You can prevent Claude from using a specific agent via `permissions.deny` in settings:
+You can prevent Claude from using a specific agent via `permissions.deny` in [settings](/en/concepts/settings):
 
 ```json
 {

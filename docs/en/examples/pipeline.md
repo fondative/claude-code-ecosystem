@@ -2,13 +2,13 @@
 
 ## Overview
 
-The migration pipeline transforms a legacy feature into a modern implementation through 4 steps, each with a verification checkpoint.
+The migration pipeline transforms a legacy feature into a modern implementation through 5 steps, each with a verification checkpoint.
 
 ```
-Specification ──► Planning ──► Implementation ──► Conformity
-     │                  │                  │                │
-     ▼                  ▼                  ▼                ▼
-  _spec.md        _analysis.md         Code + Tests      _REPORT.md
+Specification ──► Planning ──► Implementation ──► Conformity ──► Quality Loop
+     │                  │                  │                │              │
+     ▼                  ▼                  ▼                ▼              ▼
+  _spec.md        _analysis.md         Code + Tests      _REPORT.md   Score ≥ 80
 ```
 
 ## Step 1: Detailed Specification
@@ -77,8 +77,15 @@ If the spec needs corrections, the `legacy-feature-analyzer-refiner` agent (Sonn
 
 ```
 ✅ File _backend_analysis.md exists
+✅ Contains tasks with IDs (BACKEND-001, BACKEND-002...)
+✅ Each task has: title, description, acceptance criteria
+✅ Dependencies reference existing IDs in the same file
+✅ Execution order is defined
+✅ OpenAPI spec included if endpoints are created
 ✅ File _frontend_analysis.md exists
-✅ OpenAPI spec updated in api-rest-symfony-target/docs/openapi.yaml
+✅ Contains tasks with IDs (FRONTEND-001, FRONTEND-002...)
+✅ FRONTEND-001 is the HTTP client configuration
+✅ Referenced endpoints exist in the OpenAPI spec
 → Move to step 3
 ```
 
@@ -177,6 +184,30 @@ Documentation always uses the **latest version**.
 
 ### Recommendation
 CORRECTIONS REQUIRED — Implement pagination before validation.
+```
+
+## Step 5: Quality Loop
+
+**Pattern**: LLM-as-Judge (maximum 2 iterations)
+
+**Process**:
+
+1. Read the conformity report score (step 4)
+2. If score ≥ 80/100: pipeline completed successfully
+3. If score < 80/100:
+   - Extract CRITICAL and HIGH deductions from the report
+   - Identify the concerned executor (backend or frontend)
+   - Re-run the executor with the list of corrections
+   - Re-run the conformity-reporter (V2 report)
+   - If V2 score ≥ 80/100: success
+   - If V2 score < 80/100: **STOP** — human intervention required
+
+### Checkpoint
+
+```
+✅ Final report score (V1 or V2) ≥ 80/100
+✅ No remaining CRITICAL non-conformities
+→ Pipeline completed
 ```
 
 ## Pipeline Resilience

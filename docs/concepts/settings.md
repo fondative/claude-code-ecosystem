@@ -14,7 +14,7 @@
 
 ## Qu'est-ce que Settings ?
 
-Le fichier `settings.json` configure le **comportement complet de Claude Code** : permissions, sandbox, modèle, hooks, variables d'environnement, et plus. C'est le pare-feu et le tableau de bord du projet.
+Le fichier `settings.json` configure le **comportement complet de Claude Code** : permissions, sandbox, modèle, [hooks](/concepts/hooks), variables d'environnement, et plus. C'est le pare-feu et le tableau de bord du projet.
 
 ```
 ┌────────────────────────────────────────────┐
@@ -73,10 +73,6 @@ Idéal pour les préférences personnelles sur un projet sans polluer le repo : 
 4. Rien ne matche → DEMANDE CONFIRMATION
 ```
 
-::: warning deny est prioritaire
-`deny` l'emporte toujours sur `allow` et `ask`. Si un outil matche deny, il est bloqué même s'il est dans allow.
-:::
-
 ### Permissions : 3 niveaux
 
 ```json
@@ -109,9 +105,9 @@ Idéal pour les préférences personnelles sur un projet sans polluer le repo : 
 | `Read(.env*)` | Fichiers .env |
 | `Write(src/**)` | Écriture récursive dans src/ |
 | `WebFetch(domain:example.com)` | Requêtes vers un domaine |
-| `MCP(github)` | Outils du serveur MCP github |
-| `Agent(codereview)` | Agent nommé "codereview" |
-| `Skill(deploy *)` | Skill deploy avec arguments |
+| `MCP(github)` | Outils du serveur [MCP](/concepts/mcp) github |
+| `Agent(codereview)` | [Agent](/concepts/agents) nommé "codereview" |
+| `Skill(deploy *)` | [Skill](/concepts/skills) deploy avec arguments |
 
 ### 5 modes de permission
 
@@ -152,7 +148,7 @@ Désactive **toute** sécurité. Peut être bloqué par l'admin via `permissions
 
 ### Sandbox
 
-Le sandbox isole les commandes Bash du filesystem et du réseau (macOS, Linux, WSL2) :
+Le [sandbox](https://docs.anthropic.com/en/docs/claude-code/security#sandbox) isole les commandes Bash du filesystem et du réseau (macOS, Linux, WSL2) :
 
 ```json
 {
@@ -237,49 +233,87 @@ Action TOUJOURS safe ?
 | `Bash(rm -rf *)` | deny | Destructeur |
 | `Write(.env*)` | deny | Fichiers secrets |
 
-### Les erreurs à éviter
+### Warnings
 
-#### ❌ Piège 1 : Permissions trop larges
+#### ⚠️ `WARN-001` : Permissions trop larges
 
+Autoriser `Bash(*)` revient à désactiver toute protection sur les commandes shell.
+
+::: danger Problème
 ```json
 // ❌ — Désactive toute sécurité
 { "allow": ["Bash(*)"] }
 ```
+Claude peut exécuter n'importe quelle commande sans restriction ni confirmation.
+:::
 
+::: info Solution
 ```json
 // ✅ — Commandes spécifiques
 { "allow": ["Bash(npm test *)", "Bash(docker compose *)"] }
 ```
+Autoriser uniquement les commandes nécessaires au workflow du projet.
+:::
 
-#### ❌ Piège 2 : Oubli du deny en écriture
+---
 
+#### ⚠️ `WARN-002` : Oubli du deny en écriture
+
+Sans règle `deny` explicite, Claude peut écrire dans des répertoires sensibles. Voir aussi [`CLAUDE.md` WARN-005](/concepts/claude-md#warn-005) sur la différence contexte vs permissions.
+
+::: danger Problème
 ```json
 // ❌ — Le legacy n'est pas protégé
 { "allow": ["Read", "Write"] }
 ```
+`Write` sans restriction autorise l'écriture partout, y compris dans le code source en lecture seule.
+:::
 
+::: info Solution
 ```json
 // ✅ — Protection explicite
 { "deny": ["Write(php-legacy/**)", "Edit(php-legacy/**)"] }
 ```
+Définir explicitement les répertoires protégés en écriture via `deny`.
+:::
 
-#### ❌ Piège 3 : Glob `*` vs `**`
+---
 
+#### ⚠️ `WARN-003` : Glob `*` vs `**`
+
+Un glob avec `*` simple ne protège que le premier niveau de répertoire, laissant les sous-dossiers exposés.
+
+::: danger Problème
 ```json
 // ❌ — Premier niveau seulement
 { "deny": ["Write(php-legacy/*)"] }
+```
+Les fichiers dans `php-legacy/src/Controller/` ne sont pas couverts par ce pattern.
+:::
 
+::: info Solution
+```json
 // ✅ — Récursif
 { "deny": ["Write(php-legacy/**)"] }
 ```
+Utiliser `**` pour une protection récursive sur tous les niveaux de sous-dossiers.
+:::
 
-#### ❌ Piège 4 : MCP sans permissions
+---
 
+#### ⚠️ `WARN-004` : MCP sans permissions
+
+Déclarer un serveur [MCP](/concepts/mcp) sans permissions `allow`/`deny` expose tous ses outils sans contrôle.
+
+::: danger Problème
 ```json
 // ❌ — Tous les outils GitHub autorisés
 { "mcpServers": { "github": {} } }
 ```
+Tous les outils du serveur MCP sont accessibles, y compris les opérations destructives.
+:::
 
+::: info Solution
 ```json
 // ✅ — Permissions granulaires
 {
@@ -289,18 +323,30 @@ Action TOUJOURS safe ?
   }
 }
 ```
+Lister explicitement les outils MCP autorisés et bloquer les outils dangereux. La syntaxe `mcp__server__tool` est utilisée dans les permissions, tandis que `MCP(server)` cible tous les outils d'un serveur.
+:::
 
-#### ❌ Piège 5 : Settings projet pour des préférences personnelles
+---
 
+#### ⚠️ `WARN-005` : Settings projet pour des préférences personnelles
+
+Mettre des préférences personnelles dans `.claude/settings.json` les impose à toute l'équipe via git.
+
+::: danger Problème
 ```json
 // ❌ — Dans .claude/settings.json (git) : préférences perso
 { "model": "claude-opus-4-6", "language": "french" }
 ```
+Ces préférences personnelles sont committées et s'appliquent à tous les membres de l'équipe.
+:::
 
+::: info Solution
 ```json
 // ✅ — Dans .claude/settings.local.json (gitignore)
 { "model": "claude-opus-4-6", "language": "french" }
 ```
+Utiliser `settings.local.json` (dans `.gitignore`) pour les préférences individuelles.
+:::
 
 ---
 
@@ -361,7 +407,8 @@ Mettre `""` pour masquer l'attribution.
       "Bash(docker compose exec *)",
       "Bash(git status)", "Bash(git diff *)",
       "Bash(git log *)", "Bash(git add *)",
-      "Bash(ls *)", "Bash(find *)", "Bash(mkdir *)"
+      "Bash(ls *)", "Bash(find *)", "Bash(mkdir *)",
+      "Bash(npm *)"
     ],
     "ask": [
       "Bash(git push *)",

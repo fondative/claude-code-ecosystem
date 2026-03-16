@@ -5,17 +5,21 @@ hero:
   text: Fondative
   tagline: Référentiel complet pour maîtriser agents, skills, rules, hooks et MCP
   actions:
-    - theme: brand
-      text: Démarrage rapide
-      link: /guide/getting-started
     - theme: alt
       text: Concepts
       link: /concepts/claude-md
     - theme: alt
-      text: Exemples concrets "Modernisation Legacy"
+      text: Cas d'usage réel
       link: /examples/
+    - theme: brand
+      text: AI-Driven Modernisation
+      link: /guide/methodology
 
 features:
+  - icon: 🚀
+    title: Démarrage rapide
+    details: Installer Claude Code, configurer votre premier projet et lancer votre première commande en 5 minutes.
+    link: /guide/getting-started
   - icon: 🤖
     title: Agents
     details: Instances spécialisées de Claude avec outils, modèle et instructions dédiées. Orchestration séquentielle, parallèle ou hiérarchique.
@@ -40,4 +44,8 @@ features:
     title: CLAUDE.md
     details: Mémoire persistante du projet. Source de vérité pour les conventions, chemins et instructions.
     link: /concepts/claude-md
+  - icon: 📦
+    title: Plugins
+    details: Packages portables de skills, agents, hooks et MCP. Distribution cross-projets avec namespace isolé.
+    link: /concepts/plugins
 ---

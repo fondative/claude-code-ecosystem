@@ -7,28 +7,34 @@
 ├── settings.json
 ├── agents/
 │   ├── legacy-technical-analyzer.md      # Opus - Reverse engineering
-│   ├── legacy-functional-analyzer.md     # Opus - Inventaire fonctionnel
+│   ├── legacy-functional-analyzer.md     # Sonnet - Inventaire fonctionnel
 │   ├── legacy-functional-analyzer-auditor.md  # Haiku - Audit
 │   ├── legacy-feature-analyzer.md        # Opus - Spec 12 sections
 │   ├── legacy-feature-analyzer-refiner.md # Sonnet - Affinement
 │   ├── backend-tasks-planner.md          # Sonnet - Planification backend
-│   ├── backend-tasks-executor.md         # Sonnet - Implementation TDD
+│   ├── backend-tasks-executor.md         # Sonnet - Implementation TDD (acceptEdits)
 │   ├── frontend-tasks-planner.md         # Sonnet - Planification frontend
-│   ├── frontend-tasks-executor.md        # Sonnet - Implementation frontend
-│   ├── frontend-design-executor.md       # Sonnet - Avec Figma
+│   ├── frontend-tasks-executor.md        # Sonnet - Implementation frontend + design (acceptEdits)
 │   ├── conformity-reporter.md            # Sonnet - Scoring
 │   ├── documentation-generator.md        # Haiku - VitePress
-│   └── health-check.md                   # Haiku - Diagnostics
+│   └── health-check.md                   # Haiku - Diagnostics (plan)
 ├── skills/
 │   ├── modernization/
 │   │   ├── analyze-legacy/SKILL.md       # Pipeline d'analyse
 │   │   ├── migrate-feature/SKILL.md      # Migration E2E
 │   │   ├── generate-visualization/SKILL.md  # ECharts
-│   │   └── generate-docs/SKILL.md        # VitePress
+│   │   ├── generate-docs/SKILL.md        # VitePress
+│   │   └── conformity-conventions/       # Scoring et rapports
+│   │       ├── SKILL.md
+│   │       └── references/               # 4 fichiers
+│   │           ├── scoring-methodology.md
+│   │           ├── report-template.md
+│   │           ├── version-management.md
+│   │           └── issue-reporting.md
 │   ├── symfony/
 │   │   ├── api-conventions/
 │   │   │   ├── SKILL.md                  # Conventions backend
-│   │   │   └── references/               # 14 fichiers
+│   │   │   └── references/               # 15 fichiers
 │   │   │       ├── getting-started.md
 │   │   │       ├── request-lifecycle.md
 │   │   │       ├── create-entity.md
@@ -42,7 +48,8 @@
 │   │   │       ├── database-setup.md
 │   │   │       ├── jwt-auth.md
 │   │   │       ├── email-service.md
-│   │   │       └── logging.md
+│   │   │       ├── logging.md
+│   │   │       └── debugging.md
 │   │   └── testing-conventions/
 │   │       ├── SKILL.md                  # TDD et stratégies
 │   │       └── references/               # 3 fichiers
@@ -62,6 +69,8 @@
 │   │   │       ├── routing.md
 │   │   │       ├── features.md
 │   │   │       └── styling.md
+│   │   ├── design-conventions/
+│   │   │   └── SKILL.md                  # Conventions design Figma
 │   │   └── testing-conventions/
 │   │       ├── SKILL.md                  # TDD et stratégies
 │   │       └── references/               # 3 fichiers
@@ -88,7 +97,8 @@
     │   ├── php-test.md       # /dev/php-test
     │   └── php-lint.md       # /dev/php-lint
     └── review/
-        └── symfony-review.md # /review/symfony-review
+        ├── symfony-review.md  # /review/symfony-review
+        └── frontend-review.md # /review/frontend-review
 ```
 
 ## Settings : la couche de sécurité
@@ -101,7 +111,8 @@
       "Bash(docker compose exec *)",
       "Bash(git status)", "Bash(git diff *)",
       "Bash(git log *)", "Bash(git add *)",
-      "Bash(ls *)", "Bash(find *)", "Bash(mkdir *)"
+      "Bash(ls *)", "Bash(find *)", "Bash(mkdir *)",
+      "Bash(npm *)"
     ],
     "deny": [
       "Write(php-legacy/**)",
@@ -122,9 +133,11 @@
 |-------|----------------|
 | `backend-tasks-planner` | `symfony/api-conventions`, `symfony/testing-conventions` |
 | `backend-tasks-executor` | `symfony/api-conventions`, `symfony/testing-conventions` |
-| `frontend-tasks-planner` | `frontend/app-conventions` |
-| `frontend-tasks-executor` | `frontend/app-conventions`, `frontend/testing-conventions` |
-| `frontend-design-executor` | `frontend/app-conventions`, `frontend/testing-conventions` |
+| `frontend-tasks-planner` | `frontend/app-conventions`, `frontend/testing-conventions` |
+| `frontend-tasks-executor` | `frontend/app-conventions`, `frontend/testing-conventions`, `frontend/design-conventions` |
+| `legacy-feature-analyzer` | `symfony/api-conventions`, `frontend/app-conventions` |
+| `legacy-feature-analyzer-refiner` | `symfony/api-conventions`, `frontend/app-conventions` |
+| `conformity-reporter` | `symfony/api-conventions`, `symfony/testing-conventions`, `frontend/app-conventions`, `frontend/testing-conventions`, `modernization/conformity-conventions` |
 
 ### Rules et leur renfort settings
 
@@ -139,7 +152,7 @@
 ```
 /modernization/analyze-legacy
   → legacy-technical-analyzer (Opus)
-  → legacy-functional-analyzer (Opus)
+  → legacy-functional-analyzer (Sonnet)
   → legacy-functional-analyzer-auditor (Haiku)
 
 /modernization/migrate-feature <nom>
@@ -149,4 +162,5 @@
   → backend-tasks-executor (Sonnet)
   → frontend-tasks-executor (Sonnet)
   → conformity-reporter (Sonnet)
+  → boucle qualité (si score < 80/100, max 2 iterations)
 ```

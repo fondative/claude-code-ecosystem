@@ -64,7 +64,7 @@ paths:
 | Type | Frontmatter | Trigger |
 |------|------------|---------|
 | **Targeted** | `paths: ["src/**"]` | When a file matches |
-| **Global** | No `paths` | Always active (same priority as `.claude/CLAUDE.md`) |
+| **Global** | No `paths` | Always active (same priority as [`.claude/CLAUDE.md`](/en/concepts/claude-md)) |
 
 ### Scopes and Priority
 
@@ -136,75 +136,125 @@ Information < 30 lines?
 ├── YES → Subset of files? → TARGETED RULE
 │         Everywhere? → GLOBAL RULE
 │
-└── NO → Workflow? → LAUNCHER SKILL
-          Conventions? → PASSIVE SKILL + references
+└── NO → Workflow? → [LAUNCHER SKILL](/en/concepts/skills)
+          Conventions? → [PASSIVE SKILL](/en/concepts/skills) + references
 ```
 
 | Information | Component | Reason |
 |-------------|-----------|--------|
 | "PSR-12 strict" | Rule | Short, contextual |
-| PSR-12 guide with 50 examples | Passive skill | Too long for a rule |
+| PSR-12 guide with 50 examples | [Passive skill](/en/concepts/skills) | Too long for a rule |
 | "Always use /dev/commit" | Global rule | Applies everywhere |
-| Project paths | CLAUDE.md | Single source of truth |
+| Project paths | [CLAUDE.md](/en/concepts/claude-md) | Single source of truth |
 
-### Mistakes to Avoid
+### Warnings
 
-#### Pitfall 1: Glob `*` vs `**`
+#### ⚠️ `WARN-001`: Glob `*` vs `**`
 
+The `*` glob only covers the first level of files, not subdirectories.
+
+::: danger Problem
 ```yaml
 # ❌ — Only covers 1st level
 paths: ["php-legacy/*"]
+```
+Files in subdirectories are not covered by the rule.
+:::
 
+::: info Solution
+```yaml
 # ✅ — Recursive
 paths: ["php-legacy/**"]
 ```
+The double `**` covers all levels of the directory tree.
+:::
 
-#### Pitfall 2: Rule without settings enforcement
+---
 
+#### ⚠️ `WARN-002`: Rule without settings enforcement
+
+A text-only "read only" rule does not prevent Claude from writing — a technical block in [`settings.json`](/en/concepts/settings) is required.
+
+::: danger Problem
 ```markdown
 # ❌ — "Read only" without enforcement
 NEVER modify these files
 ```
+Without a deny in `settings.json`, this instruction can be ignored.
+:::
 
+::: info Solution
 ```json
 // ✅ — settings.json enforces
 { "deny": ["Write(php-legacy/**)", "Edit(php-legacy/**)"] }
 ```
+The `deny` blocks the Write and Edit tools at the engine level, independently of the rule text.
+:::
 
-#### Pitfall 3: Rule too long
+---
 
+#### ⚠️ `WARN-003`: Rule too long
+
+Rules are injected at every interaction — a large rule permanently pollutes the context.
+
+::: danger Problem
 ```markdown
 # ❌ — 80 lines of detailed conventions
 ```
+80 lines injected at every exchange unnecessarily saturate the context window.
+:::
 
+::: info Solution
 ```markdown
 # ✅ — Short rule + delegation
 Load skill `api-conventions`. Reminders: Docker, TDD, PSR-12.
 ```
+The rule recalls the essentials, the skill carries the detail. No duplication.
+:::
 
-> Rules are injected at every interaction. 80 lines = context pollution.
+---
 
-#### Pitfall 4: Glob `**` alone
+#### ⚠️ `WARN-004`: Glob `**` alone
 
+A `**` glob without a folder prefix is equivalent to a global rule, but more expensive to evaluate.
+
+::: danger Problem
 ```yaml
 # ❌ — Injected EVERYWHERE (equivalent to global but heavier)
 paths: ["**"]
+```
+The rule is injected for every file in the entire project, without discrimination.
+:::
 
+::: info Solution
+```yaml
 # ✅ — Targeted
 paths: ["ap-rest/**"]
 ```
+Targeting a specific folder limits injection to files that are actually relevant.
+:::
 
-#### Pitfall 5: Obsolete path
+---
 
+#### ⚠️ `WARN-005`: Obsolete path
+
+If the targeted folder is renamed, the glob matches nothing — with no error message.
+
+::: danger Problem
 ```yaml
 # ❌ — Folder renamed, rule silently inactive
 paths: ["php-classified-ads-legacy/**"]
+```
+No visible error if the glob matches nothing. The rule is silently ignored.
+:::
 
+::: info Solution
+```yaml
 # ✅ — Matches current folder
 paths: ["php-legacy/**"]
 ```
-
-> No visible error if the glob matches nothing.
+Verify that the path matches the current folder name after each rename.
+:::
 
 ---
 
@@ -212,7 +262,7 @@ paths: ["php-legacy/**"]
 
 ### Excluding Rules (monorepo)
 
-In a monorepo, rules from other teams may be loaded. `claudeMdExcludes` in `settings.local.json` lets you ignore them:
+In a monorepo, rules from other teams may be loaded. `claudeMdExcludes` in [`settings.local.json`](/en/concepts/settings) lets you ignore them:
 
 ```json
 {
@@ -227,9 +277,9 @@ In a monorepo, rules from other teams may be loaded. `claudeMdExcludes` in `sett
 Rules deployed via managed policy (`/etc/claude-code/CLAUDE.md`) **cannot** be excluded. This is intentional to guarantee organization standards.
 :::
 
-### Debugging with the InstructionsLoaded Hook
+### Debugging with the InstructionsLoaded [Hook](/en/concepts/hooks)
 
-The `InstructionsLoaded` hook lets you log exactly which rules are loaded, when, and why:
+The `InstructionsLoaded` [hook](/en/concepts/hooks) lets you log exactly which rules are loaded, when, and why:
 
 ```json
 {
@@ -314,6 +364,11 @@ paths:
 
 # Format
 
+## Language
+- All generated documents MUST be written in French
+- Only code names remain in English
+
+## Format
 - Markdown with hierarchical headings
 - Mermaid diagrams
 - Debt classification: Critical / High / Medium / Low
@@ -337,7 +392,7 @@ paths:
 
 ### Protection
 
-- [ ] "Read only" rule doubled with a `deny` in `settings.json`
+- [ ] "Read only" rule doubled with a `deny` in [`settings.json`](/en/concepts/settings)
 - [ ] Managed policy for organization standards (cannot be excluded)
 
 ### Organization

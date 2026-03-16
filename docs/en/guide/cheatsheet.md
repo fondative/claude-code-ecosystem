@@ -31,6 +31,8 @@ Quick reference — everything you need in 2 minutes.
 | `/mcp` | MCP server status and OAuth authentication |
 | `/status` | View active settings and their source |
 | `/hooks` | Status of configured hooks |
+| `/agents` | List available agents (built-in + custom) |
+| `/btw <question>` | Quick side question without tools (answer discarded from history) |
 
 ## Permission Modes
 
@@ -90,7 +92,7 @@ Run tests after implementation.
 1. /plan          → Explore, understand context
 2. Implement      → Code with conventions (skills)
 3. Test           → /dev/php-test or npm test
-4. Review         → /review/symfony-review
+4. Review         → /review/symfony-review or /review/frontend-review
 5. /dev/commit    → Conventional Commits
 ```
 

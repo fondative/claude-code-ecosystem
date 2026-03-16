@@ -29,12 +29,12 @@
 
 | Component | Responsibility | Anti-pattern |
 |-----------|---------------|-------------|
-| CLAUDE.md | Paths + workflow | Detailed conventions |
-| Rules | Contextual reminders | Complete documentation |
-| Passive skills | Detailed conventions | Execution instructions |
-| Launcher skills | Orchestration | Conventions |
-| Agents | Single task execution | Multi-responsibility |
-| Commands | User actions | Business logic |
+| [CLAUDE.md](/en/concepts/claude-md) | Paths + workflow | Detailed conventions |
+| [Rules](/en/concepts/rules) | Contextual reminders | Complete documentation |
+| [Skills](/en/concepts/skills) (passive) | Detailed conventions | Execution instructions |
+| [Skills](/en/concepts/skills) (launcher) | Orchestration | Conventions |
+| [Agents](/en/concepts/agents) | Single task execution | Multi-responsibility |
+| [Commands](/en/concepts/commands) | User actions | Business logic |
 
 ## Path Management
 
@@ -151,6 +151,19 @@ Reminders:
 - Docker: `docker compose exec -T app [cmd]`
 - TDD mandatory
 ```
+
+## RTK — Raw Token Keying
+
+RTK is an advanced technique to maximize information density in CLAUDE.md and skill instructions. Principle: use raw keywords rather than complete sentences.
+
+| Approach | Tokens | Example |
+|----------|--------|---------|
+| Verbose | ~30 | "Always use Docker Compose to execute backend commands" |
+| RTK | ~10 | "Backend cmds: `docker compose exec -T app [cmd]`" |
+
+::: tip When to use RTK
+Reserve RTK for frequently loaded files (CLAUDE.md, global rules). Passive skills can remain more detailed since they are only loaded on demand.
+:::
 
 ## Most Common Mistakes
 

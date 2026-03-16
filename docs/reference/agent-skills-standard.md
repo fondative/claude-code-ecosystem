@@ -70,10 +70,17 @@ Le standard définit un ensemble minimal de champs. Chaque outil peut ajouter se
 
 ### Champs universels
 
-| Champ | Description |
-|-------|-------------|
-| `name` | Identifiant de la skill |
-| `description` | Ce que fait la skill (pour la découverte automatique) |
+| Champ | Requis | Description |
+|-------|--------|-------------|
+| `name` | Oui | Identifiant de la skill |
+| `description` | Oui | Ce que fait la skill (pour la découverte automatique) |
+| `license` | Non | Licence de la skill (ex: `MIT`, `Apache-2.0`) |
+| `compatibility` | Non | Outils compatibles (ex: `claude-code, cursor, copilot`) |
+| `metadata` | Non | Métadonnées additionnelles (objet libre) |
+
+::: info Requis dans le standard, optionnel dans Claude Code
+`name` et `description` sont **requis** par le standard Agent Skills mais **optionnels** dans Claude Code (déduits du dossier et du premier paragraphe).
+:::
 
 ### Extensions Claude Code
 
@@ -151,6 +158,17 @@ disable-model-invocation: true
 3. Créer le tag Git
 4. Publier le package
 ```
+
+## Validation
+
+L'outil `skills-ref` de la reference library permet de valider qu'une skill respecte le standard :
+
+```bash
+# Installer depuis la reference library
+npx skills-ref validate .claude/skills/my-skill/
+```
+
+La validation vérifie la présence du `SKILL.md`, le format du frontmatter, et la taille des métadonnées (~100 tokens max) et des instructions (<5000 tokens recommandé).
 
 ## Où trouver des skills
 

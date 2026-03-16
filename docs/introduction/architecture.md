@@ -1,6 +1,6 @@
 # Architecture du dossier .claude/
 
-Le dossier `.claude/` est le coeur de la configuration projet. Il contient tous les composants qui étendent les capacités de Claude pour un projet spécifique.
+Le dossier `.claude/` est le coeur de la configuration projet. Il contient tous les composants qui étendent les capacités de Claude pour un projet spécifique : [settings](/concepts/settings), [agents](/concepts/agents), [skills](/concepts/skills), [rules](/concepts/rules), [commands](/concepts/commands), [hooks](/concepts/hooks) et [MCP](/concepts/mcp).
 
 ## Structure type
 
@@ -25,15 +25,24 @@ Le dossier `.claude/` est le coeur de la configuration projet. Il contient tous 
 │   ├── modernization/
 │   │   ├── migrate-feature/
 │   │   │   └── SKILL.md
+│   │   ├── conformity-conventions/
+│   │   │   ├── SKILL.md
+│   │   │   └── references/
 │   │   └── ...
-│   └── frontend-dev-conventions/
-│       └── SKILL.md
+│   └── frontend/
+│       ├── app-conventions/
+│       │   ├── SKILL.md
+│       │   └── references/
+│       ├── design-conventions/
+│       │   └── SKILL.md
+│       └── testing-conventions/
+│           ├── SKILL.md
+│           └── references/
 ├── rules/                 # Injection contextuelle
 │   ├── legacy-readonly.md
 │   ├── symfony-api.md
 │   ├── git.md
 │   └── ...
-├── settings.local.json    # Preferences personnelles (gitignore)
 └── commands/              # Slash commands (fusionne avec skills)
     ├── dev/
     │   ├── commit.md
@@ -77,11 +86,11 @@ Un projet de modernisation legacy utilise typiquement :
 
 | Composant | Quantité | Répartition |
 |-----------|----------|-------------|
-| Agents | 13 | 3 analyse, 5 implémentation, 2 planification, 3 reporting |
-| Skills | 8 | 4 launchers + 3 passives + 1 framework |
+| Agents | 12 | 5 analyse, 2 implémentation, 2 planification, 2 reporting, 1 diagnostic |
+| Skills | 11 | 4 launchers + 6 passives + 1 framework |
 | Rules | 7 | 1 globale + 6 ciblées par path |
-| Commands | 4 | 2 dev + 1 lint + 1 review |
-| Références | 20 | 14 backend + 3 testing + 3 framework |
+| Commands | 5 | 3 dev + 2 review |
+| Références | 34 | 15 backend + 3 testing + 9 frontend + 3 testing-fe + 4 conformity |
 
 ## Ressources
 

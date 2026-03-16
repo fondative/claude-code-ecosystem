@@ -2,13 +2,13 @@
 
 ## Vue d'ensemble
 
-Le pipeline de migration transforme une feature legacy en implémentation moderne à travers 4 étapes, chacune avec un checkpoint de vérification.
+Le pipeline de migration transforme une feature legacy en implémentation moderne à travers 5 étapes, chacune avec un checkpoint de vérification.
 
 ```
-Spécification ──► Planification ──► Implémentation ──► Conformité
-     │                  │                  │                │
-     ▼                  ▼                  ▼                ▼
-  _spec.md        _analysis.md         Code + Tests      _REPORT.md
+Spécification ──► Planification ──► Implémentation ──► Conformité ──► Boucle qualité
+     │                  │                  │                │               │
+     ▼                  ▼                  ▼                ▼               ▼
+  _spec.md        _analysis.md         Code + Tests      _REPORT.md    Score ≥ 80
 ```
 
 ## Étape 1 : Spécification détaillée
@@ -77,8 +77,15 @@ Si la spec nécessite des corrections, l'agent `legacy-feature-analyzer-refiner`
 
 ```
 ✅ Fichier _backend_analysis.md existe
+✅ Contient des tâches avec IDs (BACKEND-001, BACKEND-002...)
+✅ Chaque tâche a : titre, description, critères d'acceptation
+✅ Les dépendances réfèrent des IDs existants dans le même fichier
+✅ L'ordre d'exécution est défini
+✅ Spec OpenAPI incluse si des endpoints sont créés
 ✅ Fichier _frontend_analysis.md existe
-✅ Spec OpenAPI mise à jour dans api-rest-symfony-target/docs/openapi.yaml
+✅ Contient des tâches avec IDs (FRONTEND-001, FRONTEND-002...)
+✅ FRONTEND-001 est la configuration HTTP client
+✅ Les endpoints référencés existent dans la spec OpenAPI
 → Passer à l'étape 3
 ```
 
@@ -177,6 +184,30 @@ La documentation utilise toujours la **dernière version**.
 
 ### Recommandation
 CORRECTIONS REQUIRED — Implémenter la pagination avant validation.
+```
+
+## Étape 5 : Boucle qualité
+
+**Pattern** : LLM-as-Judge (maximum 2 itérations)
+
+**Processus** :
+
+1. Lire le score du rapport de conformité (étape 4)
+2. Si score ≥ 80/100 : pipeline terminé avec succès
+3. Si score < 80/100 :
+   - Extraire les déductions CRITIQUES et ÉLEVÉES du rapport
+   - Identifier l'executor concerné (backend ou frontend)
+   - Relancer l'executor avec la liste des corrections
+   - Relancer le conformity-reporter (rapport V2)
+   - Si score V2 ≥ 80/100 : succès
+   - Si score V2 < 80/100 : **STOP** — intervention humaine requise
+
+### Checkpoint
+
+```
+✅ Score du rapport final (V1 ou V2) ≥ 80/100
+✅ Aucune non-conformité CRITIQUE restante
+→ Pipeline terminé
 ```
 
 ## Résilience du pipeline

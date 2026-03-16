@@ -36,11 +36,11 @@ Phase 3: Documentation
 
 | Component | Count |
 |-----------|-------|
-| Agents | 13 (3 Opus + 8 Sonnet + 3 Haiku) |
-| Skills | 8 (4 launchers + 3 passive + 1 framework) |
+| Agents | 12 (2 Opus + 7 Sonnet + 3 Haiku) |
+| Skills | 11 (4 launchers + 6 passive + 1 framework) |
 | Rules | 7 (1 global + 6 targeted) |
-| Commands | 4 (commit, test, lint, review) |
-| References | 20 technical documentation files |
+| Commands | 5 (commit, test, lint, symfony-review, frontend-review) |
+| References | 34 technical documentation files |
 | Features migrated | 14+ (auth, ads, search, categories...) |
 
 ## Invocation

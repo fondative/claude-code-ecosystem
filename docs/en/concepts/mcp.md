@@ -5,10 +5,10 @@
 | Aspect | Detail |
 |--------|--------|
 | **What** | Standardized protocol to connect Claude to external tools and data |
-| **Where** | `settings.json` (`mcpServers`), `.mcp.json` (project), CLI `claude mcp` |
+| **Where** | [`settings.json`](/en/concepts/settings) (`mcpServers`), `.mcp.json` (project), CLI `claude mcp` |
 | **Transports** | `http` (recommended), `stdio` (local), `sse` (deprecated) |
 | **Scopes** | `local` (default), `project` (.mcp.json, git), `user` (cross-project) |
-| **Security** | Trust dialog, per-tool permissions, secrets via env vars |
+| **Security** | Trust dialog, per-tool [permissions](/en/concepts/settings), secrets via env vars |
 
 ---
 
@@ -129,7 +129,9 @@ Priority: local > project > user. Managed servers take exclusive control.
 MCP tools are not loaded at startup. Claude discovers them via `ToolSearch` on demand. When tools exceed 10% of context, Tool Search activates automatically (`ENABLE_TOOL_SEARCH=auto`).
 :::
 
-### Granular Permissions
+### Granular Permissions {#permissions}
+
+MCP permissions are configured in [`settings.json`](/en/concepts/settings):
 
 ```json
 {
@@ -220,40 +222,63 @@ Anthropic has not verified the security of all community servers. Check the sour
 
 See the [complete registry on GitHub](https://github.com/modelcontextprotocol/servers) for hundreds of servers.
 
-### Mistakes to Avoid
+### Warnings
 
-#### Pitfall 1: Hardcoded token
+#### ⚠️ `WARN-001` : Hardcoded token
 
+Writing a token in plaintext in a configuration file exposes credentials in git history.
+
+::: danger Problem
 ```json
 // ❌ — Token in plaintext in the file
 { "env": { "GITHUB_TOKEN": "ghp_abc123..." } }
 ```
+The token is visible in the git repository and all its clones.
+:::
 
+::: info Solution
 ```json
 // ✅ — Environment variable
 { "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" } }
 ```
+Export in `.bashrc`: `export GITHUB_TOKEN=ghp_...`
+:::
 
-> Export in `.bashrc`: `export GITHUB_TOKEN=ghp_...`
+---
 
-#### Pitfall 2: No deny for destructive actions
+#### ⚠️ `WARN-002` : No deny for destructive actions
 
+A wildcard on allow permissions gives Claude unlimited access, including irreversible actions.
+
+::: danger Problem
 ```json
 // ❌ — Claude can delete a repo
 { "allow": ["mcp__github__*"] }
 ```
+All GitHub actions are permitted, including repository deletion.
+:::
 
+::: info Solution
 ```json
 // ✅ — Specific actions
 { "allow": ["mcp__github__list_prs"], "deny": ["mcp__github__delete_repo"] }
 ```
+Always explicitly define destructive actions in the `deny` list.
+:::
 
-#### Pitfall 3: Server from unknown source
+---
 
-> Every MCP server has network access. **Never** install an unverified server. Prefer `@modelcontextprotocol/` packages and official HTTP servers.
+#### ⚠️ `WARN-003` : Server from unknown source
 
-#### Pitfall 4: Expired token
+::: warning Attention
+Every MCP server has network access. **Never** install an unverified server. Prefer `@modelcontextprotocol/` packages and official HTTP servers.
+:::
 
+---
+
+#### ⚠️ `WARN-004` : Expired token
+
+::: warning Attention
 **Symptom**: Vague error or empty result.
 
 **Diagnosis**:
@@ -261,16 +286,29 @@ See the [complete registry on GitHub](https://github.com/modelcontextprotocol/se
 2. `gh auth status` — token valid?
 3. `/mcp` — server status?
 4. Regenerate if necessary
+:::
 
-#### Pitfall 5: Forgetting --scope for team sharing
+---
 
+#### ⚠️ `WARN-005` : Forgetting --scope for team sharing
+
+Without the `--scope project` flag, the MCP server remains local and invisible to other team members.
+
+::: danger Problem
 ```bash
 # ❌ — Local scope by default, invisible to the team
 claude mcp add --transport http api https://mcp.example.com
+```
+The server is registered in `~/.claude.json` and is not shared via git.
+:::
 
+::: info Solution
+```bash
 # ✅ — Project scope, .mcp.json in git
 claude mcp add --transport http --scope project api https://mcp.example.com
 ```
+The server is written to `.mcp.json` at the project root, versioned with the code.
+:::
 
 ---
 
@@ -299,7 +337,7 @@ Config for Claude Desktop:
 
 ### Plugin MCP Servers
 
-Plugins can bundle MCP servers that start automatically:
+[Plugins](/en/concepts/plugins) can bundle MCP servers that start automatically:
 
 ```json
 {

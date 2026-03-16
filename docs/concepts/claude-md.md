@@ -14,40 +14,49 @@
 
 ## Qu'est-ce que CLAUDE.md ?
 
-`CLAUDE.md` est le **premier fichier que Claude charge** à chaque session. Il contient les instructions permanentes du projet : chemins, conventions, commandes disponibles et workflow. C'est la "mémoire de travail" de Claude pour votre projet.
+`CLAUDE.md` est le **premier fichier que Claude charge** à chaque session. Il contient les instructions permanentes du projet : chemins, conventions, commandes disponibles et workflow. C'est la « mémoire de travail » de Claude pour votre projet.
 
 ::: warning Contexte, pas enforcement
-CLAUDE.md fournit du **contexte et des instructions** que Claude suit au mieux, mais ce n'est pas un mécanisme d'enforcement. Pour bloquer des actions, utiliser les **permissions** dans `settings.json` (deny) ou le **sandbox**.
+CLAUDE.md fournit du **contexte et des instructions** que Claude suit au mieux, mais ce n'est pas un mécanisme d'enforcement. Pour bloquer des actions, utiliser les **permissions** dans [`settings.json`](/concepts/settings) (deny) ou le [**sandbox**](https://docs.anthropic.com/en/docs/claude-code/security#sandbox).
 :::
 
+```mermaid
+flowchart LR
+    A([Session]) --> B[CLAUDE.md] --> C[settings.json] --> D[Skills] --> E[Rules] --> F([Pret])
+
+    B -.-> G[Agents]
+    B -.-> H[Skills]
+    B -.-> I[Rules]
+
+    style A fill:#1e3a8a,stroke:#0f172a,color:#fff
+    style B fill:#115e59,stroke:#0d4f4a,color:#fff
+    style C fill:#334155,stroke:#1e293b,color:#e2e8f0
+    style D fill:#334155,stroke:#1e293b,color:#e2e8f0
+    style E fill:#334155,stroke:#1e293b,color:#e2e8f0
+    style F fill:#15803d,stroke:#0f172a,color:#fff
+    style G fill:#fbbf24,stroke:#d97706,color:#0f172a
+    style H fill:#fbbf24,stroke:#d97706,color:#0f172a
+    style I fill:#fbbf24,stroke:#d97706,color:#0f172a
 ```
-┌─────────────────────────────────────────────┐
-│              SESSION CLAUDE CODE             │
-│                                             │
-│  1. Charge CLAUDE.md (integral)             │
-│     ├── Chemins (SOURCE, TARGET, ...)       │
-│     ├── Commandes (/dev/commit, ...)        │
-│     ├── @import fichiers references         │
-│     └── Workflow (ordre des etapes)         │
-│                                             │
-│  2. Charge settings.json (permissions)      │
-│                                             │
-│  3. Charge descriptions des skills          │
-│                                             │
-│  4. Pret a travailler                       │
-│                                             │
-│  Agents lisent CLAUDE.md pour les paths     │
-│  Skills referent CLAUDE.md pour le ctx      │
-│  Rules completent avec du detail cible      │
-│  Survit a /compact (toujours en contexte)   │
-└─────────────────────────────────────────────┘
-```
+
+| Etape | Fichier | Ce qui est charge |
+|:-----:|---------|-------------------|
+| 1 | **CLAUDE.md** | Chemins, commandes, workflow (integral + `@imports`) |
+| 2 | **[settings.json](/concepts/settings)** | Permissions allow/deny, sandbox, hooks |
+| 3 | **[Skills](/concepts/skills)** | Descriptions des skills passives + launchers |
+| 4 | **[Rules](/concepts/rules)** | Contenu injecte selon les fichiers manipules (glob match) |
+
+::: tip Qui consomme CLAUDE.md ?
+Les **[agents](/concepts/agents)** lisent les chemins (`SOURCE_PROJECT`, `BACKEND_TARGET`...), les **[skills](/concepts/skills)** l'utilisent comme contexte de reference, et les **[rules](/concepts/rules)** completent avec du detail cible.
+:::
 
 ---
 
 ## Comment ça marche
 
-### Emplacements et découverte
+### Découverte et chargement
+
+#### Emplacements
 
 Claude découvre les fichiers CLAUDE.md par un **directory tree walk** — il parcourt l'arborescence depuis la racine du projet :
 
@@ -59,23 +68,65 @@ Claude découvre les fichiers CLAUDE.md par un **directory tree walk** — il pa
 | `./src/CLAUDE.md` | Sous-dossier | Oui (git) |
 | `./src/components/CLAUDE.md` | Sous-sous-dossier | Oui (git) |
 
-::: info Directory tree walk
-Claude charge **tous** les fichiers CLAUDE.md trouvés dans l'arborescence du projet, pas seulement celui de la racine. Un `src/CLAUDE.md` s'applique quand Claude travaille dans `src/`. Les deux emplacements racine (`./CLAUDE.md` et `./.claude/CLAUDE.md`) sont équivalents.
+::: info Directory tree walk (top-down)
+Claude parcourt l'arborescence **de la racine vers les sous-dossiers**. Les fichiers racine (`~/.claude/CLAUDE.md`, `./CLAUDE.md`) sont chargés **au démarrage de la session**. Les fichiers de sous-dossiers (`src/CLAUDE.md`) sont chargés **à la demande**, quand Claude travaille dans ce dossier.
 :::
 
-### Exclure des dossiers : claudeMdExcludes
+::: warning Deux fichiers racine ?
+Si `./CLAUDE.md` **et** `./.claude/CLAUDE.md` existent tous les deux, `./CLAUDE.md` a priorité. Préférer un seul emplacement pour éviter toute ambiguïté.
+:::
 
-Pour empêcher Claude de charger des CLAUDE.md dans certains dossiers (ex. `node_modules`, `vendor`) :
+#### Priorité de chargement
 
-```json
-{
-  "claudeMdExcludes": ["node_modules", "vendor", "dist", ".git"]
-}
+```mermaid
+flowchart TB
+    M[Managed Policy] -->|cumul| P[Personnel] -->|cumul| R[Projet racine] -->|cumul| S[Sous-dossier]
+
+    style M fill:#7f1d1d,stroke:#450a0a,color:#fecaca
+    style P fill:#1e3a8a,stroke:#0f172a,color:#bfdbfe
+    style R fill:#115e59,stroke:#0d4f4a,color:#ccfbf1
+    style S fill:#334155,stroke:#1e293b,color:#e2e8f0
 ```
 
-Configurable dans `settings.json` à n'importe quel scope.
+::: info Cumul, pas remplacement
+Tous les niveaux de CLAUDE.md sont chargés **simultanément** — ils se **cumulent**, ils ne se remplacent pas. La priorité ne s'applique qu'en cas d'**instructions contradictoires** entre niveaux : le niveau le plus haut l'emporte.
+:::
 
-### @import : inclure des fichiers externes
+| Priorité | Niveau | Emplacement | Partage |
+|:--------:|--------|-------------|---------|
+| MAX | **Managed Policy** | `/etc/claude-code/CLAUDE.md` | Organisation (non excluable) |
+| Haute | **Personnel** | `~/.claude/CLAUDE.md` | Non (local) |
+| Normale | **Projet racine** | `./CLAUDE.md` | Oui (git) |
+| Contextuelle | **Sous-dossier** | `./src/CLAUDE.md` | Oui (git) |
+
+### Contenu et organisation
+
+#### Structure recommandée
+
+```markdown
+# Nom du Projet
+
+## Configuration
+
+### Chemins (PATHS)
+| Alias | Chemin | Description |
+|-------|--------|-------------|
+| `SRC` | `./src/` | Code source |
+| `TESTS` | `./tests/` | Tests |
+
+### Commandes
+- `npm test` : Lancer les tests
+- `npm run lint` : Vérifier le style
+
+## Workflow
+### Skills disponibles
+- `/migrate <nom>` : Migration E2E
+
+### Ordre
+1. Analyse → 2. Migration → 3. Documentation
+```
+
+#### @import : inclure des fichiers
 
 CLAUDE.md supporte l'import de fichiers pour garder le fichier principal court :
 
@@ -92,33 +143,9 @@ CLAUDE.md supporte l'import de fichiers pour garder le fichier principal court :
 | **Syntaxe** | `@import <chemin-relatif>` |
 | **Profondeur max** | 5 niveaux d'imports imbriqués |
 | **Résolution** | Relatif au fichier contenant l'import |
-| **Échec** | Fichier manquant = warning silencieux |
+| **Échec** | Fichier manquant = ignoré silencieusement (pas d'erreur) |
 
-::: tip Garder CLAUDE.md court
-Utiliser `@import` pour déléguer le détail à des fichiers séparés. CLAUDE.md reste un sommaire avec les chemins et commandes essentiels.
-:::
-
-### Niveaux de priorité
-
-| Niveau | Emplacement | Portée | Priorité |
-|--------|------------|--------|----------|
-| Enterprise | Managed settings | Organisation | Maximale |
-| Personnel | `~/.claude/CLAUDE.md` | Tous vos projets | Haute |
-| Projet (racine) | `./CLAUDE.md` | Ce projet | Normale |
-| Projet (sous-dossier) | `./src/CLAUDE.md` | Ce sous-dossier | Contextuelle |
-
-### Initialisation : /init
-
-La commande `/init` génère un CLAUDE.md initial pour votre projet :
-
-```bash
-# Dans Claude Code
-/init
-```
-
-Claude analyse le projet (structure, stack, commandes) et génère un CLAUDE.md adapté. Utile pour démarrer rapidement sur un nouveau projet.
-
-### Auto-mémoire vs CLAUDE.md
+#### CLAUDE.md vs MEMORY.md
 
 Claude maintient aussi un fichier de mémoire automatique :
 
@@ -130,16 +157,31 @@ Claude maintient aussi un fichier de mémoire automatique :
 |--------|-----------|-----------|
 | **Nature** | Instructions stables, écrites par l'humain | Notes évolutives, écrites par Claude |
 | **Chargement** | Intégral (pas de limite) | Tronqué après 200 lignes |
+| **Survie à `/compact`** | Oui — re-lu depuis le disque | Oui — rechargé (200 premières lignes) |
 | **Persistence** | Dans le repo (git) | Local (`~/.claude/projects/`) |
 | **Contenu** | Chemins, commandes, workflow, conventions | Patterns découverts, corrections, décisions |
 | **Modifié par** | L'utilisateur (manuellement) | Claude (automatiquement) |
 | **Commande** | `/init` (génération initiale) | `/memory` (voir/éditer) |
 
-::: warning 200 lignes = MEMORY.md, pas CLAUDE.md
-La limite de 200 lignes s'applique à **MEMORY.md** (auto-mémoire), pas à CLAUDE.md. CLAUDE.md est chargé intégralement quelle que soit sa taille. Garder CLAUDE.md court reste une bonne pratique pour la lisibilité, pas une contrainte technique.
+::: info 200 lignes = MEMORY.md, pas CLAUDE.md
+La limite de 200 lignes s'applique à **MEMORY.md**, pas à CLAUDE.md. MEMORY.md est écrit **automatiquement par Claude** — sans limite, il gonflerait indéfiniment. Claude compense en déplaçant les notes détaillées dans des fichiers thématiques séparés chargés à la demande. CLAUDE.md est écrit **par vous** (contenu intentionnel), donc pas de limite — mais garder < 200 lignes reste une bonne pratique pour l'adhérence.
 :::
 
-### Répertoires supplémentaires : --add-dir
+### Configuration
+
+#### claudeMdExcludes
+
+Pour empêcher Claude de charger des CLAUDE.md dans certains dossiers (ex. `node_modules`, `vendor`) :
+
+```json
+{
+  "claudeMdExcludes": ["node_modules", "vendor", "dist", ".git"]
+}
+```
+
+Configurable dans [`settings.json`](/concepts/settings) à n'importe quel scope.
+
+#### --add-dir
 
 Pour ajouter des répertoires hors du projet courant au scope de Claude :
 
@@ -149,34 +191,48 @@ claude --add-dir /path/to/other/project
 
 Claude chargera aussi les CLAUDE.md trouvés dans ces répertoires supplémentaires, avec les mêmes règles de découverte.
 
-### Comportement avec /compact
+### Comportement runtime
 
-CLAUDE.md **survit à la compaction**. Quand Claude compresse le contexte via `/compact` ou auto-compaction, les instructions de CLAUDE.md restent toujours présentes — elles sont réinjectées dans le contexte compressé.
+#### Chargement intégral
 
-### Structure recommandée
+CLAUDE.md est chargé **en entier** à chaque requête, sans limite de taille. Les fichiers `@import` sont **expansés au chargement** et deviennent partie intégrante du contenu. Utiliser `/status` pour vérifier quels fichiers CLAUDE.md sont effectivement chargés dans la session courante.
 
-```markdown
-# Nom du Projet
+::: tip Recommandation officielle
+Bien qu'il n'y ait **aucune limite technique**, la doc officielle recommande de viser **< 200 lignes**. Un fichier trop long consomme du contexte à chaque requête et **réduit l'adhérence** — Claude suit moins bien les instructions noyées dans un fichier massif. Extraire le détail dans des skills ou `@import`.
+:::
 
-## Configuration
+#### Survie à /compact
 
-### Chemins (PATHS)
-| Alias | Chemin | Description |
-|-------|--------|-------------|
-| `SRC` | `./src/` | Code source |
-| `TESTS` | `./tests/` | Tests |
+CLAUDE.md **survit à la compaction** grâce à un mécanisme de **reconstruction** (pas de préservation) :
 
-### Commandes
-- `npm test` : Lancer les tests
-- `npm run lint` : Verifier le style
+1. La compaction est déclenchée (auto ou manuelle via `/compact`)
+2. Le hook `PreCompact` se déclenche (si configuré)
+3. Le contexte conversation est compressé : anciens outputs supprimés, messages résumés
+4. **CLAUDE.md est re-lu depuis le disque** et ré-injecté frais dans le nouveau contexte
+5. Les fichiers `@import` sont également re-expansés
 
-## Workflow
-### Skills disponibles
-- `/migrate <nom>` : Migration E2E
+| Élément | Pendant la compaction |
+|---------|----------------------|
+| **CLAUDE.md** | Re-lu depuis le disque, ré-injecté à 100% |
+| **Conversation** | Résumée (anciens outputs supprimés, messages clés gardés) |
+| **MEMORY.md** | Rechargé (200 premières lignes) |
+| **Skills / Rules** | Descriptions disponibles, inchangées |
+| **Serveurs MCP** | Connexions maintenues |
 
-### Ordre
-1. Analyse → 2. Migration → 3. Documentation
+::: warning Si une instruction disparaît après /compact...
+C'est qu'elle était dans la **conversation**, pas dans CLAUDE.md. Mettre les instructions persistantes dans CLAUDE.md, pas dans le chat.
+:::
+
+#### Initialisation avec /init
+
+La commande `/init` génère un CLAUDE.md initial pour votre projet :
+
+```bash
+# Dans Claude Code
+/init
 ```
+
+Claude analyse le projet (structure, stack, commandes) et génère un CLAUDE.md adapté. Utile pour démarrer rapidement sur un nouveau projet.
 
 ---
 
@@ -189,101 +245,124 @@ CLAUDE.md **survit à la compaction**. Quand Claude compresse le contexte via `/
 | Chemins du projet | **CLAUDE.md** | Source unique de vérité |
 | Commandes disponibles | **CLAUDE.md** | Vue d'ensemble du workflow |
 | Stack technique (1 ligne) | **CLAUDE.md** | Contexte global |
-| Conventions détaillées | **Skill passive** | Trop long pour CLAUDE.md |
-| Rappel contextuel court | **Rule** | Injecté selon les fichiers |
+| Conventions détaillées | **[Skill passive](/concepts/skills)** | Trop long pour CLAUDE.md |
+| Rappel contextuel court | **[Rule](/concepts/rules)** | Injecté selon les fichiers |
 | Préférences personnelles | **~/.claude/CLAUDE.md** | Pas dans le repo |
 | Notes de session | **MEMORY.md** | Évolue automatiquement |
-| Sécurité (deny/allow) | **settings.json** | Enforcement réel (pas juste contexte) |
+| Sécurité (deny/allow) | **[settings.json](/concepts/settings)** | Enforcement réel (pas juste contexte) |
 
-### Les erreurs à éviter
+### Warnings
 
-#### Piège 1 : Fichier trop long
+#### ⚠️ `WARN-001` : Fichier trop long / monolithique
 
+Un CLAUDE.md de 200+ lignes noie les informations essentielles et réduit l'adhérence de Claude.
+
+::: danger Problème
 ```markdown
-# --- 500 lignes de conventions detaillees
 ## Architecture (100 lignes)
 ## Patterns (100 lignes)
 ## DTOs (100 lignes)
-...
 ```
+Tout dans un seul fichier — impossible à scanner, Claude ne distingue plus l'essentiel.
+:::
 
+::: info Solution
 ```markdown
-# --- Court et factuel, detail dans les skills ou @import
 ## Stack
 Symfony 7.4, PostgreSQL, Docker
 
 ## Conventions
-Voir skill `symfony/api-conventions` pour le detail.
+Voir skill `symfony/api-conventions` pour le détail.
+
+## Architecture
+@import ./docs/architecture.md
 ```
+Garder CLAUDE.md **court et factuel** (< 200 lignes). Déléguer le détail aux skills, rules ou `@import`.
+:::
 
-> Bien que CLAUDE.md n'ait pas de limite technique, un fichier trop long noie les informations essentielles. Déléguer le détail aux skills, rules ou `@import`.
+---
 
-#### Piège 2 : Chemins hardcodés dans les agents
+#### ⚠️ `WARN-002` : Chemins hardcodés dans les agents
 
+Si un dossier est renommé, il faut modifier chaque agent un par un.
+
+::: danger Problème
 ```markdown
-# --- Agent avec chemin en dur
 Lire les fichiers dans ./php-classified-ads-legacy/
-
-# --- Agent lit le chemin depuis CLAUDE.md
-Lire SOURCE_PROJECT (defini dans CLAUDE.md)
 ```
+Chemin en dur dans l'agent — fragile et source de bugs silencieux.
+:::
 
-> Si le dossier est renommé, un seul endroit à modifier.
-
-#### Piège 3 : Conventions dupliquées
-
+::: info Solution
 ```markdown
-# --- PSR-12 dans CLAUDE.md ET dans la skill
+Lire SOURCE_PROJECT (défini dans CLAUDE.md)
+```
+L'agent lit le chemin depuis CLAUDE.md. Si le dossier est renommé, **un seul endroit à modifier**.
+:::
+
+---
+
+#### ⚠️ `WARN-003` : Conventions dupliquées
+
+Les mêmes conventions écrites à deux endroits divergent inévitablement.
+
+::: danger Problème
+```markdown
 ## Conventions
 - PSR-12 strict
-- camelCase methodes
+- camelCase méthodes
 ```
+Dupliqué dans CLAUDE.md **et** dans la skill — lequel fait foi ?
+:::
 
+::: info Solution
 ```markdown
-# --- Reference vers la skill
 ## Conventions
 Voir skill `symfony/api-conventions`.
 ```
+Une seule source de vérité. CLAUDE.md **pointe** vers la skill, sans dupliquer.
+:::
 
-#### Piège 4 : Instructions temporaires
+---
 
+#### ⚠️ `WARN-004` : Instructions temporaires
+
+CLAUDE.md est chargé à **chaque session**. Les tâches en cours n'ont pas leur place ici.
+
+::: danger Problème
 ```markdown
-# --- Tache en cours dans CLAUDE.md
 ## TODO
 - Finir la migration Search_Engine
 - Corriger le bug #42
 ```
+Ces notes polluent le fichier permanent et deviennent obsolètes.
+:::
 
-> Utiliser MEMORY.md pour les notes de session, pas CLAUDE.md.
+::: info Solution
+Utiliser **MEMORY.md** (`/memory`) pour les notes de session et les tâches en cours. CLAUDE.md reste réservé aux instructions **permanentes**.
+:::
 
-#### Piège 5 : Confondre CLAUDE.md et permissions
+---
 
+#### ⚠️ `WARN-005` : Confondre CLAUDE.md et permissions
+
+CLAUDE.md est du **contexte**, pas un mécanisme de blocage.
+
+::: danger Problème
 ```markdown
-# --- Croire que CLAUDE.md bloque les actions
-## Regles
+## Règles
 Ne JAMAIS modifier les fichiers dans php-legacy/
 ```
+Claude fera de son mieux, mais rien ne l'empêche **techniquement** de modifier ces fichiers.
+:::
 
-> CLAUDE.md est du **contexte**, pas de l'enforcement. Claude fera de son mieux pour respecter l'instruction, mais pour un blocage réel, utiliser `deny` dans `settings.json`.
-
-#### Piège 6 : Oublier @import pour les gros projets
-
-```markdown
-# --- Tout dans un seul fichier
-## Architecture (50 lignes)
-## API Guide (80 lignes)
-## Testing (40 lignes)
-## Deployment (30 lignes)
+::: info Solution
+Utiliser `deny` dans **[settings.json](/concepts/settings)** pour un blocage réel :
+```json
+{ "deny": ["Edit(php-legacy/**)", "Write(php-legacy/**)"] }
 ```
-
-```markdown
-# --- CLAUDE.md comme sommaire + @import
-## Architecture
-@import ./docs/architecture.md
-
-## API
-@import ./docs/api-guide.md
-```
+CLAUDE.md fournit le **pourquoi**, settings.json applique le **blocage**.
+:::
 
 ---
 
@@ -291,7 +370,7 @@ Ne JAMAIS modifier les fichiers dans php-legacy/
 
 ### Hook InstructionsLoaded
 
-Le hook `InstructionsLoaded` se déclenche après le chargement de CLAUDE.md et toutes les instructions :
+Le [hook](/concepts/hooks) `InstructionsLoaded` se déclenche après le chargement de CLAUDE.md et toutes les instructions :
 
 ```json
 {
@@ -309,6 +388,16 @@ Utile pour du logging, des validations custom, ou l'injection dynamique de conte
 ### Enterprise : managed CLAUDE.md
 
 Les organisations peuvent forcer des instructions via managed settings. Ces instructions ont **priorité maximale** et ne peuvent pas être surchargées par les fichiers projet ou utilisateur.
+
+| OS | Chemin |
+|----|--------|
+| macOS | `/Library/Application Support/ClaudeCode/CLAUDE.md` |
+| Linux | `/etc/claude-code/CLAUDE.md` |
+| Windows | `C:\Program Files\ClaudeCode\CLAUDE.md` |
+
+::: warning Non excluable
+Les instructions managed ne peuvent **pas** être ignorées via `claudeMdExcludes`. C'est voulu pour garantir les standards de l'organisation.
+:::
 
 ### Troubleshooting
 
@@ -340,7 +429,7 @@ Les organisations peuvent forcer des instructions via managed settings. Ces inst
 |-------|--------|-------------|
 | `SOURCE_PROJECT` | `./php-legacy` | Legacy (LECTURE SEULE) |
 | `BACKEND_TARGET` | `./api-rest-symfony-target/` | Backend cible |
-| `FRONTEND_TARGET` | `./ap-rest/` | Frontend cible |
+| `FRONTEND_TARGET` | `./app-react-target/` | Frontend cible |
 | `OPENAPI_SPEC` | `./api-rest-symfony-target/docs/openapi.yaml` | Spec OpenAPI |
 | `FEATURE_SPECS_DIR` | `./output/features/` | Specifications |
 | `REPORTS_DIR` | `./output/reports/` | Rapports conformite |
@@ -395,7 +484,7 @@ Toujours repondre en francais.
 - Ne jamais push sans confirmation
 
 ## Style
-- Code concis, pas de commentaires obvies
+- Code concis, pas de commentaires evidents
 - Noms de variables explicites
 ```
 

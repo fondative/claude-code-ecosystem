@@ -1,8 +1,8 @@
 # Référence Frontmatter
 
-## Agents
+## [Agents](/concepts/agents)
 
-Les agents utilisent un frontmatter YAML en début de fichier `.claude/agents/<nom>.md` :
+Les [agents](/concepts/agents) utilisent un frontmatter YAML en début de fichier `.claude/agents/<nom>.md` :
 
 ```yaml
 ---
@@ -22,17 +22,18 @@ skills:
 |-------|--------|------|-------------|
 | `name` | Oui | string | Identifiant unique de l'agent |
 | `description` | Oui | string | Ce que fait l'agent (1-2 lignes). Utilisée par Claude pour la délégation auto |
-| `tools` | Oui | string (CSV) | Outils autorisés : `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash` |
-| `model` | Oui | string | Modèle : `opus`, `sonnet`, `haiku` |
+| `tools` | Non | string (CSV) | Outils autorisés : `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash`, `Agent(type)`. Défaut : tous |
+| `model` | Non | string | Modèle : `opus`, `sonnet`, `haiku`. Défaut : hérite du parent |
 | `skills` | Non | list | Skills héritées (noms de dossiers dans `.claude/skills/`) |
 | `allowed-tools` | Non | string (CSV) | Outils autorisés sans confirmation (ex: `Bash(docker *)`) |
-| `disable-model-invocation` | Non | boolean | `true` = seul l'utilisateur peut spawner cet agent |
-| `user-invocable` | Non | boolean | `false` = invisible dans le menu, délégation Claude uniquement |
-| `context` | Non | string | `fork` = exécuter dans un sub-agent isolé |
-| `agent` | Non | string | Type de sub-agent si `context: fork` (défaut: `general-purpose`) |
-| `argument-hint` | Non | string | Hint d'autocomplétion (ex: `[feature-name]`) |
+| `disallowedTools` | Non | list | Outils interdits pour cet agent |
+| `permissionMode` | Non | string | Mode de permission : `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
+| `maxTurns` | Non | number | Nombre max de tours (échanges outil/réponse) |
+| `mcpServers` | Non | object | Serveurs MCP spécifiques à l'agent |
+| `memory` | Non | string | Mémoire persistante : `user`, `project`, `local` |
+| `background` | Non | boolean | Exécuter l'agent en arrière-plan |
+| `isolation` | Non | string | `worktree` pour exécuter dans un git worktree isolé |
 | `hooks` | Non | object | Hooks spécifiques au cycle de vie de l'agent |
-| `run_in_background` | Non | boolean | Exécuter l'agent en arrière-plan |
 
 ### Valeurs de model
 
@@ -55,9 +56,9 @@ skills:
 
 ---
 
-## Skills
+## [Skills](/concepts/skills)
 
-Les skills utilisent un frontmatter YAML en début de `SKILL.md` :
+Les [skills](/concepts/skills) utilisent un frontmatter YAML en début de `SKILL.md` :
 
 ```yaml
 ---
@@ -122,9 +123,9 @@ La commande entre `` !` `` et `` ` `` est exécutée avant l'envoi au modèle. L
 
 ---
 
-## Rules
+## [Rules](/concepts/rules)
 
-Les rules utilisent un frontmatter YAML minimal :
+Les [rules](/concepts/rules) utilisent un frontmatter YAML minimal :
 
 ```yaml
 ---
@@ -152,9 +153,9 @@ paths:
 
 ---
 
-## Commands
+## [Commands](/concepts/commands)
 
-Les commands supportent le même frontmatter que les skills :
+Les [commands](/concepts/commands) supportent le même frontmatter que les [skills](/concepts/skills) :
 
 ```yaml
 ---

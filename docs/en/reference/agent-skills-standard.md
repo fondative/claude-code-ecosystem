@@ -70,10 +70,17 @@ The standard defines a minimal set of fields. Each tool can add its own extensio
 
 ### Universal Fields
 
-| Field | Description |
-|-------|-------------|
-| `name` | Skill identifier |
-| `description` | What the skill does (for automatic discovery) |
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Skill identifier |
+| `description` | Yes | What the skill does (for automatic discovery) |
+| `license` | No | Skill license (e.g.: `MIT`, `Apache-2.0`) |
+| `compatibility` | No | Compatible tools (e.g.: `claude-code, cursor, copilot`) |
+| `metadata` | No | Additional metadata (free-form object) |
+
+::: info Required in standard, optional in Claude Code
+`name` and `description` are **required** by the Agent Skills standard but **optional** in Claude Code (inferred from folder name and first paragraph).
+:::
 
 ### Claude Code Extensions
 
@@ -151,6 +158,17 @@ disable-model-invocation: true
 3. Create the Git tag
 4. Publish the package
 ```
+
+## Validation
+
+The `skills-ref` tool from the reference library validates that a skill follows the standard:
+
+```bash
+# Install from the reference library
+npx skills-ref validate .claude/skills/my-skill/
+```
+
+Validation checks for the presence of `SKILL.md`, frontmatter format, and metadata size (~100 tokens max) and instructions (<5000 tokens recommended).
 
 ## Where to Find Skills
 

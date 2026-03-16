@@ -64,7 +64,7 @@ paths:
 | Type | Frontmatter | Déclenchement |
 |------|------------|---------------|
 | **Ciblée** | `paths: ["src/**"]` | Quand un fichier matche |
-| **Globale** | Pas de `paths` | Toujours active (même priorité que `.claude/CLAUDE.md`) |
+| **Globale** | Pas de `paths` | Toujours active (même priorité que [`.claude/CLAUDE.md`](/concepts/claude-md)) |
 
 ### Scopes et priorité
 
@@ -136,75 +136,125 @@ Information < 30 lignes ?
 ├── OUI → Sous-ensemble de fichiers ? → RULE ciblee
 │         Partout ? → RULE globale
 │
-└── NON → Workflow ? → SKILL launcher
-          Conventions ? → SKILL passive + references
+└── NON → Workflow ? → [SKILL](/concepts/skills) launcher
+          Conventions ? → [SKILL](/concepts/skills) passive + references
 ```
 
 | Information | Composant | Raison |
 |-------------|-----------|--------|
 | "PSR-12 strict" | Rule | Court, contextuel |
-| Guide PSR-12 avec 50 exemples | Skill passive | Trop long pour une rule |
+| Guide PSR-12 avec 50 exemples | [Skill](/concepts/skills) passive | Trop long pour une rule |
 | "Toujours utiliser /dev/commit" | Rule globale | S'applique partout |
-| Chemins du projet | CLAUDE.md | Source unique de vérité |
+| Chemins du projet | [CLAUDE.md](/concepts/claude-md) | Source unique de vérité |
 
-### Les erreurs à éviter
+### Warnings
 
-#### ❌ Piège 1 : Glob `*` vs `**`
+#### ⚠️ `WARN-001` : Glob `*` vs `**`
 
+Le glob `*` ne couvre que le premier niveau de fichiers, pas les sous-dossiers.
+
+::: danger Problème
 ```yaml
 # ❌ — Ne couvre que le 1er niveau
 paths: ["php-legacy/*"]
+```
+Les fichiers dans les sous-dossiers ne sont pas concernés par la rule.
+:::
 
+::: info Solution
+```yaml
 # ✅ — Recursif
 paths: ["php-legacy/**"]
 ```
+Le double `**` couvre tous les niveaux de l'arborescence.
+:::
 
-#### ❌ Piège 2 : Rule sans renfort settings
+---
 
+#### ⚠️ `WARN-002` : Rule sans renfort settings
+
+Une rule "lecture seule" en texte seul n'empêche pas Claude d'écrire — il faut un blocage technique dans [`settings.json`](/concepts/settings).
+
+::: danger Problème
 ```markdown
 # ❌ — "Lecture seule" sans enforcement
 NE JAMAIS modifier ces fichiers
 ```
+Sans deny dans `settings.json`, cette instruction peut être ignorée.
+:::
 
+::: info Solution
 ```json
 // ✅ — settings.json enforce
 { "deny": ["Write(php-legacy/**)", "Edit(php-legacy/**)"] }
 ```
+Le `deny` bloque les outils Write et Edit au niveau du moteur, indépendamment du texte de la rule.
+:::
 
-#### ❌ Piège 3 : Rule trop longue
+---
 
+#### ⚠️ `WARN-003` : Rule trop longue
+
+Les rules sont injectées à chaque interaction — une rule volumineuse pollue le contexte en permanence.
+
+::: danger Problème
 ```markdown
 # ❌ — 80 lignes de conventions detaillees
 ```
+80 lignes injectées à chaque échange saturent inutilement la fenêtre de contexte.
+:::
 
+::: info Solution
 ```markdown
 # ✅ — Rule courte + delegation
 Charger skill `api-conventions`. Rappels : Docker, TDD, PSR-12.
 ```
+La rule rappelle l'essentiel, la skill porte le détail. Pas de duplication.
+:::
 
-> Les rules sont injectées à chaque interaction. 80 lignes = pollution du contexte.
+---
 
-#### ❌ Piège 4 : Glob `**` seul
+#### ⚠️ `WARN-004` : Glob `**` seul
 
+Un glob `**` sans préfixe de dossier est équivalent à une rule globale, mais plus coûteux en évaluation.
+
+::: danger Problème
 ```yaml
 # ❌ — Injecte PARTOUT (equivalent a une globale en plus lourd)
 paths: ["**"]
+```
+La rule est injectée pour chaque fichier de tout le projet, sans discrimination.
+:::
 
+::: info Solution
+```yaml
 # ✅ — Cible
 paths: ["ap-rest/**"]
 ```
+Cibler un dossier précis limite l'injection aux fichiers réellement concernés.
+:::
 
-#### ❌ Piège 5 : Path obsolète
+---
 
+#### ⚠️ `WARN-005` : Path obsolète
+
+Si le dossier ciblé est renommé, le glob ne matche plus rien — sans aucun message d'erreur.
+
+::: danger Problème
 ```yaml
 # ❌ — Dossier renomme, rule silencieusement inactive
 paths: ["php-classified-ads-legacy/**"]
+```
+Aucune erreur visible si le glob ne matche rien. La rule est ignorée en silence.
+:::
 
+::: info Solution
+```yaml
 # ✅ — Correspond au dossier actuel
 paths: ["php-legacy/**"]
 ```
-
-> Aucune erreur visible si le glob ne matche rien.
+Vérifier que le path correspond au nom de dossier actuel à chaque renommage.
+:::
 
 ---
 
@@ -212,7 +262,7 @@ paths: ["php-legacy/**"]
 
 ### Exclure des rules (monorepo)
 
-Dans un monorepo, des rules d'autres équipes peuvent être chargées. `claudeMdExcludes` dans `settings.local.json` permet de les ignorer :
+Dans un monorepo, des rules d'autres équipes peuvent être chargées. `claudeMdExcludes` dans [`settings.local.json`](/concepts/settings) permet de les ignorer :
 
 ```json
 {
@@ -227,9 +277,9 @@ Dans un monorepo, des rules d'autres équipes peuvent être chargées. `claudeMd
 Les rules déployées via managed policy (`/etc/claude-code/CLAUDE.md`) ne peuvent **pas** être exclues. C'est voulu pour garantir les standards de l'organisation.
 :::
 
-### Debugger avec le hook InstructionsLoaded
+### Debugger avec le [hook](/concepts/hooks) InstructionsLoaded
 
-Le hook `InstructionsLoaded` permet de logger exactement quelles rules sont chargées, quand, et pourquoi :
+Le [hook](/concepts/hooks) `InstructionsLoaded` permet de logger exactement quelles rules sont chargées, quand, et pourquoi :
 
 ```json
 {
@@ -314,6 +364,11 @@ paths:
 
 # Format
 
+## Langue
+- Tous les documents generes DOIVENT etre rediges en francais
+- Seuls les noms de code restent en anglais
+
+## Format
 - Markdown avec titres hierarchiques
 - Diagrammes Mermaid
 - Classification dette : Critique / Haute / Moyenne / Basse
@@ -337,7 +392,7 @@ paths:
 
 ### Protection
 
-- [ ] Rule "lecture seule" doublée d'un `deny` dans `settings.json`
+- [ ] Rule "lecture seule" doublée d'un `deny` dans [`settings.json`](/concepts/settings)
 - [ ] Managed policy pour les standards organisation (non excluable)
 
 ### Organisation

@@ -6,7 +6,7 @@
 |--------|--------|
 | **Quoi** | Actions invocables par l'utilisateur via `/nom` |
 | **Où** | `.claude/commands/` (projet) ou `~/.claude/commands/` (personnel) |
-| **Status** | Fusionné avec les skills — commands continuent de fonctionner, skills recommandées pour les nouveaux workflows |
+| **Status** | Fusionné avec les [skills](/concepts/skills) — commands continuent de fonctionner, skills recommandées pour les nouveaux workflows |
 | **Priorité** | Un command et un skill avec le même nom → le skill gagne |
 | **Arguments** | Via `$ARGUMENTS`, `$0`, `$1`, `${CLAUDE_SESSION_ID}`, `${CLAUDE_SKILL_DIR}` |
 
@@ -69,9 +69,9 @@ Les commands supportent **tous** les champs du frontmatter skills :
 | `user-invocable` | `false` = invisible dans le menu `/` |
 | `allowed-tools` | Outils autorisés sans confirmation |
 | `model` | Modèle à utiliser |
-| `context` | `fork` pour exécuter dans un subagent isolé |
-| `agent` | Type de subagent si `context: fork` |
-| `hooks` | Hooks scopés au lifecycle du command |
+| `context` | `fork` pour exécuter dans un [subagent](/concepts/agents) isolé |
+| `agent` | Type de [subagent](/concepts/agents) si `context: fork` |
+| `hooks` | [Hooks](/concepts/hooks) scopés au lifecycle du command |
 
 ### Variables de substitution
 
@@ -129,8 +129,13 @@ Les sous-dossiers deviennent des namespaces :
 │   ├── php-test.md      # → /dev/php-test
 │   └── php-lint.md      # → /dev/php-lint
 └── review/
-    └── symfony-review.md # → /review/symfony-review
+    ├── symfony-review.md  # → /review/symfony-review
+    └── frontend-review.md # → /review/frontend-review
 ```
+
+::: tip Pattern hiérarchique parent:child
+Pour les [plugins](/concepts/plugins), le namespace utilise `:` au lieu de `/` : `/plugin-name:skill-name`. Cela isole les commandes du plugin de celles du projet.
+:::
 
 ---
 
@@ -140,14 +145,14 @@ Les sous-dossiers deviennent des namespaces :
 
 ```
 Besoin de fichiers de support (references, scripts) ?
-├── OUI → SKILL (seul format qui le supporte)
+├── OUI → [SKILL](/concepts/skills) (seul format qui le supporte)
 └── NON
     Besoin de chargement automatique par Claude ?
-    ├── OUI → SKILL (avec description)
+    ├── OUI → [SKILL](/concepts/skills) (avec description)
     └── NON
         Command existant et fonctionnel ?
         ├── OUI → Garder le command (pas de migration urgente)
-        └── NON → Creer un SKILL (format moderne)
+        └── NON → Creer un [SKILL](/concepts/skills) (format moderne)
 ```
 
 ### Quand migrer vers skill
@@ -159,40 +164,65 @@ Migrer un command vers un skill quand :
 - Besoin de `hooks` scopés au lifecycle
 - Création d'un nouveau workflow
 
-### Les erreurs à éviter
+### Warnings
 
-#### ❌ Piège 1 : Command et Skill avec le même nom
+#### ⚠️ `WARN-001` : Command et Skill avec le même nom
 
+Avoir un command et un skill portant le même nom crée un conflit silencieux : le skill gagne toujours.
+
+::: danger Problème
 ```
 # ❌ — Conflit de noms
 .claude/commands/review.md
 .claude/skills/review/SKILL.md
 # → Le skill a priorite, le command est ignore
 ```
+Le command est ignoré sans aucun avertissement.
+:::
 
-> Choisir l'un ou l'autre, pas les deux.
+::: info Solution
+Choisir l'un ou l'autre, pas les deux. Si les deux existent, supprimer le command ou le renommer.
+:::
 
-#### ❌ Piège 2 : Oubli des flags Docker
+---
 
+#### ⚠️ `WARN-002` : Oubli des flags Docker
+
+Sans les flags `-T` et `2>&1 | cat`, les commandes Docker perdent la sortie et retournent des codes d'erreur incorrects.
+
+::: danger Problème
 ```bash
 # ❌ — TTY + sortie perdue
 docker compose exec app php bin/phpunit
 ```
+Le TTY interactif bloque ou tronque la sortie dans un contexte non-interactif.
+:::
 
+::: info Solution
 ```bash
 # ✅ — Flags corrects
 docker compose exec -T app php bin/phpunit 2>&1 | cat
 ```
+`-T` désactive le TTY, `2>&1 | cat` capture stderr et stdout.
+:::
 
-#### ❌ Piège 3 : Command sans description
+---
 
+#### ⚠️ `WARN-003` : Command sans description
+
+Un command sans description n'apparaît pas correctement dans l'autocomplétion et ne peut pas être délégué automatiquement.
+
+::: danger Problème
 ```yaml
 # ❌ — L'autocompletion ne montre rien d'utile
 ---
 name: test
 ---
 ```
+L'utilisateur ne sait pas ce que fait ce command sans ouvrir le fichier.
+:::
 
+::: info Solution
 ```yaml
 # ✅ — Description claire
 ---
@@ -201,28 +231,46 @@ description: Lancer les tests backend via Docker Compose
 argument-hint: "[unit|integration|functional]"
 ---
 ```
+La description guide l'autocomplétion et la délégation automatique.
+:::
 
-#### ❌ Piège 4 : Logique trop complexe
+---
 
+#### ⚠️ `WARN-004` : Logique trop complexe
+
+Un command avec du branching, des conditions et des centaines de lignes devient ingérable et difficile à maintenir.
+
+::: danger Problème
 ```markdown
 # ❌ — Branching, conditions, 200 lignes d'instructions
 ```
+La complexité croissante rend le command fragile et difficile à déboguer.
+:::
 
+::: info Solution
 ```markdown
 # ✅ — Extraire la logique complexe dans un skill avec fichiers de support
 ```
+Un command = un fichier unique. Si la logique déborde, c'est un skill.
+:::
 
-> Un command = un fichier unique. Si la logique déborde, c'est un skill.
+---
 
-#### ❌ Piège 5 : Dépendances cachées
+#### ⚠️ `WARN-005` : Dépendances cachées
 
+Un command qui requiert des outils externes sans le documenter échoue silencieusement selon l'environnement.
+
+::: danger Problème
 ```yaml
 # ❌ — Necessite gh CLI + Docker mais ne le dit pas
 ---
 name: deploy
 ---
 ```
+L'utilisateur découvre les dépendances manquantes à l'exécution.
+:::
 
+::: info Solution
 ```yaml
 # ✅ — Prerequis documentes
 ---
@@ -230,6 +278,8 @@ name: deploy
 description: Deploy via Docker (necessite gh CLI et Docker)
 ---
 ```
+Les prérequis documentés dans la description évitent les erreurs surprises.
+:::
 
 ---
 

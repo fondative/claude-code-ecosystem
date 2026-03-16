@@ -5,9 +5,9 @@
 | Aspect | Detail |
 |--------|--------|
 | **What** | Scripts, HTTP endpoints or LLM prompts executed before/after Claude's actions |
-| **Where** | `settings.json` (`hooks` section), skill/agent frontmatter |
-| **Types** | `command` (shell), `http` (POST), `prompt` (LLM), `agent` (subagent) |
-| **Events** | 16 execution points in the lifecycle |
+| **Where** | [`settings.json`](/en/concepts/settings) (`hooks` section), [skill](/en/concepts/skills)/[agent](/en/concepts/agents) frontmatter |
+| **Types** | `command` (shell), `http` (POST), `prompt` (LLM) |
+| **Events** | 18 execution points in the lifecycle |
 | **Security** | Block dangerous commands, detect secrets, validate writes |
 
 ---
@@ -45,7 +45,7 @@ A hook is a **script, HTTP endpoint or LLM prompt** that executes automatically 
 
 ## How It Works
 
-### The 16 Events
+### The 18 Events
 
 | Event | When | Can block? | Typical usage |
 |-------|------|-----------|---------------|
@@ -61,21 +61,20 @@ A hook is a **script, HTTP endpoint or LLM prompt** that executes automatically 
 | `Stop` | Claude turn end | Yes | Force continuation |
 | `TeammateIdle` | Teammate going idle | Yes | Prevent idle |
 | `TaskCompleted` | Task marked complete | Yes | Validate before completion |
-| `InstructionsLoaded` | CLAUDE.md/rules loaded | No | Audit, observability |
+| `InstructionsLoaded` | [CLAUDE.md](/en/concepts/claude-md)/[rules](/en/concepts/rules) loaded | No | Audit, observability |
 | `ConfigChange` | Config modified | Yes | Block config changes |
 | `WorktreeCreate` | Worktree creation | Yes | Customize creation |
 | `WorktreeRemove` | Worktree removal | No | Cleanup |
 | `PreCompact` | Before compaction | No | Save context |
 | `SessionEnd` | Session end | No | Cleanup, analytics |
 
-### The 4 Hook Types
+### The 3 Hook Types
 
 | Type | Description | Usage |
 |------|-------------|-------|
 | `command` | Shell script (bash/sh) | Local validation, logging |
 | `http` | POST JSON to an endpoint | External monitoring, API |
 | `prompt` | Evaluation by an LLM model | Nuanced decisions |
-| `agent` | Subagent with tools (Read, Grep...) | Complex verification |
 
 ### Configuration
 
@@ -115,7 +114,7 @@ The `matcher` is a **regex**, not just a tool name:
 | `Bash` | Bash tool |
 | `Edit\|Write` | Edit or Write |
 | `Notebook.*` | Any tool starting with Notebook |
-| `mcp__memory__.*` | All tools from the MCP memory server |
+| `mcp__memory__.*` | All tools from the [MCP](/en/concepts/mcp) memory server |
 | `mcp__.*__write.*` | Any "write" tool from any MCP |
 | `""` or omitted | All events of this type |
 
@@ -188,8 +187,8 @@ All hooks receive these fields as JSON on stdin:
 | `.claude/settings.json` | Project | Yes (git) |
 | `.claude/settings.local.json` | Project (local) | No (gitignored) |
 | Managed policy settings | Organization | Admin |
-| Plugin `hooks/hooks.json` | When plugin active | Yes |
-| Skill/agent frontmatter | During the component | Yes |
+| [Plugin](/en/concepts/plugins) `hooks/hooks.json` | When plugin active | Yes |
+| [Skill](/en/concepts/skills)/[agent](/en/concepts/agents) frontmatter | During the component | Yes |
 
 ### Hooks in Skills and Agents
 
@@ -212,8 +211,8 @@ hooks:
 
 | Field | Types | Description |
 |-------|-------|-------------|
-| `type` | all | `command`, `http`, `prompt`, `agent` |
-| `timeout` | all | Seconds before cancellation (default: 600 command, 30 prompt, 60 agent) |
+| `type` | all | `command`, `http`, `prompt` |
+| `timeout` | all | Seconds before cancellation (default: 600 command, 30 prompt) |
 | `statusMessage` | all | Spinner message during execution |
 | `once` | skills | `true` = single execution per session |
 | `command` | command | Shell command |
@@ -221,8 +220,8 @@ hooks:
 | `url` | http | POST URL |
 | `headers` | http | Headers with `$VAR_NAME` interpolation |
 | `allowedEnvVars` | http | Variables allowed in headers |
-| `prompt` | prompt/agent | Prompt sent to the model (`$ARGUMENTS` = input JSON) |
-| `model` | prompt/agent | Model to use |
+| `prompt` | prompt | Prompt sent to the model (`$ARGUMENTS` = input JSON) |
+| `model` | prompt | Model to use |
 
 ### Environment Variables
 
@@ -241,7 +240,7 @@ hooks:
 
 ```
 Is the need STATIC (always the same pattern)?
-├── YES → settings.json deny (simpler)
+├── YES → [settings.json](/en/concepts/settings) deny (simpler)
 └── NO
     Need to ANALYZE the content?
     ├── YES → Hook PreToolUse
@@ -253,7 +252,7 @@ Is the need STATIC (always the same pattern)?
 
 | Need | Component | Why |
 |------|-----------|-----|
-| Block `rm -rf` | **Settings deny** | Static, zero latency |
+| Block `rm -rf` | **[Settings](/en/concepts/settings) deny** | Static, zero latency |
 | Block `curl \| bash` with context | **Hook PreToolUse** | Dynamic logic |
 | Scan secrets in Write | **Hook PreToolUse** | Content analysis |
 | Log actions | **Hook PostToolUse** | After execution |
@@ -264,77 +263,129 @@ Is the need STATIC (always the same pattern)?
 ### Security Layers
 
 ```
-Layer 1: settings.json deny     (static, zero latency)
-Layer 2: Rules                  (contextual reminders)
-Layer 3: Hooks PreToolUse       (dynamic validation)
-Layer 4: MCP permissions        (external tools)
+Layer 1: [settings.json](/en/concepts/settings) deny  (static, zero latency)
+Layer 2: [Rules](/en/concepts/rules)                  (contextual reminders)
+Layer 3: Hooks PreToolUse                             (dynamic validation)
+Layer 4: [MCP](/en/concepts/mcp) permissions          (external tools)
 ```
 
-### Mistakes to Avoid
+### Warnings
 
-#### Pitfall 1: Forgetting exit 0
+#### ⚠️ `WARN-001` : Forgetting exit 0
 
+Without an explicit exit, hook behavior is unpredictable.
+
+::: danger Problem
 ```bash
 # ❌ — No explicit exit → unpredictable behavior
 INPUT=$(cat)
 # ... verification ...
 ```
+The script terminates without a defined return code.
+:::
 
+::: info Solution
 ```bash
 # ✅ — ALWAYS end with exit 0
 INPUT=$(cat)
 # ... verification ...
 exit 0
 ```
+An explicit exit 0 guarantees that the hook allows the action.
+:::
 
-#### Pitfall 2: Hook too slow
+---
 
+#### ⚠️ `WARN-002` : Hook too slow
+
+A blocking PreToolUse hook must respond quickly to avoid penalizing every Claude action.
+
+::: danger Problem
 ```bash
 # ❌ SLOW — Network call on every action
 curl -s https://api.external.com/validate "$COMMAND"
 ```
+A synchronous network call can block for several seconds on each tool use.
+:::
 
+::: info Solution
 ```bash
 # ✅ FAST — Local verification
 echo "$COMMAND" | grep -qE 'rm -rf /' && exit 2
 exit 0
 ```
+A PreToolUse hook should execute in < 1 second.
+:::
 
-> A PreToolUse hook should execute in < 1 second.
+---
 
-#### Pitfall 3: Script not executable
+#### ⚠️ `WARN-003` : Script not executable
 
+A script without execute permission fails silently or raises a cryptic error.
+
+::: danger Problem
 ```bash
 # ❌
 $ ls -la security-gate.sh
 -rw-r--r-- security-gate.sh
+```
+The script cannot be launched by Claude Code.
+:::
 
+::: info Solution
+```bash
 # ✅
 $ chmod +x security-gate.sh
 ```
+Always check permissions after creating a hook.
+:::
 
-#### Pitfall 4: Matcher too broad
+---
 
+#### ⚠️ `WARN-004` : Matcher too broad
+
+An overly permissive matcher triggers the hook on every action, including those that don't need it.
+
+::: danger Problem
 ```json
 // ❌ — Triggers on ALL actions
-{ "matcher": "*" }
+{ "matcher": ".*" }
+```
+The hook runs for every tool, adding unnecessary latency.
+:::
 
+::: info Solution
+```json
 // ✅ — Only on Bash
 { "matcher": "Bash" }
 ```
+Use a precise regex to target only the relevant tools.
+:::
 
-#### Pitfall 5: Mixing exit code and JSON
+---
 
+#### ⚠️ `WARN-005` : Mixing exit code and JSON
+
+Combining exit 2 with JSON output produces an unexpected result: the JSON is ignored.
+
+::: danger Problem
 ```bash
 # ❌ — Exit 2 + JSON → the JSON is IGNORED
 echo '{"decision":"block"}' && exit 2
+```
+When exit 2 is used, Claude reads stderr — the JSON on stdout is ignored.
+:::
 
+::: info Solution
+```bash
 # ✅ — Choose one OR the other
 # Exit code method:
 echo "Block reason" >&2 && exit 2
 # JSON method:
 echo '{"decision":"block","reason":"..."}' && exit 0
 ```
+Choose a single method: exit code (simple) or JSON stdout (fine-grained control).
+:::
 
 ---
 
@@ -371,6 +422,37 @@ if [ -n "$CLAUDE_ENV_FILE" ]; then
   echo 'export NODE_ENV=production' >> "$CLAUDE_ENV_FILE"
   echo 'export DEBUG_LOG=true' >> "$CLAUDE_ENV_FILE"
 fi
+exit 0
+```
+
+### Advanced Patterns
+
+#### Velocity governor (rate limiting)
+
+A `PreToolUse` hook that blocks if too many actions are executed in a short time, preventing runaway loops:
+
+```bash
+#!/bin/bash
+LOG="/tmp/claude-velocity.log"
+NOW=$(date +%s)
+echo "$NOW" >> "$LOG"
+# Count actions in the last 10 seconds
+COUNT=$(awk -v threshold=$((NOW-10)) '$1 > threshold' "$LOG" | wc -l)
+if [ "$COUNT" -gt 20 ]; then
+  echo "Too many actions in 10s ($COUNT). Slow down." >&2
+  exit 2
+fi
+exit 0
+```
+
+#### Auto-checkpoint (automatic git commit)
+
+A `PostToolUse` hook on `Write|Edit` that creates an automatic commit after each modification, allowing rollback:
+
+```bash
+#!/bin/bash
+cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || exit 0
+git add -A && git commit -m "auto-checkpoint: $(date +%H:%M:%S)" --no-verify -q 2>/dev/null
 exit 0
 ```
 
@@ -500,7 +582,7 @@ afplay /System/Library/Sounds/Ping.aiff &
 
 - [ ] PreToolUse on `Bash`: dangerous commands
 - [ ] PreToolUse on `Write|Edit`: secrets
-- [ ] Pair with `settings.json deny` for static blocks
+- [ ] Pair with [`settings.json` deny](/en/concepts/settings) for static blocks
 
 ### Scripts
 

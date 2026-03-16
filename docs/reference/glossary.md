@@ -8,6 +8,9 @@ Instance spécialisée de Claude configurée dans `.claude/agents/`. Chaque agen
 ### Agent Skills (standard)
 Standard ouvert initié par Anthropic pour définir un format portable de skills compatible avec plusieurs outils IA (Claude Code, Cursor, VS Code Copilot, Gemini CLI, etc.). Voir [Standard Agent Skills](/reference/agent-skills-standard).
 
+### Agent Teams
+Fonctionnalité de coordination multi-agents où plusieurs sessions Claude Code collaborent sur des tâches différentes. Contrairement aux subagents (même session), les agent teams opèrent dans des sessions séparées.
+
 ### Allow (permission)
 Liste des outils et commandes que Claude peut utiliser sans demander confirmation. Configuré dans `settings.json`. Voir [Settings](/concepts/settings).
 
@@ -16,6 +19,14 @@ Directive dans CLAUDE.md pour inclure le contenu d'un autre fichier. Syntaxe : `
 
 ### Auto-mémoire
 Fichier `MEMORY.md` dans `~/.claude/projects/<project>/memory/` que Claude met à jour automatiquement pour retenir des patterns et décisions entre sessions. Tronqué après 200 lignes.
+
+## B
+
+### Boucle qualité
+Mécanisme itératif où un agent juge (conformity-reporter) évalue la sortie d'un executor. Si le score est inférieur à 80/100, l'executor est relancé avec les corrections. Maximum 2 itérations avant intervention humaine. Voir [Pipeline](/examples/pipeline).
+
+### /btw
+Commande intégrée pour poser une question rapide sans outils. La réponse est jetée de l'historique de conversation, préservant le contexte pour la tâche en cours.
 
 ## C
 
@@ -34,6 +45,9 @@ Fichier Markdown dans `.claude/commands/` invocable via `/nom`. Fusionné avec l
 ### Context (fork)
 Option frontmatter `context: fork` qui exécute une skill dans un sub-agent isolé, sans accès à l'historique de conversation.
 
+### conformity-conventions (skill)
+Skill passive contenant la méthodologie de scoring, les templates de rapport de conformité, la gestion de versions des rapports et le format d'issues. Héritée par le conformity-reporter. Voir [Skills](/concepts/skills).
+
 ### Conventional Commits
 Convention de format de messages de commit : `type(scope): description`. Types : feat, fix, refactor, docs, test, chore.
 
@@ -41,6 +55,9 @@ Convention de format de messages de commit : `type(scope): description`. Types :
 
 ### Deny (permission)
 Liste des outils et commandes que Claude ne peut jamais utiliser. Configuré dans `settings.json`. Priorité sur allow.
+
+### design-conventions (skill)
+Skill passive définissant les conventions de design (rem/em/%, breakpoints, design tokens, checklist fidélité). Héritée par le frontend-tasks-executor pour le traitement conditionnel des fichiers Figma JSON. Voir [Skills](/concepts/skills).
 
 ### disable-model-invocation
 Champ frontmatter qui empêche Claude de charger une skill automatiquement. Seul l'utilisateur peut l'invoquer via `/nom`.
@@ -61,7 +78,7 @@ Pattern de correspondance de fichiers utilisé dans les rules (`paths:`) et les 
 Modèle Claude léger et rapide. Utilisé pour les tâches structurées : documentation, audit, diagnostics. Coût minimal.
 
 ### Hook
-Script, endpoint HTTP, prompt ou agent exécuté automatiquement en réponse à un événement de Claude. 16 événements disponibles : PreToolUse, PostToolUse, Notification, Stop, SubagentStop, etc. 4 types : command, http, prompt, agent. Voir [Hooks](/concepts/hooks).
+Script, endpoint HTTP ou prompt exécuté automatiquement en réponse à un événement de Claude. 18 événements disponibles : PreToolUse, PostToolUse, Notification, Stop, SubagentStop, etc. 3 types : command, http, prompt. Voir [Hooks](/concepts/hooks).
 
 ## I
 
@@ -76,10 +93,16 @@ Commande intégrée qui génère automatiquement un CLAUDE.md adapté au projet 
 ### Launcher (skill)
 Skill invocable manuellement via `/nom` qui orchestre un workflow multi-étapes, souvent en déléguant à plusieurs agents.
 
+### LLM-as-Judge
+Pattern d'orchestration où un agent (conformity-reporter) évalue la sortie d'un autre agent (executor). Utilisé dans la boucle qualité du pipeline migrate-feature pour garantir un score minimum de 80/100. Voir [Pipeline](/examples/pipeline).
+
 ## M
 
 ### MCP (Model Context Protocol)
 Protocole standardisé connectant Claude à des outils et données externes via des serveurs. Voir [MCP](/concepts/mcp).
+
+### Managed Policy CLAUDE.md
+Fichier CLAUDE.md système déployé au niveau organisation. Emplacements : macOS `/Library/Application Support/ClaudeCode/CLAUDE.md`, Linux `/etc/claude-code/CLAUDE.md`, Windows `C:\Program Files\ClaudeCode\CLAUDE.md`. Non excluable via `claudeMdExcludes`. Voir [CLAUDE.md](/concepts/claude-md).
 
 ### Managed settings
 Configuration déployée au niveau enterprise, applicable à tous les utilisateurs d'une organisation.
@@ -101,7 +124,7 @@ Skill avec `user-invocable: false`, invisible dans le menu `/`. Claude la charge
 Niveau de confiance configuré pour Claude Code : Plan Mode (lecture seule), Default (confirmation), Accept Edits (auto-edits), Don't Ask (allowlist auto), Bypass Permissions (tout auto, danger).
 
 ### Plugin
-Extension packagée qui peut contenir des skills, configurée dans un répertoire externe ajouté via `--add-dir`.
+Package portable contenant skills, agents, hooks et/ou serveurs MCP dans un repertoire unique. Installe via `claude plugins add <source>`. Utilise un namespace `plugin-name:skill-name` pour eviter les conflits. Voir [Plugins](/concepts/plugins).
 
 ### PreToolUse / PostToolUse
 Points d'exécution des hooks. PreToolUse s'exécute avant l'action (peut bloquer), PostToolUse après (pour logging/notification).

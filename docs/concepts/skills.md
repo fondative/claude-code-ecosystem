@@ -104,17 +104,21 @@ Garder `SKILL.md` sous 500 lignes. Déporter le détail dans les fichiers de ré
 
 | Emplacement | Scope | Priorité |
 |-------------|-------|----------|
-| Enterprise (managed settings) | Tous les utilisateurs de l'organisation | 1 (plus haute) |
+| Enterprise ([managed settings](/concepts/settings)) | Tous les utilisateurs de l'organisation | 1 (plus haute) |
 | `~/.claude/skills/<nom>/SKILL.md` | Personnel (tous les projets) | 2 |
 | `.claude/skills/<nom>/SKILL.md` | Projet (versionnable en git) | 3 |
-| Plugin `skills/` | Namespace `plugin:skill`, pas de conflit | 4 (plus basse) |
+| [Plugin](/concepts/plugins) `skills/` | Namespace `plugin:skill`, pas de conflit | 4 (plus basse) |
 
-::: info Compatibilité commands
-Les fichiers `.claude/commands/deploy.md` continuent de fonctionner — ils créent la même `/deploy` qu'une skill. Les skills sont le **format recommandé** car elles supportent les fichiers de référence, le frontmatter complet, et `context: fork`. Si une skill et une command partagent le même nom, la skill a priorité.
+::: info Compatibilité [commands](/concepts/commands)
+Les fichiers `.claude/commands/deploy.md` continuent de fonctionner — ils créent la même `/deploy` qu'une skill. Les skills sont le **format recommandé** car elles supportent les fichiers de référence, le [frontmatter](/reference/frontmatter) complet, et `context: fork`. Si une skill et une command partagent le même nom, la skill a priorité.
 :::
 
 ::: details Découverte automatique en monorepo
 Claude Code découvre aussi les skills dans les sous-répertoires. Si vous éditez un fichier dans `packages/frontend/`, les skills de `packages/frontend/.claude/skills/` sont aussi chargées. Les skills ajoutées via `--add-dir` sont détectées en temps réel (pas besoin de redémarrer).
+:::
+
+::: details Standard Agent Skills vs Claude Code
+Dans le [standard Agent Skills](https://agentskills.io), `name` et `description` sont **requis**. Dans Claude Code, ils sont **optionnels** : `name` est déduit du nom de dossier, `description` du premier paragraphe. Claude Code ajoute aussi des champs exclusifs : `disable-model-invocation`, `user-invocable`, `context`, `agent`, `argument-hint`, `hooks`, `model`.
 :::
 
 ### Frontmatter complet
@@ -130,7 +134,7 @@ model: sonnet                      # Modele force
 context: fork                      # Execution dans un sub-agent isole
 agent: Explore                     # Type de sub-agent (si context: fork)
 argument-hint: "[feature-name]"    # Hint d'autocompletion
-hooks:                             # Hooks de cycle de vie
+hooks:                             # [Hooks](/concepts/hooks) de cycle de vie
   PreToolUse:
     - matcher: Bash
       hooks:
@@ -164,6 +168,18 @@ Avec `context: fork`, **vous** écrivez la tâche dans la skill et choisissez un
 Inclure le mot **`ultrathink`** dans le contenu d'une skill active le mode [extended thinking](https://code.claude.com/docs/en/common-workflows#use-extended-thinking-thinking-mode) pour un raisonnement plus profond.
 :::
 
+### Pattern de sortie visuelle
+
+Une skill peut embarquer des scripts qui génèrent des fichiers HTML interactifs (arbres, graphes, dashboards). Le script est dans `scripts/`, la skill l'invoque via Bash, et le résultat est un fichier HTML autonome ouvrable dans le navigateur.
+
+### Budget de chargement
+
+Par défaut, le contenu d'une skill est limité à environ 2% de la fenêtre de contexte (~16 000 caractères). Pour augmenter cette limite :
+
+```bash
+SLASH_COMMAND_TOOL_CHAR_BUDGET=50000 claude
+```
+
 ---
 
 ## Guide pratique : concevoir ses skills
@@ -175,10 +191,10 @@ Inclure le mot **`ultrathink`** dans le contenu d'une skill active le mode [exte
 | Besoin | Composant | Pourquoi |
 |--------|-----------|----------|
 | Conventions de code (style, archi, nommage) | **Skill passive** | Chargée automatiquement, supporte les références |
-| Rappel contextuel court (< 30 lignes) | **Rule** | Plus léger, injection par glob |
-| Workflow multi-étapes (migration, deploy) | **Skill launcher** | Orchestre des agents, invocable par `/nom` |
-| Exécution d'une tâche atomique | **Agent** | Contexte isolé, modèle dédié |
-| Action ponctuelle (commit, test) | **Command** ou skill launcher | Commands marchent toujours, skills recommandées |
+| Rappel contextuel court (< 30 lignes) | **[Rule](/concepts/rules)** | Plus léger, injection par glob |
+| Workflow multi-étapes (migration, deploy) | **Skill launcher** | Orchestre des [agents](/concepts/agents), invocable par `/nom` |
+| Exécution d'une tâche atomique | **[Agent](/concepts/agents)** | Contexte isolé, modèle dédié |
+| Action ponctuelle (commit, test) | **[Command](/concepts/commands)** ou skill launcher | Commands marchent toujours, skills recommandées |
 
 #### Passive vs Launcher
 
@@ -212,9 +228,11 @@ La skill contient-elle des INSTRUCTIONS D'EXECUTION ?
 ├── modernization/              # Par workflow
 │   ├── analyze-legacy/
 │   ├── migrate-feature/
+│   ├── conformity-conventions/ # Scoring et rapports
 │   └── generate-docs/
 ├── frontend/                  # Par framework
 │   ├── app-conventions/
+│   ├── design-conventions/    # Conventions design Figma
 │   └── testing-conventions/
 ```
 
@@ -232,10 +250,13 @@ skills:
 
 L'agent reçoit le contenu **complet** des skills au démarrage — pas seulement la description. Différent du chargement automatique en session normale.
 
-### Les erreurs à éviter
+### Warnings
 
-#### ❌ Piège 1 : Skill trop longue
+#### ⚠️ `WARN-001` : Skill trop longue
 
+Au-delà de 500 lignes, `SKILL.md` sature le contexte à chaque invocation — même pour les parties non pertinentes.
+
+::: danger Problème
 ```yaml
 # ❌ MAUVAIS — 2000 lignes dans SKILL.md
 ---
@@ -245,7 +266,10 @@ name: api-conventions
 ## Entites (300 lignes...)
 ## DTOs (400 lignes...)
 ```
+2000 lignes chargées en entier à chaque fois, même quand seule l'architecture est nécessaire.
+:::
 
+::: info Solution
 ```yaml
 # ✅ BON — SKILL.md court + references
 ---
@@ -257,18 +281,26 @@ Controller → Service → Repository → Entity
 - [create-entity.md](references/create-entity.md)
 - [create-dto.md](references/create-dto.md)
 ```
+Claude charge les fichiers de référence à la demande, uniquement quand le contexte l'exige.
+:::
 
-> **Pourquoi ?** Au-delà de 500 lignes, SKILL.md sature le contexte.
+---
 
-#### ❌ Piège 2 : Description vague ou manquante
+#### ⚠️ `WARN-002` : Description vague ou manquante
 
+Claude utilise la `description` pour décider automatiquement quand charger une skill passive — sans description précise, la skill n'est jamais déclenchée.
+
+::: danger Problème
 ```yaml
 # ❌ MAUVAIS — Claude ne sait pas quand charger
 ---
 name: helper
 ---
 ```
+Sans description, Claude ne peut pas associer la skill à un contexte d'utilisation.
+:::
 
+::: info Solution
 ```yaml
 # ✅ BON — Mots-cles precis
 ---
@@ -277,11 +309,16 @@ description: Conventions backend Symfony. Architecture REST, DTOs,
   repositories avec filtrage, gestion d'exceptions.
 ---
 ```
+Des mots-clés précis permettent à Claude de charger la skill dès que le contexte correspond.
+:::
 
-> **Pourquoi ?** Claude utilise la description pour décider QUAND charger la skill.
+---
 
-#### ❌ Piège 3 : Launcher sans protection
+#### ⚠️ `WARN-003` : Launcher sans protection
 
+Sans `disable-model-invocation: true`, Claude peut déclencher une skill launcher de manière autonome — y compris des actions à effets de bord.
+
+::: danger Problème
 ```yaml
 # ❌ DANGEREUX — Claude peut deployer seul
 ---
@@ -289,7 +326,10 @@ name: deploy
 description: Deployer en production
 ---
 ```
+Claude peut décider de déployer parce que "le code a l'air prêt", sans action humaine.
+:::
 
+::: info Solution
 ```yaml
 # ✅ SECURISE — Controle humain obligatoire
 ---
@@ -298,35 +338,45 @@ description: Deployer en production
 disable-model-invocation: true
 ---
 ```
+Avec `disable-model-invocation: true`, la skill ne peut être invoquée que par l'utilisateur explicitement.
+:::
 
-> **Pourquoi ?** Sans protection, Claude peut déployer parce que "le code a l'air prêt".
+---
 
-#### ❌ Piège 4 : Duplication skill / rule
+#### ⚠️ `WARN-004` : Duplication skill / [rule](/concepts/rules)
 
+Maintenir le même contenu dans une [rule](/concepts/rules) et une skill crée deux sources de vérité qui divergent lors des mises à jour.
+
+::: danger Problème
 ```yaml
 # ❌ MAUVAIS — Meme contenu a 2 endroits
 # rules/backend.md → PSR-12, camelCase...
 # skills/api-conventions/SKILL.md → PSR-12, camelCase...
 ```
+Une mise à jour dans l'un n'est pas répercutée dans l'autre — désynchronisation garantie.
+:::
 
+::: info Solution
 ```yaml
 # ✅ BON — Rule delegue, skill detaille
 # rules/backend.md
 # → "Charger la skill api-conventions. Rappels : Docker, TDD."
 # skills/api-conventions/SKILL.md → (detail complet)
 ```
+La rule pointe vers la skill. Un seul endroit à maintenir pour le contenu détaillé.
+:::
 
-> **Pourquoi ?** Deux sources = désynchronisation lors des mises à jour.
+---
 
-#### ❌ Piège 5 : Budget de contexte dépassé
+#### ⚠️ `WARN-005` : Budget de contexte dépassé
 
+Quand trop de skills sont présentes, certaines sont exclues silencieusement du chargement automatique.
+
+::: warning
 **Symptôme** : `⚠️ Some skills were excluded due to context budget limits`
 
-**Solutions** :
-1. Vérifier avec `/context` quelles skills sont exclues
-2. Passer certaines skills en `disable-model-invocation: true`
-3. Raccourcir les descriptions
-4. Augmenter via `SLASH_COMMAND_TOOL_CHAR_BUDGET`
+Voir [Claude ne voit pas toutes les skills](#claude-ne-voit-pas-toutes-les-skills) pour les solutions.
+:::
 
 ---
 
@@ -336,7 +386,7 @@ disable-model-invocation: true
 
 Trois niveaux de contrôle sur les skills que Claude peut invoquer :
 
-**Désactiver toutes les skills** — ajouter `Skill` aux règles deny dans `/permissions`.
+**Désactiver toutes les skills** — ajouter `Skill` aux règles deny dans les [permissions](/concepts/settings).
 
 **Autoriser/bloquer des skills spécifiques** :
 
@@ -447,6 +497,10 @@ Lancer en PARALLELE :
 
 ## Etape 4 : Conformite
 Lancer `conformity-reporter`. Ne JAMAIS ecraser — creer V2, V3...
+
+## Etape 5 : Boucle qualite (max 2 iterations)
+Si score < 80/100 : relancer l'executor + conformity-reporter (V2).
+Si V2 < 80/100 : STOP — intervention humaine requise.
 ```
 
 ::: warning disable-model-invocation: true
@@ -508,7 +562,7 @@ Le script genere `codebase-map.html` et l'ouvre dans le navigateur.
 
 ### Cohérence projet
 
-- [ ] Pas de duplication avec une rule existante ([piège 4](#piege-4-duplication-skill-rule))
+- [ ] Pas de duplication avec une [rule](/concepts/rules) existante (voir [WARN-004](#warn-004--duplication-skill--rule))
 - [ ] Namespace cohérent (`framework/`, `workflow/`)
 - [ ] Skills listées dans les agents qui en ont besoin (`skills:`)
 
@@ -516,7 +570,7 @@ Le script genere `codebase-map.html` et l'ouvre dans le navigateur.
 
 - [ ] `allowed-tools` limité au strict nécessaire
 - [ ] `context: fork` si la skill doit tourner en isolation
-- [ ] Permissions deny configurées si besoin (`Skill(name *)`)
+- [ ] [Permissions](/concepts/settings) deny configurées si besoin (`Skill(name *)`)
 
 ### Validation
 
