@@ -16,7 +16,6 @@
 │   ├── frontend-tasks-planner.md         # Sonnet - Frontend planning
 │   ├── frontend-tasks-executor.md        # Sonnet - Frontend implementation + design (acceptEdits)
 │   ├── conformity-reporter.md            # Sonnet - Scoring
-│   ├── documentation-generator.md        # Haiku - VitePress
 │   └── health-check.md                   # Haiku - Diagnostics (plan)
 ├── skills/
 │   ├── modernization/
@@ -94,6 +93,7 @@
 └── commands/
     ├── dev/
     │   ├── commit.md         # /dev/commit
+    │   ├── install-stack.md  # /dev/install-stack
     │   ├── php-test.md       # /dev/php-test
     │   └── php-lint.md       # /dev/php-lint
     └── review/

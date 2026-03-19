@@ -258,9 +258,8 @@ Sonnet (7 agents) ────────────────────�
 ├── legacy-functional-analyzer
 └── conformity-reporter          # Scoring
 
-Haiku (3 agents) ────────────────────────────── $
+Haiku (2 agents) ────────────────────────────── $
 ├── legacy-functional-analyzer-auditor
-├── documentation-generator      # VitePress
 └── health-check                 # Diagnostics (plan)
 ```
 

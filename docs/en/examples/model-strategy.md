@@ -63,18 +63,13 @@ model: sonnet
 
 **Why Sonnet?** These agents have clear context (specifications, conventions, analyses) and apply defined patterns. Opus's creative reasoning isn't necessary.
 
-### Haiku — Lightweight Tasks (3 agents)
+### Haiku — Lightweight Tasks (2 agents)
 
 ```yaml
 # legacy-functional-analyzer-auditor.md
 model: haiku
 # Justification: verification of an existing inventory
 # Comparison task, not creation
-
-# documentation-generator.md
-model: haiku
-# Justification: structured Markdown generation
-# Clear template, no complex reasoning
 
 # health-check.md
 model: haiku
@@ -83,6 +78,8 @@ model: haiku
 ```
 
 **Why Haiku?** These tasks are structured, repetitive and don't require complex reasoning. Haiku is 10x cheaper than Sonnet for equivalent results.
+
+> **The `documentation-generator` agent was removed** and replaced by the `/modernization/generate-docs` launcher skill. Documentation generation is now orchestrated as a workflow, not an isolated agent.
 
 ## Cost Impact
 

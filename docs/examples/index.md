@@ -6,7 +6,7 @@ Ce projet utilise Claude Code pour migrer une application PHP legacy vers une ar
 
 - **Source** : PHP procédurale, MySQL, pas de framework
 - **Cible backend** : Symfony 7.4, PostgreSQL, API REST, JWT
-- **Cible frontend** : SPA avec appels HTTP directs à l'API
+- **Cible frontend** : React 19 + TypeScript + Vite + Tailwind CSS 4, appels HTTP directs à l'API
 
 L'écosystème Claude Code orchestre l'ensemble du processus, de l'analyse initiale à la documentation finale.
 
@@ -36,10 +36,10 @@ Phase 3 : Documentation
 
 | Composant | Quantité |
 |-----------|----------|
-| Agents | 12 (2 Opus + 7 Sonnet + 3 Haiku) |
-| Skills | 11 (4 launchers + 6 passives + 1 framework) |
+| Agents | 11 (2 Opus + 7 Sonnet + 2 Haiku) |
+| Skills | 11 (4 launchers + 7 passives) |
 | Rules | 7 (1 globale + 6 ciblées) |
-| Commands | 5 (commit, test, lint, symfony-review, frontend-review) |
+| Commands | 6 (commit, install-stack, test, lint, symfony-review, frontend-review) |
 | Références | 34 fichiers de documentation technique |
 | Features migrées | 14+ (auth, annonces, recherche, catégories...) |
 
