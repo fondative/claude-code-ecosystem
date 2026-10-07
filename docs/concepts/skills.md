@@ -218,33 +218,39 @@ La skill contient-elle des INSTRUCTIONS D'EXECUTION ?
 | `disable-model-invocation: true` | ✅ | ❌ | Deploy, commit, actions à risque |
 | `user-invocable: false` | ❌ | ✅ | Conventions, contexte métier |
 
-### Organisation par namespace
+::: warning Skill appelée par un pipeline
+Une skill lancée par une autre skill (ex : `mod-generate-visualization` appelée par `mod-analyze-legacy`, `mod-generate-docs` appelée par `mod-migrate-feature`) ne doit **pas** avoir `disable-model-invocation: true` : Claude ne pourrait plus l'invoquer depuis le pipeline.
+:::
+
+### Organisation par préfixe
+
+Claude Code ne découvre les skills qu'au premier niveau (`.claude/skills/<nom>/SKILL.md`) : les sous-dossiers de namespace ne sont pas chargés. Le regroupement se fait donc par **préfixe** dans le nom du dossier.
 
 ```
 .claude/skills/
-├── symfony/                    # Par framework
-│   ├── api-conventions/
-│   └── testing-conventions/
-├── modernization/              # Par workflow
-│   ├── analyze-legacy/
-│   ├── migrate-feature/
-│   ├── conformity-conventions/ # Scoring et rapports
-│   └── generate-docs/
-├── frontend/                  # Par framework
-│   ├── app-conventions/
-│   ├── design-conventions/    # Conventions design Figma
-│   └── testing-conventions/
+├── sym-api-conventions/            # sym-   : conventions Symfony
+├── sym-testing-conventions/
+├── front-app-conventions/          # front- : conventions frontend
+├── front-design-conventions/       # Conventions design Figma
+├── front-testing-conventions/
+├── mod-analyze-legacy/             # mod-   : workflows de modernisation
+├── mod-migrate-feature/
+├── mod-generate-visualization/
+├── mod-generate-docs/
+├── mod-conformity-conventions/     # Scoring et rapports
+├── claude-code-parallel-agents/    # claude-code- : skills internes
+└── claude-code-skill-command-model/
 ```
 
 ### Héritage skill → agent
 
 ```yaml
-# .claude/agents/backend-executor.md
+# .claude/agents/backend-tasks-executor.md
 ---
-name: backend-executor
+name: backend-tasks-executor
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 ```
 
@@ -260,7 +266,7 @@ Au-delà de 500 lignes, `SKILL.md` sature le contexte à chaque invocation — m
 ```yaml
 # ❌ MAUVAIS — 2000 lignes dans SKILL.md
 ---
-name: api-conventions
+name: sym-api-conventions
 ---
 ## Architecture (200 lignes...)
 ## Entites (300 lignes...)
@@ -273,7 +279,7 @@ name: api-conventions
 ```yaml
 # ✅ BON — SKILL.md court + references
 ---
-name: api-conventions
+name: sym-api-conventions
 ---
 ## Architecture
 Controller → Service → Repository → Entity
@@ -304,7 +310,7 @@ Sans description, Claude ne peut pas associer la skill à un contexte d'utilisat
 ```yaml
 # ✅ BON — Mots-cles precis
 ---
-name: api-conventions
+name: sym-api-conventions
 description: Conventions backend Symfony. Architecture REST, DTOs,
   repositories avec filtrage, gestion d'exceptions.
 ---
@@ -351,7 +357,7 @@ Maintenir le même contenu dans une [rule](/concepts/rules) et une skill crée d
 ```yaml
 # ❌ MAUVAIS — Meme contenu a 2 endroits
 # rules/backend.md → PSR-12, camelCase...
-# skills/api-conventions/SKILL.md → PSR-12, camelCase...
+# skills/sym-api-conventions/SKILL.md → PSR-12, camelCase...
 ```
 Une mise à jour dans l'un n'est pas répercutée dans l'autre — désynchronisation garantie.
 :::
@@ -360,8 +366,8 @@ Une mise à jour dans l'un n'est pas répercutée dans l'autre — désynchronis
 ```yaml
 # ✅ BON — Rule delegue, skill detaille
 # rules/backend.md
-# → "Charger la skill api-conventions. Rappels : Docker, TDD."
-# skills/api-conventions/SKILL.md → (detail complet)
+# → "Charger la skill sym-api-conventions. Rappels : Docker, TDD."
+# skills/sym-api-conventions/SKILL.md → (detail complet)
 ```
 La rule pointe vers la skill. Un seul endroit à maintenir pour le contenu détaillé.
 :::
@@ -438,9 +444,9 @@ Les descriptions de skills sont chargées dans un budget de **2% de la fenêtre 
 
 ```yaml
 ---
-name: api-conventions
-description: Conventions backend Symfony pour ce projet. Architecture
-  REST, DTOs, repositories avec filtrage, gestion d'exceptions.
+name: sym-api-conventions
+description: Conventions de developpement backend Symfony 7.4. Architecture,
+  patterns, standards de code. Charger pour tout travail sur l'API REST backend.
 user-invocable: false
 ---
 
@@ -462,32 +468,35 @@ Controller → Service → Repository → Entity
 - Creer un controller → [create-controller.md](references/create-controller.md)
 ```
 
-**14 fichiers de référence** couvrent chaque pattern en détail.
+**15 fichiers de référence** couvrent chaque pattern en détail.
 
 ::: info Pourquoi passive ?
-Les conventions ne sont pas une action. Claude doit les connaître quand il travaille sur le backend, pas quand l'utilisateur tape `/api-conventions`.
+Les conventions ne sont pas une action. Claude doit les connaître quand il travaille sur le backend, pas sur demande de l'utilisateur : avec `user-invocable: false`, `sym-api-conventions` n'apparaît pas dans le menu `/`.
 :::
 
 ### Exemple 2 : Skill launcher — Migration E2E
 
 ```yaml
 ---
-name: modernization/migrate-feature
+name: mod-migrate-feature
 description: Migration end-to-end d'une feature legacy vers la stack moderne
 disable-model-invocation: true
-argument-hint: "[feature-name] [stage]"
+argument-hint: "[nom-feature]"
 ---
 
-# Migration de $0
+# Migration de $ARGUMENTS
+
+## Etape 0 : Pre-requis
+Verifier que BACKEND_TARGET et FRONTEND_TARGET existent.
+Sinon : STOP, proposer `/dev/install-stack backend|frontend`.
 
 ## Etape 1 : Specification detaillee
-Lancer l'agent `legacy-feature-analyzer` sur la feature $0.
-**Checkpoint** : Verifier que `output/features/$0_spec.md` existe.
+Lancer l'agent `legacy-feature-analyzer` sur la feature $ARGUMENTS.
+**Checkpoint** : Verifier que `FEATURE_SPECS_DIR/$ARGUMENTS_spec.md` existe.
 
-## Etape 2 : Planification
-Lancer en PARALLELE :
-- `backend-tasks-planner`
-- `frontend-tasks-planner`
+## Etape 2 : Planification (SEQUENTIELLE)
+1. `backend-tasks-planner` (taches + spec OpenAPI)
+2. `frontend-tasks-planner` (base sur OPENAPI_SPEC)
 **Checkpoint** : Les fichiers _analysis.md existent.
 
 ## Etape 3 : Implementation TDD
@@ -501,7 +510,12 @@ Lancer `conformity-reporter`. Ne JAMAIS ecraser — creer V2, V3...
 ## Etape 5 : Boucle qualite (max 2 iterations)
 Si score < 80/100 : relancer l'executor + conformity-reporter (V2).
 Si V2 < 80/100 : STOP — intervention humaine requise.
+
+## Etape 6 : Sync wiki (si le dossier wiki existe)
+Lancer `/mod-generate-docs $ARGUMENTS`.
 ```
+
+Pas d'argument `stage` : relancer `/mod-migrate-feature $ARGUMENTS` reprend depuis l'étape échouée.
 
 ::: warning disable-model-invocation: true
 TOUJOURS mettre `true` pour les workflows avec effets de bord. On ne veut pas que Claude lance une migration parce qu'il "pense que c'est pertinent".
@@ -563,7 +577,7 @@ Le script genere `codebase-map.html` et l'ouvre dans le navigateur.
 ### Cohérence projet
 
 - [ ] Pas de duplication avec une [rule](/concepts/rules) existante (voir [WARN-004](#warn-004--duplication-skill--rule))
-- [ ] Namespace cohérent (`framework/`, `workflow/`)
+- [ ] Préfixe cohérent (`sym-`, `front-`, `mod-`)
 - [ ] Skills listées dans les agents qui en ont besoin (`skills:`)
 
 ### Sécurité & visibilité

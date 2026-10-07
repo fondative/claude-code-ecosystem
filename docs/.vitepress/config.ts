@@ -1,10 +1,39 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import recodeSidebar from './recode-sidebar.json'
+
+// Chemin de base du site (GitHub Pages : servi sous /claude-code-ecosystem/)
+const SITE_BASE = '/claude-code-ecosystem/'
+
+// Wiki d'exemple (sous-site statique dans public/, construit par scripts/sync-example-wiki.sh)
+const EXAMPLE_WIKI = `${SITE_BASE}exemple-wiki-legacy/`
+const publicDir = join(__dirname, '..', 'public')
 
 export default withMermaid(defineConfig({
+  base: SITE_BASE,
+
+  // En dev, résout les URLs propres du wiki d'exemple (/page → page.html, /dossier/ → index.html),
+  // comme le fait un hébergeur statique en production
+  vite: {
+    plugins: [{
+      name: 'example-wiki-clean-urls',
+      configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+          const [path, query = ''] = (req.url ?? '').split('?')
+          if (path.startsWith(EXAMPLE_WIKI) && !/\.[a-z0-9]+$/i.test(path)) {
+            const file = path.endsWith('/') ? `${path}index.html` : `${path}.html`
+            if (existsSync(join(publicDir, file.slice(SITE_BASE.length)))) req.url = file + (query ? `?${query}` : '')
+          }
+          next()
+        })
+      }
+    }]
+  },
+
   title: 'Claude Code Ecosystem',
   lastUpdated: true,
-  base: '/claude-code-ecosystem/',
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
@@ -21,9 +50,17 @@ export default withMermaid(defineConfig({
         nav: [
           { text: 'Accueil', link: '/' },
           { text: 'Concepts', link: '/concepts/claude-md' },
-          { text: 'Cas d\'usage réel', link: '/examples/' },
           { text: 'Guide', link: '/guide/getting-started' },
+          { text: 'Plugin recode', link: '/recode/' },
           { text: 'AI-Driven Modernisation', link: '/guide/methodology' },
+          {
+            text: 'Cas d\'usage réel',
+            items: [
+              { text: 'Vue d\'ensemble', link: '/examples/' },
+              // Sous-site statique construit par scripts/sync-example-wiki.sh (docs/public/exemple-wiki-legacy/)
+              { text: 'Exemple de wiki généré (projet legacy)', link: '/exemple-wiki-legacy/', target: '_blank' }
+            ]
+          },
           { text: 'Référence', link: '/reference/glossary' }
         ],
         sidebar: {
@@ -68,6 +105,7 @@ export default withMermaid(defineConfig({
               ]
             }
           ],
+          '/recode/': recodeSidebar,
           '/examples/': [
             {
               text: 'Cas d\'usage réel',
@@ -76,7 +114,8 @@ export default withMermaid(defineConfig({
                 { text: 'Structure du projet', link: '/examples/project-structure' },
                 { text: 'Pipeline de migration', link: '/examples/pipeline' },
                 { text: 'Stratégie de modèles', link: '/examples/model-strategy' },
-                { text: 'Templates', link: '/examples/templates' }
+                { text: 'Templates', link: '/examples/templates' },
+                { text: 'Exemple de wiki généré', link: '/exemple-wiki-legacy/', target: '_blank' }
               ]
             }
           ],
@@ -117,9 +156,15 @@ export default withMermaid(defineConfig({
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Concepts', link: '/en/concepts/claude-md' },
-          { text: 'Real-world Use Cases', link: '/en/examples/' },
           { text: 'Guide', link: '/en/guide/getting-started' },
           { text: 'AI-Driven Modernisation', link: '/en/guide/methodology' },
+          {
+            text: 'Real-world Use Cases',
+            items: [
+              { text: 'Overview', link: '/en/examples/' },
+              { text: 'Generated wiki example (legacy project, FR)', link: '/exemple-wiki-legacy/', target: '_blank' }
+            ]
+          },
           { text: 'Reference', link: '/en/reference/glossary' }
         ],
         sidebar: {
@@ -172,7 +217,8 @@ export default withMermaid(defineConfig({
                 { text: 'Project Structure', link: '/en/examples/project-structure' },
                 { text: 'Migration Pipeline', link: '/en/examples/pipeline' },
                 { text: 'Model Strategy', link: '/en/examples/model-strategy' },
-                { text: 'Templates', link: '/en/examples/templates' }
+                { text: 'Templates', link: '/en/examples/templates' },
+                { text: 'Generated wiki example (FR)', link: '/exemple-wiki-legacy/', target: '_blank' }
               ]
             }
           ],
@@ -265,6 +311,15 @@ export default withMermaid(defineConfig({
           return html
         }
       }
+    }
+  },
+
+  // Images du contenu : enveloppées dans le conteneur plein écran des diagrammes (voir theme/index.ts)
+  markdown: {
+    config: (md) => {
+      const defaultImage = md.renderer.rules.image!
+      md.renderer.rules.image = (tokens, idx, options, env, self) =>
+        `<span class="mermaid-zoom img-zoom">${defaultImage(tokens, idx, options, env, self)}</span>`
     }
   },
 

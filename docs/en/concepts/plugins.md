@@ -5,7 +5,7 @@
 | Aspect | Detail |
 |--------|--------|
 | **What** | Distributable packages containing [skills](/en/concepts/skills), [agents](/en/concepts/agents), [MCP servers](/en/concepts/mcp) and [hooks](/en/concepts/hooks) |
-| **Where** | Installed via `claude plugins add <source>` |
+| **Where** | Installed from a marketplace: `/plugin install <name>@<marketplace>` (in session) or `claude plugin install` (CLI) |
 | **Namespace** | `plugin-name:skill-name` — no conflict with project/user skills |
 | **Scope** | Active in projects where the plugin is enabled |
 | **Sharing** | Git, npm, or managed settings for team/organization distribution |
@@ -84,18 +84,21 @@ Plugins use a `plugin-name:skill-name` namespace to avoid conflicts:
 ### Installation
 
 ```bash
-# From a git repository
-claude plugins add https://github.com/org/my-plugin
+# Add a marketplace (GitHub repo, git URL or local path)
+claude plugin marketplace add org/my-marketplace
 
-# From a local path
-claude plugins add ./path/to/plugin
+# Install a plugin from that marketplace (--scope user|project|local)
+claude plugin install my-plugin@my-marketplace
 
 # List installed plugins
-claude plugins list
+claude plugin list
 
-# Remove a plugin
-claude plugins remove my-plugin
+# Disable / uninstall a plugin
+claude plugin disable my-plugin
+claude plugin uninstall my-plugin
 ```
+
+In a session, the same actions go through `/plugin` (interactive panel), `/plugin marketplace add …` and `/plugin install my-plugin@my-marketplace`.
 
 ### Managing plugins
 
@@ -262,7 +265,7 @@ devops-plugin/
 
 ### Distribution
 
-- [ ] Plugin tested locally (`claude plugins add ./`)
+- [ ] Plugin tested locally (installed from a local marketplace: `claude plugin marketplace add ./`)
 - [ ] Clear and descriptive namespace
 - [ ] No conflict with common skill names
 

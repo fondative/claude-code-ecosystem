@@ -28,8 +28,8 @@ A command (or slash command) is a Markdown file in `.claude/commands/` that defi
 │  Executes the instructions:          │
 │  1. git diff --staged                │
 │  2. Determine type/scope             │
-│  3. Propose message                  │
-│  4. Commit                           │
+│  3. Write the message                │
+│  4. User validates → commit          │
 └──────────────────────────────────────┘
 ```
 
@@ -112,7 +112,7 @@ The shell commands execute first, their output replaces the placeholder, and Cla
 | **Personal** | `~/.claude/commands/*.md` | Medium | All your projects |
 | **Project** | `.claude/commands/*.md` | Standard | Team (git) |
 
-Project commands override personal commands with the same name.
+On a name conflict, the personal command wins over the project command (order of the table above).
 
 ::: tip Personal commands
 `~/.claude/commands/` lets you define commands that follow you across **all** your projects (e.g.: `/my-commit`, `/my-review`).
@@ -290,17 +290,18 @@ Prerequisites documented in the description prevent surprise errors.
 ```yaml
 ---
 name: commit
-description: Commit with Conventional Commits
+description: Commit changes following Conventional Commits
 disable-model-invocation: true
+argument-hint: "[message]"
 ---
 
 # Commit
 
 1. Analyze `git diff --staged` and `git diff`
-2. Determine the type: feat, fix, refactor, docs, test, chore
-3. Deduce the scope from modified files
-4. Propose: `type(scope): concise description`
-5. Add `Co-Authored-By: Claude <noreply@anthropic.com>`
+2. Determine the type (feat, fix, refactor, docs, test, chore...) and the scope
+3. Write: `type(scope): description` (the why, not the what)
+4. Propose the message and WAIT for validation before `git commit`
+5. End with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`
 
 Warning: If pre-commit hook fails → fix → NEW commit (NOT amend)
 ```
@@ -358,7 +359,7 @@ argument-hint: "[path]"
 - LOW: suggestion
 
 ## Verdict
-APPROVED | CORRECTIONS REQUIRED | REFONTE NEEDED
+APPROVED | CORRECTIONS REQUIRED | REWORK REQUIRED
 ```
 
 ### Example 4: Dynamic injection

@@ -55,8 +55,8 @@ Pour un projet de migration, protéger le legacy en lecture seule :
 {
   "permissions": {
     "deny": [
-      "Write(php-legacy/**)",
-      "Edit(php-legacy/**)"
+      "Write(/php-legacy/**)",
+      "Edit(/php-legacy/**)"
     ]
   }
 }

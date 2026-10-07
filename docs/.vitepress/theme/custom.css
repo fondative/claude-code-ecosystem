@@ -509,7 +509,8 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   box-shadow: 0 4px 20px rgba(34, 197, 94, 0.08);
 }
 
-.mermaid-zoom svg {
+.mermaid-zoom svg,
+.mermaid-zoom img {
   width: 100%;
   height: auto;
   display: block;
@@ -528,7 +529,7 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   ry: 10;
 }
 
-/* ---- Fullscreen button ---- */
+/* ---- Bouton « Agrandir » : toujours visible, accentué au survol ---- */
 .mermaid-fullscreen-btn {
   position: absolute;
   top: 8px;
@@ -537,17 +538,17 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  color: var(--vp-c-text-3);
+  font-weight: 600;
+  color: var(--vp-c-text-2);
   background: var(--vp-c-bg-elv);
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--vp-c-divider);
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease, background 0.2s ease;
+  cursor: zoom-in;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .mermaid-zoom:hover .mermaid-fullscreen-btn {
@@ -560,44 +561,104 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   border-color: var(--vp-c-brand-1);
 }
 
-/* ---- Fullscreen overlay ---- */
-.mermaid-zoom.fullscreen {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: 40px;
-  border-radius: 0;
-  border: none;
+.mermaid-zoom svg,
+.mermaid-zoom img {
+  cursor: zoom-in;
+}
+
+/* ---- Visionneuse (zoom-viewer.ts) ---- */
+.zoom-viewer {
+  position: fixed;
+  inset: 0;
   z-index: 9999;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
   background: var(--vp-c-bg);
+}
+
+.zoom-toolbar {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
 }
 
-.mermaid-zoom.fullscreen svg {
-  width: auto;
-  height: auto;
-  max-width: 95vw;
-  max-height: 90vh;
+.zoom-toolbar button {
+  min-width: 36px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.mermaid-zoom.fullscreen .mermaid-fullscreen-btn {
-  position: fixed;
-  top: 12px;
-  right: 16px;
-  opacity: 1;
+.zoom-toolbar button:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.zoom-toolbar button[data-act="close"] {
+  margin-left: 16px;
+}
+
+.zoom-level {
+  min-width: 64px;
+  text-align: center;
   font-size: 13px;
-  padding: 6px 16px;
-  z-index: 10000;
+  font-variant-numeric: tabular-nums;
+  color: var(--vp-c-text-2);
+}
+
+.zoom-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.zoom-stage.dragging {
+  cursor: grabbing;
+}
+
+.zoom-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  user-select: none;
+}
+
+.zoom-content > svg,
+.zoom-content > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none !important;
+  max-height: none !important;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.zoom-hint {
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+@media (max-width: 640px) {
+  .zoom-hint {
+    display: none;
+  }
 }
 
 /* Dark mode */
@@ -616,6 +677,92 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   border-color: rgba(30, 58, 90, 0.5);
 }
 
-.dark .mermaid-zoom.fullscreen {
-  background: var(--vp-c-bg);
+/* Images du contenu : même conteneur que les diagrammes (span pour rester valide dans un <p>) */
+.img-zoom {
+  display: block;
+}
+
+.img-zoom img {
+  border-radius: 8px;
+}
+
+/* ========================================
+   Plugin recode : couleurs des workflows (composants Recode*.vue, pages /recode/)
+   ======================================== */
+:root {
+  /* Teintes sourdes : la couleur sert d'accent (liseré, numéro, puce), les fonds restent neutres */
+  --recode-dev: #3d7a6c;  --recode-dev-soft: rgba(61, 122, 108, 0.07);
+  --recode-mig: #45618f;  --recode-mig-soft: rgba(69, 97, 143, 0.07);
+  --recode-real: #9a6a45; --recode-real-soft: rgba(154, 106, 69, 0.07);
+  --recode-doc: #6e6290;  --recode-doc-soft: rgba(110, 98, 144, 0.07);
+  --recode-surface: var(--vp-c-bg-soft);
+}
+
+.dark {
+  --recode-dev: #7fb5a7;  --recode-dev-soft: rgba(127, 181, 167, 0.08);
+  --recode-mig: #93a9cf;  --recode-mig-soft: rgba(147, 169, 207, 0.08);
+  --recode-real: #c9a081; --recode-real-soft: rgba(201, 160, 129, 0.08);
+  --recode-doc: #aea4cb;  --recode-doc-soft: rgba(174, 164, 203, 0.08);
+  --recode-surface: rgba(255, 255, 255, 0.03);
+}
+
+.rc-dev  { --c: var(--recode-dev);  --c-soft: var(--recode-dev-soft); }
+.rc-mig  { --c: var(--recode-mig);  --c-soft: var(--recode-mig-soft); }
+.rc-real { --c: var(--recode-real); --c-soft: var(--recode-real-soft); }
+.rc-doc  { --c: var(--recode-doc);  --c-soft: var(--recode-doc-soft); }
+
+/* Points clés d'un skill : titre à gauche, détail à droite */
+.vp-doc .rc-points {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  margin: 8px 0 32px;
+}
+
+.vp-doc .rc-points > h4,
+.vp-doc .rc-points > ul {
+  margin: 0;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc .rc-points > h4 {
+  padding-right: 24px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--vp-c-text-1);
+}
+
+.vp-doc .rc-points > ul {
+  padding-left: 18px;
+  list-style-position: outside;
+}
+
+.vp-doc .rc-points > ul > li {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.vp-doc .rc-points > ul > li::marker {
+  color: var(--c, var(--vp-c-brand-1));
+}
+
+@media (max-width: 640px) {
+  .vp-doc .rc-points {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vp-doc .rc-points > ul {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+/* Pages recode larges (frontmatter pageClass: recode-wide) : place pour la carte des workflows */
+@media (min-width: 960px) {
+  .recode-wide .VPDoc .container,
+  .recode-wide .VPDoc .content-container {
+    max-width: 1080px !important;
+  }
 }

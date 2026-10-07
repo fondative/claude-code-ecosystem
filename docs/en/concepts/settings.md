@@ -24,7 +24,7 @@ The `settings.json` file configures the **complete behavior of Claude Code**: pe
 │         │                                  │
 │         ▼                                  │
 │  ┌──────────────┐                          │
-│  │ Check deny   │ deny: Write(php-legacy/**) │
+│  │ Check deny   │ deny: Write(/php-legacy/**)│
 │  │              │ → BLOCKED ❌              │
 │  └──────────────┘                          │
 │                                            │
@@ -89,8 +89,8 @@ Ideal for personal preferences on a project without polluting the repo: addition
       "Edit(config/**)"
     ],
     "deny": [
-      "Write(php-legacy/**)",
-      "Edit(php-legacy/**)",
+      "Write(/php-legacy/**)",
+      "Edit(/php-legacy/**)",
       "Bash(rm -rf *)"
     ]
   }
@@ -133,7 +133,7 @@ Disables **all** security. Can be blocked by admin via `permissions.disableBypas
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `model` | string | Default model (`"claude-sonnet-4-6"`) |
+| `model` | string | Default model (`"claude-sonnet-5-5"`) |
 | `availableModels` | array | Restrict models in `/model` |
 | `language` | string | Preferred response language |
 | `outputStyle` | string | System prompt style |
@@ -229,7 +229,7 @@ Action ALWAYS safe?
 | `Bash(docker compose *)` | allow | Frequent command, safe |
 | `Bash(git status/diff/log)` | allow | Read-only git |
 | `Bash(git push *)` | ask | Verify before push |
-| `Write(php-legacy/**)` | deny | Protect source code |
+| `Write(/php-legacy/**)` | deny | Protect source code |
 | `Bash(rm -rf *)` | deny | Destructive |
 | `Write(.env*)` | deny | Secret files |
 
@@ -272,7 +272,7 @@ Without an explicit `deny` rule, Claude can write to sensitive directories. See 
 ::: info Solution
 ```json
 // ✅ — Explicit protection
-{ "deny": ["Write(php-legacy/**)", "Edit(php-legacy/**)"] }
+{ "deny": ["Write(/php-legacy/**)", "Edit(/php-legacy/**)"] }
 ```
 Explicitly define protected directories using `deny`.
 :::
@@ -286,7 +286,7 @@ A single `*` glob only protects the first directory level, leaving subdirectorie
 ::: danger Problem
 ```json
 // ❌ — First level only
-{ "deny": ["Write(php-legacy/*)"] }
+{ "deny": ["Write(/php-legacy/*)"] }
 ```
 Files in `php-legacy/src/Controller/` are not covered by this pattern.
 :::
@@ -294,7 +294,7 @@ Files in `php-legacy/src/Controller/` are not covered by this pattern.
 ::: info Solution
 ```json
 // ✅ — Recursive
-{ "deny": ["Write(php-legacy/**)"] }
+{ "deny": ["Write(/php-legacy/**)"] }
 ```
 Use `**` for recursive protection across all subdirectory levels.
 :::
@@ -335,7 +335,7 @@ Putting personal preferences in `.claude/settings.json` forces them on the entir
 ::: danger Problem
 ```json
 // ❌ — In .claude/settings.json (git): personal preferences
-{ "model": "claude-opus-4-6", "language": "french" }
+{ "model": "claude-opus-5-5", "language": "french" }
 ```
 These personal preferences are committed and apply to all team members.
 :::
@@ -343,7 +343,7 @@ These personal preferences are committed and apply to all team members.
 ::: info Solution
 ```json
 // ✅ — In .claude/settings.local.json (gitignored)
-{ "model": "claude-opus-4-6", "language": "french" }
+{ "model": "claude-opus-5-5", "language": "french" }
 ```
 Use `settings.local.json` (in `.gitignore`) for individual preferences.
 :::
@@ -403,20 +403,33 @@ Set to `""` to hide attribution.
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Read", "Glob", "Grep",
-      "Bash(docker compose exec *)",
-      "Bash(git status)", "Bash(git diff *)",
-      "Bash(git log *)", "Bash(git add *)",
-      "Bash(ls *)", "Bash(find *)", "Bash(mkdir *)",
-      "Bash(npm *)"
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(docker compose exec -T app *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(mkdir *)",
+      "Bash(npm *)",
+      "Bash(cd *)",
+      "Write(output/**)",
+      "Edit(output/**)",
+      "Write(*-wiki/**)",
+      "Edit(*-wiki/**)"
     ],
     "ask": [
-      "Bash(git push *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ],
     "deny": [
-      "Write(php-legacy/**)",
-      "Edit(php-legacy/**)",
+      "Write(/php-legacy/**)",
+      "Edit(/php-legacy/**)",
+      "Write(.env*)",
+      "Edit(.env*)",
       "Bash(rm -rf *)"
     ]
   }
@@ -429,7 +442,7 @@ Set to `""` to hide attribution.
 
 ```json
 {
-  "model": "claude-opus-4-6",
+  "model": "claude-opus-5-5",
   "language": "french",
   "env": {
     "NODE_ENV": "development"

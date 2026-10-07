@@ -11,6 +11,11 @@ hero:
     - theme: alt
       text: Real-world Use Cases
       link: /en/examples/
+    - theme: alt
+      text: Generated wiki example (FR) ↗
+      link: /exemple-wiki-legacy/
+      target: _blank
+      rel: noopener
     - theme: brand
       text: AI-Driven Modernisation
       link: /en/guide/methodology

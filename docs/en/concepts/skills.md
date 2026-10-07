@@ -218,33 +218,39 @@ Does the skill contain EXECUTION INSTRUCTIONS?
 | `disable-model-invocation: true` | Yes | No | Deploy, commit, risky actions |
 | `user-invocable: false` | No | Yes | Conventions, business context |
 
-### Organization by Namespace
+::: warning Skill called by a pipeline
+A skill launched by another skill (e.g. `mod-generate-visualization` called by `mod-analyze-legacy`, `mod-generate-docs` called by `mod-migrate-feature`) must **not** have `disable-model-invocation: true`: Claude could no longer invoke it from the pipeline.
+:::
+
+### Organization by Prefix
+
+Claude Code only discovers skills at the first level (`.claude/skills/<name>/SKILL.md`): namespace subfolders are not loaded. Grouping is therefore done with a **prefix** in the folder name.
 
 ```
 .claude/skills/
-├── symfony/                    # By framework
-│   ├── api-conventions/
-│   └── testing-conventions/
-├── modernization/              # By workflow
-│   ├── analyze-legacy/
-│   ├── migrate-feature/
-│   ├── conformity-conventions/ # Scoring and reports
-│   └── generate-docs/
-├── frontend/                  # By framework
-│   ├── app-conventions/
-│   ├── design-conventions/    # Figma design conventions
-│   └── testing-conventions/
+├── sym-api-conventions/            # sym-   : Symfony conventions
+├── sym-testing-conventions/
+├── front-app-conventions/          # front- : frontend conventions
+├── front-design-conventions/       # Figma design conventions
+├── front-testing-conventions/
+├── mod-analyze-legacy/             # mod-   : modernization workflows
+├── mod-migrate-feature/
+├── mod-generate-visualization/
+├── mod-generate-docs/
+├── mod-conformity-conventions/     # Scoring and reports
+├── claude-code-parallel-agents/    # claude-code- : internal skills
+└── claude-code-skill-command-model/
 ```
 
 ### Skill → Agent Inheritance
 
 ```yaml
-# .claude/agents/backend-executor.md
+# .claude/agents/backend-tasks-executor.md
 ---
-name: backend-executor
+name: backend-tasks-executor
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 ```
 
@@ -260,7 +266,7 @@ Beyond 500 lines, `SKILL.md` saturates the context on every invocation — even 
 ```yaml
 # ❌ BAD — 2000 lines in SKILL.md
 ---
-name: api-conventions
+name: sym-api-conventions
 ---
 ## Architecture (200 lines...)
 ## Entities (300 lines...)
@@ -273,7 +279,7 @@ name: api-conventions
 ```yaml
 # ✅ GOOD — Short SKILL.md + references
 ---
-name: api-conventions
+name: sym-api-conventions
 ---
 ## Architecture
 Controller → Service → Repository → Entity
@@ -304,7 +310,7 @@ Without a description, Claude cannot associate the skill with any usage context.
 ```yaml
 # ✅ GOOD — Precise keywords
 ---
-name: api-conventions
+name: sym-api-conventions
 description: Backend Symfony conventions. REST architecture, DTOs,
   repositories with filtering, exception handling.
 ---
@@ -351,7 +357,7 @@ Maintaining the same content in both a [rule](/en/concepts/rules) and a skill cr
 ```yaml
 # ❌ BAD — Same content in 2 places
 # rules/backend.md → PSR-12, camelCase...
-# skills/api-conventions/SKILL.md → PSR-12, camelCase...
+# skills/sym-api-conventions/SKILL.md → PSR-12, camelCase...
 ```
 An update in one is not reflected in the other — desynchronization is guaranteed.
 :::
@@ -360,8 +366,8 @@ An update in one is not reflected in the other — desynchronization is guarante
 ```yaml
 # ✅ GOOD — Rule delegates, skill details
 # rules/backend.md
-# → "Load the skill api-conventions. Reminders: Docker, TDD."
-# skills/api-conventions/SKILL.md → (full detail)
+# → "Load the skill sym-api-conventions. Reminders: Docker, TDD."
+# skills/sym-api-conventions/SKILL.md → (full detail)
 ```
 The rule points to the skill. One single place to maintain for detailed content.
 :::
@@ -438,9 +444,9 @@ Skill descriptions are loaded within a budget of **2% of the context window** (~
 
 ```yaml
 ---
-name: api-conventions
-description: Backend Symfony conventions for this project. REST
-  architecture, DTOs, repositories with filtering, exception handling.
+name: sym-api-conventions
+description: Symfony 7.4 backend development conventions. Architecture,
+  patterns, code standards. Load for any work on the backend REST API.
 user-invocable: false
 ---
 
@@ -462,32 +468,35 @@ Controller → Service → Repository → Entity
 - Create a controller → [create-controller.md](references/create-controller.md)
 ```
 
-**14 reference files** cover each pattern in detail.
+**15 reference files** cover each pattern in detail.
 
 ::: info Why passive?
-Conventions are not an action. Claude needs to know them when working on the backend, not when the user types `/api-conventions`.
+Conventions are not an action. Claude needs to know them when working on the backend, not on user request: with `user-invocable: false`, `sym-api-conventions` does not appear in the `/` menu.
 :::
 
 ### Example 2: Launcher skill — E2E Migration
 
 ```yaml
 ---
-name: modernization/migrate-feature
+name: mod-migrate-feature
 description: End-to-end migration of a legacy feature to the modern stack
 disable-model-invocation: true
-argument-hint: "[feature-name] [stage]"
+argument-hint: "[nom-feature]"
 ---
 
-# Migration of $0
+# Migration of $ARGUMENTS
+
+## Step 0: Prerequisites
+Verify that BACKEND_TARGET and FRONTEND_TARGET exist.
+Otherwise: STOP, suggest `/dev/install-stack backend|frontend`.
 
 ## Step 1: Detailed specification
-Run the `legacy-feature-analyzer` agent on feature $0.
-**Checkpoint**: Verify that `output/features/$0_spec.md` exists.
+Run the `legacy-feature-analyzer` agent on feature $ARGUMENTS.
+**Checkpoint**: Verify that `FEATURE_SPECS_DIR/$ARGUMENTS_spec.md` exists.
 
-## Step 2: Planning
-Run in PARALLEL:
-- `backend-tasks-planner`
-- `frontend-tasks-planner`
+## Step 2: Planning (SEQUENTIAL)
+1. `backend-tasks-planner` (tasks + OpenAPI spec)
+2. `frontend-tasks-planner` (built on OPENAPI_SPEC)
 **Checkpoint**: The _analysis.md files exist.
 
 ## Step 3: TDD Implementation
@@ -501,7 +510,12 @@ Run `conformity-reporter`. NEVER overwrite — create V2, V3...
 ## Step 5: Quality loop (max 2 iterations)
 If score < 80/100: re-run executor + conformity-reporter (V2).
 If V2 < 80/100: STOP — human intervention required.
+
+## Step 6: Wiki sync (if the wiki folder exists)
+Run `/mod-generate-docs $ARGUMENTS`.
 ```
+
+No `stage` argument: re-running `/mod-migrate-feature $ARGUMENTS` resumes from the failed step.
 
 ::: warning disable-model-invocation: true
 ALWAYS set to `true` for workflows with side effects. You don't want Claude to start a migration because it "thinks it's relevant".
@@ -563,7 +577,7 @@ The script generates `codebase-map.html` and opens it in the browser.
 ### Project coherence
 
 - [ ] No duplication with an existing [rule](/en/concepts/rules) (see [WARN-004](#warn-004-skill--rule-duplication))
-- [ ] Coherent namespace (`framework/`, `workflow/`)
+- [ ] Coherent prefix (`sym-`, `front-`, `mod-`)
 - [ ] Skills listed in agents that need them (`skills:`)
 
 ### Security & visibility

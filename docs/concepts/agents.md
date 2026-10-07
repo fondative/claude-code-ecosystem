@@ -75,8 +75,8 @@ description: Implementation backend Test First
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 
 # Backend Tasks Executor
@@ -116,15 +116,15 @@ Quand un agent déclare `skills:`, le contenu **complet** de chaque SKILL.md est
 ```yaml
 # L'agent recoit TOUT le contenu de ces skills
 skills:
-  - symfony/api-conventions      # 14 references disponibles
-  - symfony/testing-conventions  # 3 references disponibles
+  - sym-api-conventions      # 15 references disponibles
+  - sym-testing-conventions  # 3 references disponibles
 ```
 
 ### Comment un agent est spawné
 
 | Méthode | Déclencheur | Exemple |
 |---------|------------|---------|
-| [Skill](/concepts/skills) launcher | `/modernization/migrate-feature X` | La skill orchestre les agents |
+| [Skill](/concepts/skills) launcher | `/mod-migrate-feature X` | La skill orchestre les agents |
 | Outil Agent | Claude décide de déléguer | `Agent(subagent_type: "Explore")` |
 
 ::: warning Pas de nesting
@@ -230,7 +230,7 @@ La tache necessite de COMPRENDRE du code non documente ?
     └── NON
         La tache suit un TEMPLATE clair ?
         ├── OUI → Haiku ($)
-        │   (documentation, audit, diagnostics)
+        │   (audit, diagnostics)
         └── NON → Sonnet (par defaut)
 ```
 
@@ -301,18 +301,18 @@ Donner trop d'outils à un agent augmente le risque d'actions inattendues ou des
 
 ::: danger Problème
 ```yaml
-# ❌ — Agent d'analyse avec Write/Edit
+# ❌ — Agent d'analyse avec Edit (peut modifier le legacy)
 tools: Read, Glob, Grep, Write, Edit, Bash
 ```
-Un agent d'analyse n'a pas besoin d'écrire des fichiers.
+Un agent d'analyse ne doit jamais modifier la source analysée (`SOURCE_PROJECT`) : `Edit` est inutile.
 :::
 
 ::: info Solution
 ```yaml
-# ✅ — Lecture seule pour l'analyse
-tools: Read, Glob, Grep
+# ✅ — Legacy en lecture seule, Write pour sa sortie
+tools: Read, Glob, Grep, Write
 ```
-Limiter les outils empêche les actions inattendues.
+Limiter les outils empêche les actions inattendues. `Write` reste légitime pour produire les livrables dans le dossier de sortie (ex. `SOURCE_TECHNICAL_DIR`), jamais dans le legacy.
 :::
 
 ---
@@ -323,7 +323,7 @@ Utiliser Opus pour toutes les tâches multiplie les coûts sans gain de qualité
 
 ::: danger Problème
 ```yaml
-# ❌ COUTEUX — Opus pour de la documentation
+# ❌ COUTEUX — Opus pour un audit ou un diagnostic templated
 model: opus
 ```
 Opus facture ~10x plus cher que Haiku pour un résultat identique sur les tâches templated.
@@ -331,7 +331,7 @@ Opus facture ~10x plus cher que Haiku pour un résultat identique sur les tâche
 
 ::: info Solution
 ```yaml
-# ✅ ECONOMIQUE — Haiku suffit
+# ✅ ECONOMIQUE — Haiku suffit (cf. auditor, health-check)
 model: haiku
 ```
 Haiku est ~10x moins cher pour les tâches structurées.
@@ -374,12 +374,12 @@ Usage : pipeline de migration (chaque étape dépend de la précédente).
 #### Parallèle
 
 ```
-         ┌── Backend Planner ──┐
-Spec ────┤                     ├──► Merge
-         └── Frontend Planner ─┘
+            ┌── Feature Analyzer (feature A) ──┐
+Inventaire ─┤                                  ├──► specs/*.md
+            └── Feature Analyzer (feature B) ──┘
 ```
 
-Usage : planification backend + frontend simultanée.
+Usage : `legacy-feature-analyzer` en MODE BATCH (étape 4 de `/mod-analyze-legacy`). Les planners backend et frontend restent séquentiels : le frontend s'appuie sur l'`OPENAPI_SPEC` produite par le backend.
 
 #### Hiérarchique
 
@@ -491,7 +491,7 @@ Ou via le CLI : `claude --disallowedTools "Agent(Explore)"`
 
 ## Exemples concrets
 
-### Exemple 1 : Agent d'analyse (Opus, lecture seule)
+### Exemple 1 : Agent d'analyse (Opus, legacy en lecture seule, écrit sa sortie)
 
 ```yaml
 ---
@@ -532,8 +532,8 @@ description: Implementation backend Test First via Docker
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 
 # Implementation TDD

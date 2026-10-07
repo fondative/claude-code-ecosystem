@@ -17,23 +17,23 @@
 Une rule est un fichier Markdown dont le contenu est **automatiquement injecté dans le contexte de Claude** lorsque les fichiers manipulés correspondent à un pattern glob. Pas d'invocation manuelle, pas de commande — c'est transparent.
 
 ```
-┌────────────────────────────────────────┐
-│         INJECTION CONTEXTUELLE          │
-│                                        │
-│  Claude edite api-rest/src/Entity.php  │
-│         │                              │
-│         ▼                              │
-│  Glob match: "api-rest/**"             │
-│         │                              │
-│         ▼                              │
-│  ┌──────────────────────┐              │
-│  │  rules/symfony-api.md │ ◄── injecte │
-│  │  "PSR-12, Docker,    │              │
-│  │   TDD obligatoire"   │              │
-│  └──────────────────────┘              │
-│                                        │
-│  git.md (pas de paths) ───── toujours  │
-└────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│             INJECTION CONTEXTUELLE                    │
+│                                                       │
+│  Claude edite api-rest-symfony-target/src/Entity.php  │
+│         │                                             │
+│         ▼                                             │
+│  Glob match: "api-rest-symfony-target/**"             │
+│         │                                             │
+│         ▼                                             │
+│  ┌──────────────────────┐                             │
+│  │ rules/symfony-api.md │  ◄── injecte                │
+│  │  "PSR-12, Docker,    │                             │
+│  │   TDD obligatoire"   │                             │
+│  └──────────────────────┘                             │
+│                                                       │
+│  git.md (pas de paths) ───── toujours                 │
+└───────────────────────────────────────────────────────┘
 ```
 
 ::: info Rules vs Skills
@@ -82,17 +82,17 @@ Les rules existent à plusieurs niveaux. Les plus spécifiques gagnent :
 
 ### Découverte récursive
 
-Les fichiers `.md` dans les sous-dossiers de `rules/` sont découverts automatiquement :
+Les fichiers `.md` dans les sous-dossiers de `rules/` sont découverts automatiquement (arborescence hypothétique — ce projet utilise 7 rules à plat : `legacy-readonly`, `symfony-api`, `frontend`, `output-format`, `design`, `docs`, `git`) :
 
 ```
 .claude/rules/
-├── legacy-readonly.md
+├── security.md
 ├── git.md
 ├── backend/
-│   ├── symfony-api.md
-│   └── docs.md
+│   ├── api.md
+│   └── database.md
 └── frontend/
-    └── react.md
+    └── components.md
 ```
 
 ### Glob patterns avancés
@@ -186,7 +186,7 @@ Sans deny dans `settings.json`, cette instruction peut être ignorée.
 ::: info Solution
 ```json
 // ✅ — settings.json enforce
-{ "deny": ["Write(php-legacy/**)", "Edit(php-legacy/**)"] }
+{ "deny": ["Write(/php-legacy/**)", "Edit(/php-legacy/**)"] }
 ```
 Le `deny` bloque les outils Write et Edit au niveau du moteur, indépendamment du texte de la rule.
 :::
@@ -207,7 +207,7 @@ Les rules sont injectées à chaque interaction — une rule volumineuse pollue 
 ::: info Solution
 ```markdown
 # ✅ — Rule courte + delegation
-Charger skill `api-conventions`. Rappels : Docker, TDD, PSR-12.
+Charger skill `sym-api-conventions`. Rappels : Docker, TDD, PSR-12.
 ```
 La rule rappelle l'essentiel, la skill porte le détail. Pas de duplication.
 :::
@@ -229,7 +229,7 @@ La rule est injectée pour chaque fichier de tout le projet, sans discrimination
 ::: info Solution
 ```yaml
 # ✅ — Cible
-paths: ["ap-rest/**"]
+paths: ["api-rest-symfony-target/**"]
 ```
 Cibler un dossier précis limite l'injection aux fichiers réellement concernés.
 :::
@@ -309,16 +309,28 @@ paths:
   - "php-legacy/**"
 ---
 
-# Legacy — LECTURE SEULE
+# Code Legacy - LECTURE SEULE
 
-NE JAMAIS modifier, ecrire ou supprimer de fichiers ici.
-Utiliser uniquement Read, Glob, Grep pour l'analyse.
+**Ne JAMAIS modifier le code dans ce repertoire.**
+
+Ce code est la source de verite pour l'analyse. Il doit rester intact
+pour permettre la comparaison avec l'implementation cible.
+
+Actions autorisees :
+- Lire et analyser le code
+- Extraire des informations
+- Documenter le comportement
+
+Actions INTERDITES :
+- Modifier des fichiers
+- Ajouter des fichiers
+- Supprimer des fichiers
 ```
 
 ::: warning Double protection
 La rule rappelle. Le `settings.json` enforce :
 ```json
-{ "deny": ["Write(php-legacy/**)", "Edit(php-legacy/**)"] }
+{ "deny": ["Write(/php-legacy/**)", "Edit(/php-legacy/**)"] }
 ```
 :::
 
@@ -330,9 +342,8 @@ La rule rappelle. Le `settings.json` enforce :
 
 # Git - Conventions
 
-- TOUJOURS utiliser `/dev/commit` pour commiter
-- Conventional Commits : `type(scope): description`
-- Ne jamais force-push sur main
+- **Pour tout commit** : TOUJOURS utiliser la commande `/dev/commit`. Ne JAMAIS commiter manuellement avec `git commit`.
+- Suivre le format Conventional Commits : `type(scope): description`
 ```
 
 ### Exemple 3 : Délégation vers skill
@@ -343,11 +354,16 @@ paths:
   - "app-react-target/**"
 ---
 
-# Frontend
+# Conventions Frontend (auto-injecte)
 
-Charger les skills `frontend/app-conventions` et `frontend/testing-conventions`.
+Les conventions frontend completes sont definies dans les skills :
+- `front-app-conventions` — Architecture, patterns, standards de code
+- `front-testing-conventions` — Tests, TDD, mocking MSW
 
-Rappels : mobile-first, pas de px (rem/em/%), PascalCase composants.
+Rappels critiques :
+- Appels HTTP directs (pas d'adaptateurs)
+- Responsive obligatoire, pas de pixels hardcodes
+- Consulter la spec OpenAPI avant integration
 ```
 
 ::: tip Pattern de délégation
@@ -362,16 +378,24 @@ paths:
   - "output/**"
 ---
 
-# Format
+# Conventions de sortie (auto-injecte)
 
 ## Langue
-- Tous les documents generes DOIVENT etre rediges en francais
-- Seuls les noms de code restent en anglais
+- Tous les documents generes DOIVENT etre rediges en **francais**
+- Titres, descriptions, findings, recommandations, conclusions — tout en francais
+- Seuls les noms de code restent en anglais (classes, methodes, fichiers, variables)
 
 ## Format
-- Markdown avec titres hierarchiques
-- Diagrammes Mermaid
-- Classification dette : Critique / Haute / Moyenne / Basse
+- Markdown avec diagrammes Mermaid pour les flux et architectures
+- Donnees structurees en tableaux Markdown (pas de listes quand un tableau est plus lisible)
+
+## Ton
+- Factuel, objectif, constructif
+- Pas de jugements de valeur, uniquement des constats
+
+## Classification dette technique
+- CRITIQUE > ELEVEE > MOYENNE > BASSE
+- Toujours justifier le niveau avec des exemples concrets
 ```
 
 ---

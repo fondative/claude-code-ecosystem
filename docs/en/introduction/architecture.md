@@ -1,43 +1,36 @@
 # .claude/ Directory Architecture
 
-The `.claude/` directory is the heart of the project configuration. It contains all the components that extend Claude's capabilities for a specific project: [settings](/en/concepts/settings), [agents](/en/concepts/agents), [skills](/en/concepts/skills), [rules](/en/concepts/rules), [commands](/en/concepts/commands), [hooks](/en/concepts/hooks) and [MCP](/en/concepts/mcp).
+The `.claude/` directory is the heart of the project configuration. It contains all the components that extend Claude's capabilities for a specific project: [settings](/en/concepts/settings), [agents](/en/concepts/agents), [skills](/en/concepts/skills), [rules](/en/concepts/rules), [commands](/en/concepts/commands). [Hooks](/en/concepts/hooks) and [MCP](/en/concepts/mcp) servers are optional components, not used in this project.
 
 ## Typical Structure
 
 ```
 .claude/
-├── settings.json          # Allow/deny permissions
+├── settings.json          # Allow/ask/deny permissions
 ├── settings.local.json    # Personal preferences (gitignored)
 ├── agents/                # Specialized sub-agents
 │   ├── backend-tasks-executor.md
 │   ├── conformity-reporter.md
 │   └── ...
-├── skills/                # Knowledge and workflows
-│   ├── symfony/
-│   │   ├── api-conventions/
-│   │   │   ├── SKILL.md
-│   │   │   └── references/
-│   │   │       ├── create-entity.md
-│   │   │       └── ...
-│   │   └── testing-conventions/
-│   │       ├── SKILL.md
-│   │       └── references/
-│   ├── modernization/
-│   │   ├── migrate-feature/
-│   │   │   └── SKILL.md
-│   │   ├── conformity-conventions/
-│   │   │   ├── SKILL.md
-│   │   │   └── references/
-│   │   └── ...
-│   └── frontend/
-│       ├── app-conventions/
-│       │   ├── SKILL.md
-│       │   └── references/
-│       ├── design-conventions/
-│       │   └── SKILL.md
-│       └── testing-conventions/
-│           ├── SKILL.md
-│           └── references/
+├── skills/                # Knowledge and workflows (one folder per skill, domain-prefixed)
+│   ├── sym-api-conventions/          # sym-   : Symfony conventions
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── create-entity.md
+│   │       └── ...
+│   ├── sym-testing-conventions/
+│   ├── front-app-conventions/        # front- : frontend conventions
+│   ├── front-design-conventions/
+│   ├── front-testing-conventions/
+│   ├── mod-analyze-legacy/           # mod-   : modernization workflows
+│   ├── mod-migrate-feature/
+│   ├── mod-generate-visualization/
+│   ├── mod-generate-docs/
+│   ├── mod-conformity-conventions/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── claude-code-parallel-agents/  # claude-code- : internal skills
+│   └── claude-code-skill-command-model/
 ├── rules/                 # Contextual injection
 │   ├── legacy-readonly.md
 │   ├── symfony-api.md
@@ -46,9 +39,11 @@ The `.claude/` directory is the heart of the project configuration. It contains 
 └── commands/              # Slash commands (merged with skills)
     ├── dev/
     │   ├── commit.md
-    │   └── php-test.md
+    │   ├── php-test.md
+    │   └── ...
     └── review/
-        └── symfony-review.md
+        ├── symfony-review.md
+        └── frontend-review.md
 ```
 
 ## Relationships Between Components
@@ -75,7 +70,7 @@ CLAUDE.md (single source of truth for paths)
 | Element | Convention | Example |
 |---------|-----------|---------|
 | Agents | kebab-case | `backend-tasks-executor.md` |
-| Skills (folder) | kebab-case or namespace/ | `symfony/api-conventions/` |
+| Skills (folder) | prefixed kebab-case (`sym-`, `front-`, `mod-`, `claude-code-`) | `sym-api-conventions/` |
 | Rules | kebab-case | `legacy-readonly.md` |
 | Commands | kebab-case in subfolder | `dev/commit.md` |
 | References | kebab-case | `create-entity.md` |
@@ -86,11 +81,11 @@ A legacy modernization project typically uses:
 
 | Component | Count | Distribution |
 |-----------|-------|-------------|
-| Agents | 12 | 5 analysis, 2 implementation, 2 planning, 2 reporting, 1 diagnostic |
-| Skills | 11 | 4 launchers + 6 passive + 1 framework |
+| Agents | 11 | 5 analysis, 2 planning, 2 implementation, 1 reporting, 1 diagnostic |
+| Skills | 12 | 4 launchers + 6 passive + 2 internal (`claude-code-`) |
 | Rules | 7 | 1 global + 6 path-targeted |
-| Commands | 5 | 3 dev + 2 review |
-| References | 34 | 15 backend + 3 testing + 9 frontend + 3 testing-fe + 4 conformity |
+| Commands | 8 | 6 dev + 2 review |
+| References | 41 | 15 backend + 3 testing + 9 frontend + 3 testing-fe + 4 conformity + 4 generate-docs + 3 skill-command-model |
 
 ## Resources
 

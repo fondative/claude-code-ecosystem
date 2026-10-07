@@ -1,0 +1,31 @@
+[
+  {
+    "text": "Plugin recode",
+    "items": [
+      {
+        "text": "Vue d'ensemble",
+        "link": "/recode/"
+      },
+      {
+        "text": "Workflows",
+        "link": "/recode/workflows"
+      },
+      {
+        "text": "Développement",
+        "link": "/recode/developpement"
+      },
+      {
+        "text": "Migration",
+        "link": "/recode/migration"
+      },
+      {
+        "text": "Réalisation",
+        "link": "/recode/realisation"
+      },
+      {
+        "text": "Documentation",
+        "link": "/recode/documentation"
+      }
+    ]
+  }
+]

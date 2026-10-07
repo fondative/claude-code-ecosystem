@@ -5,7 +5,7 @@
 | Aspect | Detail |
 |--------|--------|
 | **Quoi** | Packages distribuables contenant [skills](/concepts/skills), [agents](/concepts/agents), [MCP servers](/concepts/mcp) et [hooks](/concepts/hooks) |
-| **Ou** | Installes via `claude plugins add <source>` |
+| **Ou** | Installes depuis un marketplace : `/plugin install <nom>@<marketplace>` (en session) ou `claude plugin install` (CLI) |
 | **Namespace** | `plugin-name:skill-name` — pas de conflit avec les skills projet/user |
 | **Scope** | Actifs dans les projets ou le plugin est active |
 | **Partage** | Git, npm, ou managed settings pour distribution equipe/organisation |
@@ -84,18 +84,21 @@ Les plugins utilisent un namespace `plugin-name:skill-name` pour eviter les conf
 ### Installation
 
 ```bash
-# Depuis un depot git
-claude plugins add https://github.com/org/my-plugin
+# Ajouter un marketplace (depot GitHub, URL git ou chemin local)
+claude plugin marketplace add org/my-marketplace
 
-# Depuis un chemin local
-claude plugins add ./path/to/plugin
+# Installer un plugin depuis ce marketplace (--scope user|project|local)
+claude plugin install my-plugin@my-marketplace
 
 # Lister les plugins installes
-claude plugins list
+claude plugin list
 
-# Supprimer un plugin
-claude plugins remove my-plugin
+# Desactiver / desinstaller un plugin
+claude plugin disable my-plugin
+claude plugin uninstall my-plugin
 ```
+
+En session, les memes actions passent par `/plugin` (panneau interactif), `/plugin marketplace add …` et `/plugin install my-plugin@my-marketplace`.
 
 ### Gestion des plugins
 
@@ -262,7 +265,7 @@ devops-plugin/
 
 ### Distribution
 
-- [ ] Plugin teste localement (`claude plugins add ./`)
+- [ ] Plugin teste localement (installe depuis un marketplace local : `claude plugin marketplace add ./`)
 - [ ] Namespace clair et descriptif
 - [ ] Pas de conflit avec les noms de skills courants
 

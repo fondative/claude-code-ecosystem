@@ -5,7 +5,7 @@
 | Aspect | Détail |
 |--------|--------|
 | **Quoi** | Protocole standardisé pour connecter Claude à des outils et données externes |
-| **Où** | [`settings.json`](/concepts/settings) (`mcpServers`), `.mcp.json` (projet), CLI `claude mcp` |
+| **Où** | `.mcp.json` (projet), `~/.claude.json` (utilisateur / local), CLI `claude mcp add` — les permissions des outils MCP restent dans [`settings.json`](/concepts/settings) |
 | **Transports** | `http` (recommandé), `stdio` (local), `sse` (déprécié) |
 | **Scopes** | `local` (défaut), `project` (.mcp.json, git), `user` (cross-projets) |
 | **Sécurité** | Dialogue de confiance, [permissions](/concepts/settings) par outil, secrets via env vars |

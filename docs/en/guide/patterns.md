@@ -31,15 +31,15 @@ disable-model-invocation: true
 # Migration $ARGUMENTS
 
 ## Step 1: Specification
-Run the `feature-analyzer` agent on $ARGUMENTS.
+Run the `legacy-feature-analyzer` agent on $ARGUMENTS.
 **Checkpoint**: verify that `output/features/$ARGUMENTS_spec.md` exists.
 
 ## Step 2: Planning
-Run `backend-planner` then `frontend-planner`.
+Run `backend-tasks-planner` then `frontend-tasks-planner`.
 **Checkpoint**: verify that the _analysis.md files exist.
 
 ## Step 3: Implementation
-Run `backend-executor` then `frontend-executor`.
+Run `backend-tasks-executor` then `frontend-tasks-executor`.
 **Checkpoint**: all tests pass.
 
 ## Step 4: Conformity
@@ -59,13 +59,13 @@ Run `conformity-reporter`.
 Multiple agents work simultaneously on independent tasks.
 
 ```
-         ┌── Agent A (backend) ──┐
-Input ───┤                       ├──► Merge
-         └── Agent B (frontend) ─┘
+         ┌── Agent A (feature X) ──┐
+Input ───┤                         ├──► Merge
+         └── Agent B (feature Y) ──┘
 ```
 
 ### Use Cases
-- Backend + frontend planning in parallel
+- Batch specs for several features (`legacy-feature-analyzer` in BATCH MODE within `/mod-analyze-legacy`)
 - Security + performance + quality analysis simultaneously
 - Multi-criteria review
 
@@ -124,21 +124,21 @@ disable-model-invocation: true
 
 # Complete Modernization
 
-## Phase 1: Analysis (parallel)
-Run in parallel:
+## Phase 1: Analysis (sequential)
+Run in order (checkpoint between each):
 - `legacy-technical-analyzer`
-- `legacy-functional-analyzer`
+- then `legacy-functional-analyzer`
 
 ## Phase 2: Audit
 Run `legacy-functional-analyzer-auditor`
 
 ## Phase 3: Migration per feature
 For each feature in 0-index.md:
-  Run `/modernization/migrate-feature [feature]`
-  (which itself orchestrates 4 agents)
+  Run `/mod-migrate-feature [feature]`
+  (which itself orchestrates 6 agents)
 
 ## Phase 4: Documentation
-Run `/modernization/generate-docs all`
+Run `/mod-generate-docs all`
 ```
 
 ## Pattern 4: LLM-as-Judge (Evaluation)
@@ -165,11 +165,11 @@ name: implement-and-validate
 
 # Implementation-Validation Loop
 
-1. Run `backend-executor` for the task $ARGUMENTS
+1. Run `backend-tasks-executor` for the task $ARGUMENTS
 2. Run `conformity-reporter` on the result
 3. If score < 80%:
    - Identify major deductions
-   - Rerun `backend-executor` with corrections
+   - Rerun `backend-tasks-executor` with corrections
    - Re-evaluate (max 2 iterations)
 4. If score >= 80%: DONE
 ```
@@ -193,14 +193,14 @@ Does the next task depend on the previous one?
 In practice, real projects combine multiple patterns:
 
 ```
-Phase 1: Analysis (PARALLEL)
-├── Technical (sequential internally)
-└── Functional (sequential internally)
+Phase 1: Analysis (SEQUENTIAL: Technical → Functional → Audit)
+└── Feature specs in batch (PARALLEL, optional)
+    └── N × legacy-feature-analyzer (BATCH MODE)
 
 Phase 2: Migration per feature (SEQUENTIAL between features)
 ├── Spec → Plan → Impl → Conformity (SEQUENTIAL per feature)
-│         ├── Backend (PARALLEL with Frontend if possible)
-│         └── Frontend
+│         ├── Backend (first: produces openapi.yaml)
+│         └── Frontend (then, SEQUENTIAL: reads openapi.yaml)
 └── Evaluation (LLM-AS-JUDGE)
 
 Phase 3: Documentation (SEQUENTIAL)

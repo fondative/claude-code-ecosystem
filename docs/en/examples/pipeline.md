@@ -2,7 +2,7 @@
 
 ## Overview
 
-The migration pipeline transforms a legacy feature into a modern implementation through 5 steps, each with a verification checkpoint.
+The migration pipeline transforms a legacy feature into a modern implementation through 5 main steps (1 to 5), framed by a step 0 prerequisite (target stacks check, otherwise `/dev/install-stack` is suggested) and a step 6 wiki sync (`/mod-generate-docs`, if the wiki folder exists). Each step has a verification checkpoint.
 
 ```
 Specification ──► Planning ──► Implementation ──► Conformity ──► Quality Loop
@@ -21,18 +21,20 @@ Specification ──► Planning ──► Implementation ──► Conformity �
 
 ### The 12 Sections
 
-1. Functional overview
-2. Legacy implementation reference
-3. User scenarios
-4. Interface points (UI)
-5. Business rules
-6. Validation and constraints
-7. Error handling
-8. Security and permissions
-9. Dependencies with other features
-10. Data and persistence
-11. Performance and scalability
-12. Acceptance criteria
+1. Overview (Vue d'Ensemble)
+2. Source Implementation Reference
+3. User Scenarios
+4. Interaction Points
+5. Business Rules
+6. Data Validation Rules
+7. State Management
+8. Access Control & Authorization
+9. Error Handling
+10. Edge Cases & Special Scenarios
+11. Integration Points
+12. Testing Considerations
+
+The output format ends with two complementary sections: Migration Notes and Appendix.
 
 ### Checkpoint
 
@@ -45,7 +47,7 @@ Specification ──► Planning ──► Implementation ──► Conformity �
 
 ### Refinement (optional)
 
-If the spec needs corrections, the `legacy-feature-analyzer-refiner` agent (Sonnet) can enrich it without changing its nature. The corrected file is suffixed with `-corrected`.
+If the spec needs corrections, the `legacy-feature-analyzer-refiner` agent (Sonnet) can enrich it without changing its nature. It enriches `[Feature]_spec.md` in place (no new file) and updates the features tree.
 
 ## Step 2: Planning
 
@@ -131,6 +133,7 @@ Each task in the analysis moves from `Unprocessed` to `Processed` with:
 ✅ All integration tests pass
 ✅ All functional tests pass
 ✅ All tasks marked "Processed"
+✅ The frontend application compiles without errors
 → Move to step 4
 ```
 
@@ -140,7 +143,7 @@ Each task in the analysis moves from `Unprocessed` to `Processed` with:
 
 **Input**: Specification + analysis + implemented code
 
-**Output**: `output/reports/[Feature]_CONFORMITY_REPORT-V[N].md`
+**Output**: `output/reports/[Feature]_CONFORMITY_REPORT.md` (V1), then `[Feature]_CONFORMITY_REPORT-V[N].md` (V2+)
 
 ### Scoring System
 
@@ -151,7 +154,9 @@ Each task in the analysis moves from `Unprocessed` to `Processed` with:
 | Medium | -5 points |
 | Low | -2 points |
 
-Starting score: 100 points. Each non-conformity deducts according to its severity.
+Starting score: 100 points per section. Each non-conformity deducts according to its severity, with a per-section cap for Medium (max 25 points) and Low (max 10 points); Critical and High are not capped.
+
+The overall score weights 4 categories: Project Guidelines Conformity (30%), Codebase Consistency (25%), Feature Specifications Conformity (25%), Analysis Document Alignment (20%).
 
 ### Versioning
 
@@ -159,10 +164,12 @@ Reports are **never overwritten**. Each evaluation produces a new version:
 
 ```
 output/reports/
-├── Search_Engine_CONFORMITY_REPORT-V1.md   # First evaluation
-├── Search_Engine_CONFORMITY_REPORT-V2.md   # After corrections
-└── Search_Engine_CONFORMITY_REPORT-V3.md   # Final version
+├── Search_Engine_CONFORMITY_REPORT.md      # V1: first evaluation (no suffix)
+├── Search_Engine_CONFORMITY_REPORT-V2.md   # After corrections (quality loop)
+└── Search_Engine_CONFORMITY_REPORT-V3.md   # Only after manual intervention
 ```
+
+The automatic quality loop stops at V2: a V3 is only produced after human intervention.
 
 Documentation always uses the **latest version**.
 
@@ -183,7 +190,7 @@ Documentation always uses the **latest version**.
 - ❌ MEDIUM (-5): Relevance sorting missing
 
 ### Recommendation
-CORRECTIONS REQUIRED — Implement pagination before validation.
+APPROVED WITH CONDITIONS (80-89) — Implement pagination before merge.
 ```
 
 ## Step 5: Quality Loop
@@ -214,11 +221,11 @@ CORRECTIONS REQUIRED — Implement pagination before validation.
 
 ### Failure Recovery
 
-Each launcher skill accepts a stage argument to resume at a specific step:
+Each step checks its output files before moving on. Rerunning the same command resumes the pipeline at the failed step:
 
 ```bash
-# Resume at step 3 (implementation)
-/modernization/migrate-feature Search_Engine stage=3
+# Resumes at the failed step (e.g. implementation), without redoing spec or planning
+/mod-migrate-feature Search_Engine
 ```
 
 ### Intermediate Files = Relays
@@ -227,6 +234,6 @@ Agents are isolated (no shared context). Intermediate files (`_spec.md`, `_analy
 
 ### Corrected Versions
 
-If a `Feature_spec.md` file is corrected, the `-corrected` version takes priority:
+When generating the wiki (`/mod-generate-docs`), if a `-corrected` version of a file exists, it takes priority:
 - `Search_Engine_spec.md` → initial version
 - `Search_Engine_spec-corrected.md` → version to use

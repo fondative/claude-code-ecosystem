@@ -79,7 +79,7 @@ model: haiku
 
 **Why Haiku?** These tasks are structured, repetitive and don't require complex reasoning. Haiku is 10x cheaper than Sonnet for equivalent results.
 
-> **The `documentation-generator` agent was removed** and replaced by the `/modernization/generate-docs` launcher skill. Documentation generation is now orchestrated as a workflow, not an isolated agent.
+> **The `documentation-generator` agent was removed** and replaced by the `/mod-generate-docs` launcher skill. Documentation generation is now orchestrated as a workflow, not an isolated agent.
 
 ## Cost Impact
 
@@ -87,18 +87,18 @@ model: haiku
 
 | Step | Agent | Model | Estimated tokens |
 |------|-------|-------|-----------------|
-| Specification | feature-analyzer | Opus | ~50k input + ~10k output |
-| Backend planning | backend-planner | Sonnet | ~30k input + ~8k output |
-| Frontend planning | frontend-planner | Sonnet | ~25k input + ~6k output |
-| Backend implementation | backend-executor | Sonnet | ~40k input + ~20k output |
-| Frontend implementation | frontend-executor | Sonnet | ~35k input + ~15k output |
+| Specification | legacy-feature-analyzer | Opus | ~50k input + ~10k output |
+| Backend planning | backend-tasks-planner | Sonnet | ~30k input + ~8k output |
+| Frontend planning | frontend-tasks-planner | Sonnet | ~25k input + ~6k output |
+| Backend implementation | backend-tasks-executor | Sonnet | ~40k input + ~20k output |
+| Frontend implementation | frontend-tasks-executor | Sonnet | ~35k input + ~15k output |
 | Conformity | conformity-reporter | Sonnet | ~30k input + ~5k output |
 
 ### Optimization
 
 1. **Opus only when necessary** — Technical analysis is done once for the entire project
 2. **Skills as context** — References prevent Sonnet from "guessing" conventions
-3. **Haiku for repetitive work** — Documentation and serial audits
+3. **Haiku for repetitive work** — Audits and diagnostics (auditor, health-check)
 
 ## Decision Tree
 

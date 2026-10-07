@@ -28,8 +28,8 @@ Un command (ou slash command) est un fichier Markdown dans `.claude/commands/` q
 │  Execute les instructions :          │
 │  1. git diff --staged                │
 │  2. Determiner type/scope            │
-│  3. Proposer message                 │
-│  4. Commiter                         │
+│  3. Rediger le message               │
+│  4. Valider avec l'user → commiter   │
 └──────────────────────────────────────┘
 ```
 
@@ -112,7 +112,7 @@ Les commandes shell s'exécutent d'abord, leur sortie remplace le placeholder, e
 | **Personnel** | `~/.claude/commands/*.md` | Moyenne | Tous vos projets |
 | **Projet** | `.claude/commands/*.md` | Standard | Équipe (git) |
 
-Les commands projet écrasent les commands personnels avec le même nom.
+En cas de conflit de nom, le command personnel l'emporte sur le command projet (ordre du tableau ci-dessus).
 
 ::: tip Commands personnels
 `~/.claude/commands/` permet de définir des commandes qui vous suivent sur **tous** vos projets (ex: `/my-commit`, `/my-review`).
@@ -290,17 +290,18 @@ Les prérequis documentés dans la description évitent les erreurs surprises.
 ```yaml
 ---
 name: commit
-description: Commit avec Conventional Commits
+description: Commit les changements en suivant Conventional Commits
 disable-model-invocation: true
+argument-hint: "[message]"
 ---
 
 # Commit
 
 1. Analyser `git diff --staged` et `git diff`
-2. Determiner le type : feat, fix, refactor, docs, test, chore
-3. Deduire le scope depuis les fichiers modifies
-4. Proposer : `type(scope): description concise`
-5. Ajouter `Co-Authored-By: Claude <noreply@anthropic.com>`
+2. Determiner le type (feat, fix, refactor, docs, test, chore...) et le scope
+3. Rediger : `type(scope): description` (le pourquoi, pas le quoi)
+4. Proposer le message et ATTENDRE la validation avant `git commit`
+5. Terminer par `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`
 
 ⚠️ Si hook pre-commit echoue → corriger → NOUVEAU commit (PAS amend)
 ```
@@ -358,7 +359,7 @@ argument-hint: "[path]"
 - BAS : suggestion
 
 ## Verdict
-APPROVED | CORRECTIONS REQUIRED | REFONTE NEEDED
+APPROUVE | CORRECTIONS REQUISES | REFONTE REQUISE
 ```
 
 ### Exemple 4 : Injection dynamique

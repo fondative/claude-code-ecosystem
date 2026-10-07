@@ -189,6 +189,8 @@ git add .claude/skills/
 git commit -m "feat: add project skills"
 ```
 
+> Dans ce projet, ne pas commiter manuellement : passer par `/dev/commit` (rule `.claude/rules/git.md`, format Conventional Commits).
+
 ### Par plugin
 
 Créer un répertoire de skills distribué via un plugin :

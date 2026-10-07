@@ -65,7 +65,7 @@ Lire les fichiers dans `SRC` (defini dans CLAUDE.md)
 | Élément | Convention | Exemple |
 |---------|-----------|---------|
 | Agents | `role-action.md` | `backend-tasks-executor.md` |
-| Skills | `domaine/nom/SKILL.md` | `symfony/api-conventions/SKILL.md` |
+| Skills | `prefixe-nom/SKILL.md` | `sym-api-conventions/SKILL.md` |
 | Rules | `domaine-contexte.md` | `legacy-readonly.md` |
 | Commands | `categorie/action.md` | `dev/commit.md` |
 | Références | `action-objet.md` | `create-entity.md` |
@@ -79,7 +79,7 @@ Lire les fichiers dans `SRC` (defini dans CLAUDE.md)
 |------------|--------|---------------|
 | Analyse approfondie | Opus | Raisonnement multi-étapes, contexte large |
 | Implémentation | Sonnet | Équilibre qualité/vitesse |
-| Documentation | Haiku | Tâche structurée, rapide |
+| Audit d'inventaire | Haiku | Enrichissement ciblé (`legacy-functional-analyzer-auditor`) |
 | Health-check | Haiku | Diagnostics simples |
 
 **Règle** : commencer par Haiku, monter en puissance seulement si la qualité ne suffit pas.
@@ -108,9 +108,9 @@ Ne jamais écraser un rapport existant :
 
 ```
 output/reports/
-├── Feature_REPORT-V1.md    # Premier rapport
-├── Feature_REPORT-V2.md    # Apres corrections
-└── Feature_REPORT-V3.md    # Version finale ← toujours utiliser celle-ci
+├── [FEATURE]_CONFORMITY_REPORT.md       # Premier rapport (V1, sans suffixe)
+├── [FEATURE]_CONFORMITY_REPORT-V2.md    # Apres corrections
+└── [FEATURE]_CONFORMITY_REPORT-V3.md    # Version finale ← toujours utiliser celle-ci
 ```
 
 ## Skills : passive vs launcher
@@ -145,7 +145,7 @@ paths:
 
 # Backend Symfony
 
-Charger la skill `symfony/api-conventions` pour les conventions.
+Charger la skill `sym-api-conventions` pour les conventions.
 
 Rappels :
 - Docker : `docker compose exec -T app [cmd]`

@@ -16,17 +16,23 @@ The Claude Code ecosystem orchestrates the entire process, from initial analysis
 Phase 1: Analysis
 ├── Technical analysis (reverse engineering)
 ├── Functional inventory (features, roles, flows)
-└── Audit (enrichment, missing features)
+├── Audit (enrichment, missing features)
+├── Batch detailed specs (optional)
+├── Visualizations
+└── Wiki sync (if the wiki folder exists)
 
 Phase 1.5: Visualization
 ├── Dependency graph (ECharts force-directed)
 └── Functional tree (ECharts tree)
 
 Phase 2: Migration (per feature)
+├── Prerequisite: target stacks installed
 ├── Detailed specification (12 sections)
 ├── Backend + frontend planning
 ├── TDD implementation (tests before code)
-└── Conformity report (scoring)
+├── Conformity report (scoring)
+├── Quality loop (max 2 iterations, 80/100 threshold)
+└── Wiki sync (if the wiki folder exists)
 
 Phase 3: Documentation
 └── Adaptive VitePress site
@@ -37,10 +43,10 @@ Phase 3: Documentation
 | Component | Count |
 |-----------|-------|
 | Agents | 11 (2 Opus + 7 Sonnet + 2 Haiku) |
-| Skills | 11 (4 launchers + 7 passive) |
+| Skills | 12 (4 launchers + 6 passive + 2 internal Claude Code) |
 | Rules | 7 (1 global + 6 targeted) |
-| Commands | 6 (commit, install-stack, test, lint, symfony-review, frontend-review) |
-| References | 34 technical documentation files |
+| Commands | 8 (commit, install-stack, php-test, php-lint, front-test, front-lint, symfony-review, frontend-review) |
+| References | 41 technical documentation files |
 | Features migrated | 14+ (auth, ads, search, categories...) |
 
 ## Invocation
@@ -49,18 +55,18 @@ The entire workflow is triggered by 4 slash commands:
 
 ```bash
 # 1. Analyze the legacy
-/modernization/analyze-legacy
+/mod-analyze-legacy
 
 # 1.5. Generate visualizations
-/modernization/generate-visualization
+/mod-generate-visualization
 
 # 2. Migrate each feature
-/modernization/migrate-feature Search_Engine
-/modernization/migrate-feature User_Authentication
+/mod-migrate-feature Search_Engine
+/mod-migrate-feature User_Authentication
 # ...
 
 # 3. Generate documentation
-/modernization/generate-docs all
+/mod-generate-docs all
 ```
 
 ## Detail Pages

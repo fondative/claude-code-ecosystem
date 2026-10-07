@@ -245,8 +245,8 @@ Claude analyzes the project (structure, stack, commands) and generates an approp
 | Project paths | **CLAUDE.md** | Single source of truth |
 | Available commands | **CLAUDE.md** | Workflow overview |
 | Tech stack (1 line) | **CLAUDE.md** | Global context |
-| Detailed conventions | **Passive skill** | Too long for CLAUDE.md |
-| Short contextual reminder | **Rule** | Injected based on files |
+| Detailed conventions | **[Passive skill](/en/concepts/skills)** | Too long for CLAUDE.md |
+| Short contextual reminder | **[Rule](/en/concepts/rules)** | Injected based on files |
 | Personal preferences | **~/.claude/CLAUDE.md** | Not in the repo |
 | Session notes | **MEMORY.md** | Evolves automatically |
 | Security (deny/allow) | **[settings.json](/en/concepts/settings)** | Real enforcement (not just context) |
@@ -272,7 +272,7 @@ Everything in a single file — impossible to scan, Claude can no longer disting
 Symfony 7.4, PostgreSQL, Docker
 
 ## Conventions
-See skill `symfony/api-conventions` for details.
+See skill `sym-api-conventions` for details.
 
 ## Architecture
 @import ./docs/architecture.md
@@ -318,7 +318,7 @@ Duplicated in CLAUDE.md **and** in the skill — which one is authoritative?
 ::: info Solution
 ```markdown
 ## Conventions
-See skill `symfony/api-conventions`.
+See skill `sym-api-conventions`.
 ```
 A single source of truth. CLAUDE.md **points** to the skill, without duplicating.
 :::
@@ -359,7 +359,7 @@ Claude will try its best, but nothing **technically** prevents it from modifying
 ::: info Solution
 Use `deny` in **[settings.json](/en/concepts/settings)** for actual blocking:
 ```json
-{ "deny": ["Edit(php-legacy/**)", "Write(php-legacy/**)"] }
+{ "deny": ["Edit(/php-legacy/**)", "Write(/php-legacy/**)"] }
 ```
 CLAUDE.md provides the **why**, settings.json enforces the **block**.
 :::
@@ -415,35 +415,68 @@ Managed instructions **cannot** be ignored via `claudeMdExcludes`. This is by de
 
 ### Example 1: Modernization project
 
-```markdown
-# Legacy Modernization Project
+Excerpt from this project's actual `CLAUDE.md` (intermediate sections omitted):
 
-## Project Configuration
+````markdown
+# Projet de Modernisation Legacy
 
-> **SINGLE SOURCE OF TRUTH**: All subagents and skills
-> MUST read their paths from this section.
+## Configuration du Projet
 
-### Paths (PATHS)
+> **Stack** : PHP 8.2 + Symfony 7.4 + PostgreSQL + Docker (backend) | React 19 + TypeScript + Vite + Tailwind CSS 4 (frontend)
 
-| Alias | Path | Description |
-|-------|------|-------------|
-| `SOURCE_PROJECT` | `./php-legacy` | Legacy (READ-ONLY) |
-| `BACKEND_TARGET` | `./api-rest-symfony-target/` | Target backend |
-| `FRONTEND_TARGET` | `./app-react-target/` | Target frontend |
-| `OPENAPI_SPEC` | `./api-rest-symfony-target/docs/openapi.yaml` | OpenAPI spec |
-| `FEATURE_SPECS_DIR` | `./output/features/` | Specifications |
-| `REPORTS_DIR` | `./output/reports/` | Conformity reports |
+> **SOURCE UNIQUE DE VERITE** : Tous les subagents et skills DOIVENT lire leurs chemins depuis cette section.
+> En cas de changement de repertoire, modifier UNIQUEMENT ici. Ne JAMAIS hardcoder de chemins dans les subagents.
 
-### Commands
-- `/dev/commit` : Conventional Commits
-- `/dev/php-test` : Backend tests
-- `/modernization/migrate-feature <name>` : E2E migration
+### Chemins (PATHS)
 
-### Workflow
-1. `/modernization/analyze-legacy`
-2. `/modernization/migrate-feature <name>` (per feature)
-3. `/modernization/generate-docs`
+| Alias | Chemin | Description |
+|-------|--------|-------------|
+| `SOURCE_PROJECT` | `./php-legacy` | Projet legacy (LECTURE SEULE) |
+| `SOURCE_TECHNICAL_DIR` | `./output/technique/` | Documentation technique generee |
+| `FEATURE_SPECS_DIR` | `./output/features/` | Specifications fonctionnelles |
+| `BACKEND_TARGET` | `./api-rest-symfony-target/` | Projet backend cible |
+| `FRONTEND_TARGET` | `./app-react-target/` | Projet frontend cible |
+| `OPENAPI_SPEC` | `./api-rest-symfony-target/docs/openapi.yaml` | Specification OpenAPI |
+| `BACKEND_ANALYSIS_DIR` | `./output/analysis/backend/` | Analyses backend |
+| `FRONTEND_ANALYSIS_DIR` | `./output/analysis/frontend/` | Analyses frontend |
+| `FRONTEND_DOCS_DIR` | `./output/analysis/frontend/` | Documentation frontend generee |
+| `REPORTS_DIR` | `./output/reports/` | Rapports de conformite |
+| `DESIGN_DIR` | `./output/design/` | Fichiers design Figma |
+
+> **Note** : Le fichier `.claude/settings.json` utilise des chemins reels (pas des alias) car le systeme de permissions Claude Code requiert des glob patterns. En cas de changement de repertoire, mettre a jour **ici** ET dans `settings.json`.
+
+### Commandes
+
+- Toutes les commandes backend via Docker Compose : `docker compose exec -T app [commande] 2>&1 | cat`
+- Ne jamais executer de commandes PHP ou Composer directement sur l'hote
+
+## Workflow de Modernisation
+
+### Skills lanceurs (slash commands)
+
+- `/mod-analyze-legacy` : Pipeline d'analyse (technique + inventaire + audit)
+- `/mod-generate-visualization` : Visualisations interactives (arbre + graphe de dependances)
+- `/mod-migrate-feature <nom>` : Migration E2E d'une feature (specs → planif → implementation → conformite)
+- `/mod-generate-docs` : Generation documentation VitePress
+
+...
+
+### Ordre du workflow
+
 ```
+1. /mod-analyze-legacy
+   └── Analyse technique → Inventaire → Audit
+
+1.5. /mod-generate-visualization
+     └── Arbre fonctionnel + Graphe de dependances
+
+2. /mod-migrate-feature <nom>  (pour chaque feature)
+   └── Specs → Planif Backend → Planif Frontend → Implem Backend → Implem Frontend → Conformite
+
+3. /mod-generate-docs
+   └── Documentation VitePress complete
+```
+````
 
 ### Example 2: Project with @import
 

@@ -6,7 +6,8 @@
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "docs:sync-example": "SITE_BASE=/claude-code-ecosystem/ ./scripts/sync-example-wiki.sh ../legacy-poc/classified-ads-wiki"
   },
   "devDependencies": {
     "mermaid": "^11.13.0",

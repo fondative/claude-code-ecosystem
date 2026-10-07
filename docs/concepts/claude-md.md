@@ -272,7 +272,7 @@ Tout dans un seul fichier — impossible à scanner, Claude ne distingue plus l'
 Symfony 7.4, PostgreSQL, Docker
 
 ## Conventions
-Voir skill `symfony/api-conventions` pour le détail.
+Voir skill `sym-api-conventions` pour le détail.
 
 ## Architecture
 @import ./docs/architecture.md
@@ -318,7 +318,7 @@ Dupliqué dans CLAUDE.md **et** dans la skill — lequel fait foi ?
 ::: info Solution
 ```markdown
 ## Conventions
-Voir skill `symfony/api-conventions`.
+Voir skill `sym-api-conventions`.
 ```
 Une seule source de vérité. CLAUDE.md **pointe** vers la skill, sans dupliquer.
 :::
@@ -359,7 +359,7 @@ Claude fera de son mieux, mais rien ne l'empêche **techniquement** de modifier 
 ::: info Solution
 Utiliser `deny` dans **[settings.json](/concepts/settings)** pour un blocage réel :
 ```json
-{ "deny": ["Edit(php-legacy/**)", "Write(php-legacy/**)"] }
+{ "deny": ["Edit(/php-legacy/**)", "Write(/php-legacy/**)"] }
 ```
 CLAUDE.md fournit le **pourquoi**, settings.json applique le **blocage**.
 :::
@@ -415,35 +415,68 @@ Les instructions managed ne peuvent **pas** être ignorées via `claudeMdExclude
 
 ### Exemple 1 : Projet de modernisation
 
-```markdown
+Extrait du `CLAUDE.md` réel de ce projet (sections intermédiaires omises) :
+
+````markdown
 # Projet de Modernisation Legacy
 
 ## Configuration du Projet
 
-> **SOURCE UNIQUE DE VERITE** : Tous les subagents et skills
-> DOIVENT lire leurs chemins depuis cette section.
+> **Stack** : PHP 8.2 + Symfony 7.4 + PostgreSQL + Docker (backend) | React 19 + TypeScript + Vite + Tailwind CSS 4 (frontend)
+
+> **SOURCE UNIQUE DE VERITE** : Tous les subagents et skills DOIVENT lire leurs chemins depuis cette section.
+> En cas de changement de repertoire, modifier UNIQUEMENT ici. Ne JAMAIS hardcoder de chemins dans les subagents.
 
 ### Chemins (PATHS)
 
 | Alias | Chemin | Description |
 |-------|--------|-------------|
-| `SOURCE_PROJECT` | `./php-legacy` | Legacy (LECTURE SEULE) |
-| `BACKEND_TARGET` | `./api-rest-symfony-target/` | Backend cible |
-| `FRONTEND_TARGET` | `./app-react-target/` | Frontend cible |
-| `OPENAPI_SPEC` | `./api-rest-symfony-target/docs/openapi.yaml` | Spec OpenAPI |
-| `FEATURE_SPECS_DIR` | `./output/features/` | Specifications |
-| `REPORTS_DIR` | `./output/reports/` | Rapports conformite |
+| `SOURCE_PROJECT` | `./php-legacy` | Projet legacy (LECTURE SEULE) |
+| `SOURCE_TECHNICAL_DIR` | `./output/technique/` | Documentation technique generee |
+| `FEATURE_SPECS_DIR` | `./output/features/` | Specifications fonctionnelles |
+| `BACKEND_TARGET` | `./api-rest-symfony-target/` | Projet backend cible |
+| `FRONTEND_TARGET` | `./app-react-target/` | Projet frontend cible |
+| `OPENAPI_SPEC` | `./api-rest-symfony-target/docs/openapi.yaml` | Specification OpenAPI |
+| `BACKEND_ANALYSIS_DIR` | `./output/analysis/backend/` | Analyses backend |
+| `FRONTEND_ANALYSIS_DIR` | `./output/analysis/frontend/` | Analyses frontend |
+| `FRONTEND_DOCS_DIR` | `./output/analysis/frontend/` | Documentation frontend generee |
+| `REPORTS_DIR` | `./output/reports/` | Rapports de conformite |
+| `DESIGN_DIR` | `./output/design/` | Fichiers design Figma |
+
+> **Note** : Le fichier `.claude/settings.json` utilise des chemins reels (pas des alias) car le systeme de permissions Claude Code requiert des glob patterns. En cas de changement de repertoire, mettre a jour **ici** ET dans `settings.json`.
 
 ### Commandes
-- `/dev/commit` : Conventional Commits
-- `/dev/php-test` : Tests backend
-- `/modernization/migrate-feature <nom>` : Migration E2E
 
-### Workflow
-1. `/modernization/analyze-legacy`
-2. `/modernization/migrate-feature <nom>` (par feature)
-3. `/modernization/generate-docs`
+- Toutes les commandes backend via Docker Compose : `docker compose exec -T app [commande] 2>&1 | cat`
+- Ne jamais executer de commandes PHP ou Composer directement sur l'hote
+
+## Workflow de Modernisation
+
+### Skills lanceurs (slash commands)
+
+- `/mod-analyze-legacy` : Pipeline d'analyse (technique + inventaire + audit)
+- `/mod-generate-visualization` : Visualisations interactives (arbre + graphe de dependances)
+- `/mod-migrate-feature <nom>` : Migration E2E d'une feature (specs → planif → implementation → conformite)
+- `/mod-generate-docs` : Generation documentation VitePress
+
+...
+
+### Ordre du workflow
+
 ```
+1. /mod-analyze-legacy
+   └── Analyse technique → Inventaire → Audit
+
+1.5. /mod-generate-visualization
+     └── Arbre fonctionnel + Graphe de dependances
+
+2. /mod-migrate-feature <nom>  (pour chaque feature)
+   └── Specs → Planif Backend → Planif Frontend → Implem Backend → Implem Frontend → Conformite
+
+3. /mod-generate-docs
+   └── Documentation VitePress complete
+```
+````
 
 ### Exemple 2 : Projet avec @import
 

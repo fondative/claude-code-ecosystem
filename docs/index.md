@@ -11,6 +11,14 @@ hero:
     - theme: alt
       text: Cas d'usage réel
       link: /examples/
+    - theme: alt
+      text: Exemple de wiki généré ↗
+      link: /exemple-wiki-legacy/
+      target: _blank
+      rel: noopener
+    - theme: alt
+      text: Plugin recode
+      link: /recode/
     - theme: brand
       text: AI-Driven Modernisation
       link: /guide/methodology

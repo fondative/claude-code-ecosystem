@@ -79,7 +79,7 @@ model: haiku
 
 **Pourquoi Haiku ?** Ces tâches sont structurées, répétitives et ne demandent pas de raisonnement complexe. Haiku est 10x moins cher que Sonnet pour un résultat équivalent.
 
-> **L'agent `documentation-generator` a été supprimé** et remplacé par le skill launcher `/modernization/generate-docs`. La génération de documentation est désormais orchestrée comme un workflow, pas un agent isolé.
+> **L'agent `documentation-generator` a été supprimé** et remplacé par le skill launcher `/mod-generate-docs`. La génération de documentation est désormais orchestrée comme un workflow, pas un agent isolé.
 
 ## Impact sur les coûts
 
@@ -87,18 +87,18 @@ model: haiku
 
 | Étape | Agent | Modèle | Tokens estimés |
 |-------|-------|--------|----------------|
-| Spécification | feature-analyzer | Opus | ~50k input + ~10k output |
-| Planification backend | backend-planner | Sonnet | ~30k input + ~8k output |
-| Planification frontend | frontend-planner | Sonnet | ~25k input + ~6k output |
-| Implémentation backend | backend-executor | Sonnet | ~40k input + ~20k output |
-| Implémentation frontend | frontend-executor | Sonnet | ~35k input + ~15k output |
+| Spécification | legacy-feature-analyzer | Opus | ~50k input + ~10k output |
+| Planification backend | backend-tasks-planner | Sonnet | ~30k input + ~8k output |
+| Planification frontend | frontend-tasks-planner | Sonnet | ~25k input + ~6k output |
+| Implémentation backend | backend-tasks-executor | Sonnet | ~40k input + ~20k output |
+| Implémentation frontend | frontend-tasks-executor | Sonnet | ~35k input + ~15k output |
 | Conformité | conformity-reporter | Sonnet | ~30k input + ~5k output |
 
 ### Optimisation
 
 1. **Opus seulement quand nécessaire** — L'analyse technique se fait une seule fois pour tout le projet
 2. **Skills comme contexte** — Les références évitent à Sonnet de "deviner" les conventions
-3. **Haiku pour le répétitif** — Documentation et audits en série
+3. **Haiku pour le répétitif** — Audits et diagnostics (auditor, health-check)
 
 ## Decision tree
 

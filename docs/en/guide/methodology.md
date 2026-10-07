@@ -1,3 +1,7 @@
+<script setup>
+import { withBase } from 'vitepress'
+</script>
+
 # AI-Driven Modernisation: Legacy Transmutation
 
 > Transmute any legacy project into modern architecture — AI-powered, **architect/senior supervised** at every phase, driven by the Claude Code ecosystem.
@@ -62,7 +66,7 @@ graph LR
 | # | Guardrail | Phase | What it guarantees |
 |---|-----------|-------|--------------------|
 | **GF-1** | **Human validation of the inventory: we implement what we validate** | Phase 1 | The client/PO confirms that 100% of features, roles and business flows are captured. Nothing is implemented without being validated. |
-| **GF-2** | **12-section spec from legacy** | Phase 3 | Each feature is specified from legacy code. User scenarios and acceptance criteria reflect existing behavior. |
+| **GF-2** | **12-section spec from legacy** | Phase 3 | Each feature is specified from legacy code. User scenarios, business rules, edge cases and testing considerations reflect existing behavior. |
 | **GF-3** | **TDD — Test First** | Phase 3 | Each spec scenario becomes a test **before** code. The test fails first (red), then code makes it pass (green). No legacy behavior is forgotten — if it's in the spec, it has a test. |
 | **GF-4** | **Human governance** | All | Architect required at every phase. Client/PO validates functional aspects. Automatic STOP if score < 80 after 2 iterations — human takes over. |
 | **GF-5** | **Functional and technical conformity** | Phase 3 | The conformity-reporter compares produced code against the spec (derived from legacy). Score < 80 = mandatory corrections. Versioned reports (V1, V2, V3). |
@@ -144,7 +148,7 @@ graph TB
 | **Phase 0 — Infrastructure** | Defines target conventions, validates `.claude/` structure, chooses target technologies | — |
 | **Phase 1 — Analysis** | Reviews the technical report, corrects interpretation errors | **Validates the functional inventory**: verifies that all features, roles and business flows are present. Flags omissions or implicit rules the AI cannot deduce from code |
 | **Phase 2 — Visualization** | Decides the **migration order** based on technical dependencies | **Prioritizes features** by business value. Arbitrates with the architect on the final order |
-| **Phase 3 — Migration** | Approves the task plan, supervises the quality loop, intervenes if score < 80 after 2 iterations | **Validates specs** (12 sections): verifies business rules, user scenarios and acceptance criteria before implementation |
+| **Phase 3 — Migration** | Approves the task plan, supervises the quality loop, intervenes if score < 80 after 2 iterations | **Validates specs** (12 sections): verifies business rules, user scenarios and edge cases before implementation |
 | **Phase 4 — Documentation** | Reviews and validates technical documentation | Validates functional documentation |
 
 :::warning Mandatory presence
@@ -190,10 +194,10 @@ Before touching any code, we build the **declarative ecosystem** that will drive
 graph TB
     CM["CLAUDE.md — Source of truth"]
 
-    CM --> AG["12 agents"]
-    CM --> SK["11 skills"]
+    CM --> AG["11 agents"]
+    CM --> SK["12 skills"]
     CM --> RU["7 rules"]
-    CM --> CO["5 commands"]
+    CM --> CO["8 commands"]
     CM --> SE["settings.json"]
 
     classDef source fill:#0d3b3b,stroke:#39ff14,stroke-width:2px,color:#39ff14
@@ -206,7 +210,7 @@ graph TB
 - **CLAUDE.md** centralizes all paths — one place to change
 - **Rules** protect the legacy as read-only (double layer: rule + deny)
 - **Skills** carry conventions — agents inherit them automatically
-- **Settings** authorize Docker and git without confirmation
+- **Settings** allow `docker compose exec`, read-only git (`status`, `diff`, `log`) and `git add` without confirmation; `git commit` and `git push` require confirmation (`ask`)
 :::
 
 <div class="validation-checkpoint">
@@ -221,16 +225,16 @@ One command triggers three agents in sequence:
 
 ```mermaid
 graph LR
-    CMD["/analyze-legacy"]
+    CMD["/mod-analyze-legacy"]
     T["Technical Analysis — Opus"]
     F["Functional Inventory — Sonnet"]
     A["Audit — Haiku"]
     OUT["Legacy understood"]
 
     CMD --> T
-    T -->|rapport_technique.md| F
-    F -->|inventaire.md| A
-    A -->|enriched inventory| OUT
+    T -->|"7 files output/technique/"| F
+    F -->|"0-index.md + 0-features-tree.json"| A
+    A -->|"enriched 0-index.md"| OUT
 
     classDef cmd fill:#0d3b3b,stroke:#39ff14,stroke-width:2px,color:#39ff14
     classDef opus fill:#1a1a2e,stroke:#ddff00,stroke-width:2px,color:#ddff00
@@ -247,18 +251,28 @@ graph LR
 
 | Agent | Model | Role | Why this model |
 |-------|-------|------|----------------|
-| technical-analyzer | **Opus** | Reverse engineering raw code | Undocumented code, implicit architecture |
-| functional-analyzer | **Sonnet** | Inventory of features/roles/flows | Reads the technical report, not raw code |
-| functional-auditor | **Haiku** | Completeness check | Simple comparison, no reasoning needed |
+| legacy-technical-analyzer | **Opus** | Reverse engineering raw code | Undocumented code, implicit architecture |
+| legacy-functional-analyzer | **Sonnet** | Inventory of features/roles/flows | Reads the technical report, not raw code |
+| legacy-functional-analyzer-auditor | **Haiku** | Completeness check | Simple comparison, no reasoning needed |
 
 **Produced artifacts:**
 
 ```
-output/technique/
-├── rapport_technique.md      → Architecture, DB, dependencies
-├── inventaire_fonctionnel.md → Features, roles, business flows
-└── arbre_fonctionnel.md      → Parent-child hierarchy
+output/technique/          (SOURCE_TECHNICAL_DIR — legacy-technical-analyzer)
+├── 00-index.md            → Table of contents
+├── 01-overview.md         → Overview, architecture
+├── 02-data-flow.md        → Flows and logic
+├── 03-database.md         → Database
+├── 04-dependencies.md     → Dependencies
+├── 05-deployment.md       → Deployment
+└── 06-audit.md            → Quality audit and recommendations
+
+output/features/           (FEATURE_SPECS_DIR — legacy-functional-analyzer)
+├── 0-index.md             → Features, roles, business flows (enriched by the audit)
+└── 0-features-tree.json   → Parent-child functional tree
 ```
+
+Steps 1 → 2 → 3 run sequentially. The skill then continues with: optional batch specification of features (`legacy-feature-analyzer`, step 4), visualization generation via `/mod-generate-visualization` (step 5) and wiki sync (step 6).
 
 <div class="validation-checkpoint with-client">
 <strong>Architect + client validation</strong> — the architect reviews the technical report and corrects interpretation errors. The client / PO validates the functional inventory — this is the key moment to catch missing features, forgotten roles, or implicit business rules the AI couldn't deduce from code. These adjustments are <strong>far less costly here</strong> than after implementation.
@@ -268,12 +282,12 @@ output/technique/
 
 ## Phase 2: Visualize to Decide
 
-The inventory is transformed into **interactive visualizations** (standalone HTML with ECharts):
+The inventory is transformed into **interactive visualizations** (standalone HTML with ECharts). The skill runs automatically as step 5 of `/mod-analyze-legacy` and can be rerun on its own (for example after refining a spec):
 
 ```mermaid
 graph LR
-    INV["inventaire.md"]
-    VIZ["/generate-visualization"]
+    INV["0-index.md + 0-features-tree.json"]
+    VIZ["/mod-generate-visualization"]
     T["Functional tree"]
     G["Dependency graph"]
     D["Architect + Client decide the order"]
@@ -306,34 +320,45 @@ graph LR
 This is the pipeline's core. For each feature:
 
 ```bash
-/modernization/migrate-feature Search_Engine
+/mod-migrate-feature Search_Engine
 ```
 
-### The 5 Steps at a Glance
+### At a Glance: 5 Core Steps, Framed by Steps 0 and 6
 
 ```mermaid
 graph LR
+    Z{"Step 0 — Target stacks present?"}
+    INST["/dev/install-stack"]
     S["Step 1 — Specify — Opus"]
     P["Step 2 — Plan — Sonnet"]
     I["Step 3 — Implement — Sonnet"]
     C["Step 4 — Evaluate — Sonnet"]
     Q{"Step 5 — Score >= 80?"}
     OK["Feature migrated"]
+    W["Step 6 — Wiki sync (/mod-generate-docs)"]
 
+    Z -->|Yes| S
+    Z -->|No| INST
     S --> P --> I --> C --> Q
     Q -->|Yes| OK
     Q -->|No| I
+    OK --> W
 
     classDef opus fill:#1a1a2e,stroke:#ddff00,stroke-width:2px,color:#ddff00
     classDef sonnet fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#93c5fd
     classDef check fill:#0f172a,stroke:#39ff14,stroke-width:2px,color:#39ff14
     classDef done fill:#0d3b3b,stroke:#39ff14,stroke-width:3px,color:#39ff14
 
+    classDef cmd fill:#0d3b3b,stroke:#39ff14,stroke-width:2px,color:#39ff14
+
     class S opus
     class P,I,C sonnet
-    class Q check
+    class Z,Q check
     class OK done
+    class INST,W cmd
 ```
+
+**Step 0** checks that `BACKEND_TARGET` and `FRONTEND_TARGET` exist: if not, the pipeline stops and suggests `/dev/install-stack backend` and/or `/dev/install-stack frontend`. **Step 6** syncs the VitePress wiki via `/mod-generate-docs` (skipped if no `*-wiki/` folder exists).
 
 ---
 
@@ -345,7 +370,7 @@ The Opus agent produces a **12-section spec** from legacy code and the functiona
 graph LR
     IN1["Legacy code"]
     IN2["Functional inventory"]
-    FA["feature-analyzer — Opus"]
+    FA["legacy-feature-analyzer — Opus"]
     SPEC["Feature_spec.md — 12 sections"]
 
     IN1 --> FA
@@ -361,28 +386,30 @@ graph LR
     class SPEC output
 ```
 
-The 12 sections cover **every angle** of a feature:
+The 12 sections (headings from the `legacy-feature-analyzer` template) cover **every angle** of a feature, followed by migration notes and an appendix:
 
 ```
-┌─────────────────────────┬─────────────────────────┐
-│ 1. Functional overview  │  7. Error handling      │
-│ 2. Legacy reference     │  8. Security            │
-│ 3. User scenarios       │  9. Dependencies        │
-│ 4. Interface (UI)       │ 10. Data & persistence  │
-│ 5. Business rules       │ 11. Performance         │
-│ 6. Validation           │ 12. Acceptance criteria │
-└─────────────────────────┴─────────────────────────┘
+┌──────────────────────────────────────┬──────────────────────────────────────┐
+│ 1. Overview                          │  7. State management                 │
+│ 2. Source implementation reference   │  8. Access control & authorization   │
+│ 3. User scenarios                    │  9. Error handling                   │
+│ 4. Interaction points (UI / API)     │ 10. Edge cases & special scenarios   │
+│ 5. Business rules                    │ 11. Integration points               │
+│ 6. Data validation rules             │ 12. Testing considerations           │
+├──────────────────────────────────────┴──────────────────────────────────────┤
+│ + Migration notes · Appendix (glossary, sub-features)                       │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 <div class="validation-checkpoint with-client">
-<strong>Architect + client validation</strong> — the architect verifies technical coherence (dependencies, data, performance). The client validates <strong>business rules, user scenarios and acceptance criteria</strong> — last opportunity to correct before planning begins. If needed, the <code>refiner</code> agent (Sonnet) refines the spec — the corrected file is suffixed <code>-corrected</code>.
+<strong>Architect + client validation</strong> — the architect verifies technical coherence (source reference, integration points, access control). The client validates <strong>business rules, user scenarios and edge cases</strong> — last opportunity to correct before planning begins (acceptance criteria are defined later, per task, in step 2). If needed, the <code>legacy-feature-analyzer-refiner</code> agent (Sonnet), run outside <code>/mod-migrate-feature</code>, enriches <code>[FEATURE]_spec.md</code> in place, without changing its nature, and updates <code>0-features-tree.json</code>.
 </div>
 
 ---
 
 ### Step 2 — Plan (Sonnet)
 
-Two planners decompose the spec into **numbered tasks with dependencies**:
+Two planners decompose the spec into **numbered tasks with dependencies**. The backend planner runs first and produces the OpenAPI spec; the frontend planner then builds on that contract:
 
 ```mermaid
 graph TB
@@ -395,6 +422,7 @@ graph TB
     SPEC --> BP
     SPEC --> FP
     BP --> BA
+    BP -->|openapi.yaml| FP
     FP --> FA
 
     subgraph TASKS["Example tasks"]
@@ -460,8 +488,8 @@ graph LR
 graph TB
     BA["backend_analysis.md"]
     FA["frontend_analysis.md"]
-    BE["backend-executor — Sonnet"]
-    FE["frontend-executor — Sonnet"]
+    BE["backend-tasks-executor — Sonnet"]
+    FE["frontend-tasks-executor — Sonnet"]
     SYM["Target backend — Code + Tests"]
     FRONT["Target frontend — Code + Tests"]
 
@@ -492,7 +520,7 @@ graph LR
     SPEC["Feature_spec.md"]
     CODE["Implemented code"]
     CR["conformity-reporter — Sonnet"]
-    REPORT["REPORT-V1.md — Score: XX/100"]
+    REPORT["[FEATURE]_CONFORMITY_REPORT.md (V1) — Score: XX/100"]
 
     SPEC --> CR
     CODE --> CR
@@ -507,16 +535,18 @@ graph LR
     class REPORT output
 ```
 
-Deduction system from an initial score of 100:
+Deduction system from an initial score of 100, applied to each report section (`max(0, 100 - deductions)`):
 
-| Severity | Deduction | Concrete example |
-|----------|-----------|-----------------|
-| Critical | **-15 pts** | Missing API endpoint |
-| High | **-10 pts** | Pagination not implemented |
-| Medium | **-5 pts** | Relevance sorting absent |
-| Low | **-2 pts** | Non-conforming naming |
+| Severity | Deduction | Cap per section | Concrete example |
+|----------|-----------|-----------------|-----------------|
+| Critical | **-15 pts** | None | Missing API endpoint |
+| High | **-10 pts** | None | Pagination not implemented |
+| Medium | **-5 pts** | 25 pts | Relevance sorting absent |
+| Low | **-2 pts** | 10 pts | Non-conforming naming |
 
-Reports are **never overwritten** — each evaluation produces a new version (V1, V2, V3).
+The overall score is weighted: project guidelines conformity (30%), codebase consistency (25%), feature specifications conformity (25%), analysis document alignment (20%).
+
+Reports are **never overwritten** — V1 is `[FEATURE]_CONFORMITY_REPORT.md`, later evaluations produce `[FEATURE]_CONFORMITY_REPORT-V2.md`, `-V3.md`…
 
 ---
 
@@ -531,7 +561,7 @@ graph TB
     OK["Feature complete"]
     FIX["Extract non-conformities CRITICAL + HIGH"]
     EXEC["Rerun executor with corrections"]
-    R2["Report V2"]
+    R2["Report V2 (-V2.md)"]
     CHECK2{"Score V2 >= 80?"}
     STOP["STOP — Architect intervenes"]
 
@@ -580,7 +610,7 @@ graph TB
         P3["Phase 3 — Specs + Reports"]
     end
 
-    D["documentation-generator — Haiku"]
+    D["Skill /mod-generate-docs"]
     V["VitePress Site — always up to date"]
 
     P0 -.-> D
@@ -598,11 +628,15 @@ graph TB
     class V output
 ```
 
-:::tip Incremental documentation
-The `/modernization/generate-docs` command can be run at **any point** in the pipeline. Each execution incorporates the latest produced artifacts (reports, specs, conformity reports). The team thus has a living documentation that reflects the actual state of the migration.
+:::tip Real example
+The wiki generated by `/mod-generate-docs` for the *Classified Ads* legacy project (analyses, specifications, interactive mapping, modernisation tracking — in French) is available here: <a :href="withBase('/exemple-wiki-legacy/')" target="_blank" rel="noopener">generated wiki example ↗</a>.
 :::
 
-Haiku is sufficient because it's **structured Markdown** with a clear template — no complex reasoning needed.
+:::tip Incremental documentation
+The `/mod-generate-docs` command can be run at **any point** in the pipeline. Each execution incorporates the latest produced artifacts (reports, specs, conformity reports). The team thus has a living documentation that reflects the actual state of the migration.
+:::
+
+Generation is orchestrated by the `/mod-generate-docs` launcher skill (no dedicated agent anymore): it relies on versioned templates in `mod-generate-docs/references/`.
 
 <div class="validation-checkpoint">
 <strong>Architect validation</strong> — the architect reviews generated documentation and validates before publication.
@@ -612,56 +646,66 @@ Haiku is sufficient because it's **structured Markdown** with a clear template �
 
 ## How Agents Communicate
 
-Agents are **isolated** — no shared memory. Their only communication channel: **intermediate files**.
+Agents are **isolated** — no shared memory. Their main channel: **intermediate files**. One writes, the next reads. The orchestrating skill can also pass instructions in an agent's prompt (for example the list of corrections from the quality loop).
 
 ```mermaid
 graph TB
-    subgraph P1["Phase 1"]
+    subgraph P1["Phase 1 — Understand the legacy"]
         LEGACY["Legacy project"]
-        TECH["rapport_technique.md"]
-        INV["inventaire.md"]
+        TECH["Technical analysis (7 files)"]
+        INV["0-index.md<br/>0-features-tree.json"]
         LEGACY --> TECH --> INV
+    end
+
+    subgraph P2["Phase 2 — Visualize"]
+        VIZ["HTML tree + graph"]
     end
 
     subgraph P3["Phase 3 — per feature"]
         SPEC["Feature_spec.md"]
         BACK["backend_analysis.md"]
+        OAS["openapi.yaml"]
         FRONT["frontend_analysis.md"]
         CODE_B["Backend code"]
         CODE_F["Frontend code"]
-        REPORT["Feature_REPORT.md"]
+        REPORT["CONFORMITY_REPORT.md"]
 
-        INV --> SPEC
-        LEGACY --> SPEC
-        SPEC --> BACK
-        SPEC --> FRONT
+        SPEC --> BACK --> OAS --> FRONT
         BACK --> CODE_B
         FRONT --> CODE_F
         CODE_B --> REPORT
         CODE_F --> REPORT
+        REPORT -. "corrections if score < 80" .-> CODE_B
     end
 
     subgraph P4["Phase 4"]
         DOCS["VitePress"]
-        SPEC --> DOCS
-        REPORT --> DOCS
     end
+
+    INV --> VIZ
+    INV --> SPEC
+    VIZ --> DOCS
+    REPORT --> DOCS
 
     classDef file fill:#0f172a,stroke:#39ff14,stroke-width:2px,color:#39ff14
     classDef code fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#93c5fd
     classDef report fill:#1a1a2e,stroke:#ddff00,stroke-width:2px,color:#ddff00
     classDef output fill:#0d3b3b,stroke:#39ff14,stroke-width:3px,color:#39ff14
 
-    class LEGACY,TECH,INV,SPEC,BACK,FRONT file
+    class LEGACY,TECH,INV,VIZ,SPEC,BACK,OAS,FRONT file
     class CODE_B,CODE_F code
     class REPORT report
     class DOCS output
 ```
 
-**Key benefit**: each step can be **replayed independently**. If implementation fails, restart at step 3 without redoing analysis or planning:
+Two files play a special role:
+- **`openapi.yaml`** is the contract between backend and frontend: backend planning produces it, frontend planning builds on it.
+- **The conformity report** is the only feedback loop in the flow: if the score is below 80/100, its critical and high deductions go back to the relevant executor, then a V2 report is produced.
+
+**Key benefit**: each step checks its files before moving on. If implementation fails, just rerun the same command: the pipeline resumes at the failed step, without redoing specification or planning.
 
 ```bash
-/modernization/migrate-feature Search_Engine stage=3
+/mod-migrate-feature Search_Engine
 ```
 
 ---
@@ -680,9 +724,9 @@ The principle: **use the cheapest model that produces the required quality**.
       <span class="model-label">Sonnet</span>
       <span class="model-count">7</span>
     </div>
-    <div class="model-segment haiku" style="flex: 3;">
+    <div class="model-segment haiku" style="flex: 2;">
       <span class="model-label">Haiku</span>
-      <span class="model-count">3</span>
+      <span class="model-count">2</span>
     </div>
   </div>
   <div class="model-legend">
@@ -696,7 +740,7 @@ The principle: **use the cheapest model that produces the required quality**.
 |-------|------|--------|
 | **Opus** | Raw undocumented code, complex reasoning | technical-analyzer, feature-analyzer |
 | **Sonnet** | Spec as input, defined patterns, TDD | planners, executors, conformity-reporter, refiner, functional-analyzer |
-| **Haiku** | Clear templates, simple checks | auditor, documentation-generator, health-check |
+| **Haiku** | Clear templates, simple checks | functional-analyzer-auditor, health-check |
 
 ---
 

@@ -157,7 +157,7 @@ Claude veut utiliser un outil
 ## Pipeline multi-agents (projet réel)
 
 ```
-/modernization/analyze-legacy
+/mod-analyze-legacy
 │
 ├── Stage 1: Analyse technique ────────────── Opus
 │   └── 7 fichiers → output/technique/
@@ -169,24 +169,42 @@ Claude veut utiliser un outil
 │       ├── 05-deployment.md
 │       └── 06-audit.md
 │
-├── Stage 2: Inventaire fonctionnel ───────── Opus
+├── Stage 2: Inventaire fonctionnel ───────── Sonnet
 │   └── output/features/
 │       ├── 0-index.md (features)
 │       └── 0-features-tree.json
 │
-└── Stage 3: Audit ────────────────────────── Haiku
-    └── Enrichissement de l'inventaire
+├── Stage 3: Audit ────────────────────────── Haiku
+│   └── Enrichissement de l'inventaire
+│   (Stages 1 → 2 → 3 : séquentiels, checkpoint entre chaque)
+│
+├── Stage 4: Specs en batch (optionnel) ───── Opus (parallèle)
+│   └── N × legacy-feature-analyzer (MODE BATCH)
+│       └── *_spec.md, puis l'orchestrateur met à jour 0-index.md
+│
+├── Stage 5: Visualisations ───────────────── /mod-generate-visualization
+│   ├── features-tree-visualization.html
+│   └── dependency-graph.html
+│
+└── Stage 6: Sync wiki (si le wiki existe)
+    └── analyses, specs et visualisations → wiki VitePress
 
 
-/modernization/migrate-feature Search_Engine
+/mod-migrate-feature Search_Engine
+│
+├── Stage 0: Pré-requis
+│   └── Stacks backend + frontend installés ? (sinon /dev/install-stack)
 │
 ├── Stage 1: Spécification ────────────────── Opus
 │   └── Search_Engine_spec.md (12 sections)
 │   ✓ Checkpoint: fichier existe ?
 │
-├── Stage 2: Planification ────────────────── Sonnet (parallèle)
-│   ├── backend_analysis.md
-│   └── frontend_analysis.md
+├── Stage 2: Planification ────────────────── Sonnet (séquentiel)
+│   ├── backend-tasks-planner
+│   │   ├── backend_analysis.md
+│   │   └── openapi.yaml
+│   └── frontend-tasks-planner (lit openapi.yaml)
+│       └── frontend_analysis.md
 │   ✓ Checkpoint: les deux fichiers existent ?
 │
 ├── Stage 3: Implémentation TDD ───────────── Sonnet (séquentiel)
@@ -196,8 +214,15 @@ Claude veut utiliser un outil
 │       └── Tests → Code → Verify
 │   ✓ Checkpoint: tous les tests passent ?
 │
-└── Stage 4: Conformité ───────────────────── Sonnet
-    └── CONFORMITY_REPORT-V1.md (scoring /100)
+├── Stage 4: Conformité ───────────────────── Sonnet
+│   └── Search_Engine_CONFORMITY_REPORT.md (scoring /100)
+│
+├── Stage 5: Boucle qualité (max 2 itérations)
+│   └── score < 80/100 → corrections executor → rapport -V2.md
+│       (V2 < 80/100 → STOP, intervention humaine)
+│
+└── Stage 6: Sync wiki (si le wiki existe)
+    └── /mod-generate-docs Search_Engine
 ```
 
 ## Couches de sécurité

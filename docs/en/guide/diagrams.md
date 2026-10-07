@@ -157,7 +157,7 @@ Claude wants to use a tool
 ## Multi-Agent Pipeline (real project)
 
 ```
-/modernization/analyze-legacy
+/mod-analyze-legacy
 │
 ├── Stage 1: Technical analysis ────────────── Opus
 │   └── 7 files → output/technique/
@@ -169,24 +169,42 @@ Claude wants to use a tool
 │       ├── 05-deployment.md
 │       └── 06-audit.md
 │
-├── Stage 2: Functional inventory ───────── Opus
+├── Stage 2: Functional inventory ───────── Sonnet
 │   └── output/features/
 │       ├── 0-index.md (features)
 │       └── 0-features-tree.json
 │
-└── Stage 3: Audit ────────────────────────── Haiku
-    └── Inventory enrichment
+├── Stage 3: Audit ────────────────────────── Haiku
+│   └── Inventory enrichment
+│   (Stages 1 → 2 → 3: sequential, checkpoint between each)
+│
+├── Stage 4: Batch specs (optional) ───────── Opus (parallel)
+│   └── N × legacy-feature-analyzer (BATCH MODE)
+│       └── *_spec.md, then the orchestrator updates 0-index.md
+│
+├── Stage 5: Visualizations ───────────────── /mod-generate-visualization
+│   ├── features-tree-visualization.html
+│   └── dependency-graph.html
+│
+└── Stage 6: Wiki sync (if the wiki exists)
+    └── analyses, specs and visualizations → VitePress wiki
 
 
-/modernization/migrate-feature Search_Engine
+/mod-migrate-feature Search_Engine
+│
+├── Stage 0: Prerequisites
+│   └── Backend + frontend stacks installed? (otherwise /dev/install-stack)
 │
 ├── Stage 1: Specification ────────────────── Opus
 │   └── Search_Engine_spec.md (12 sections)
 │   ✓ Checkpoint: file exists?
 │
-├── Stage 2: Planning ────────────────── Sonnet (parallel)
-│   ├── backend_analysis.md
-│   └── frontend_analysis.md
+├── Stage 2: Planning ─────────────────────── Sonnet (sequential)
+│   ├── backend-tasks-planner
+│   │   ├── backend_analysis.md
+│   │   └── openapi.yaml
+│   └── frontend-tasks-planner (reads openapi.yaml)
+│       └── frontend_analysis.md
 │   ✓ Checkpoint: both files exist?
 │
 ├── Stage 3: TDD Implementation ───────────── Sonnet (sequential)
@@ -196,8 +214,15 @@ Claude wants to use a tool
 │       └── Tests → Code → Verify
 │   ✓ Checkpoint: all tests pass?
 │
-└── Stage 4: Conformity ───────────────────── Sonnet
-    └── CONFORMITY_REPORT-V1.md (score /100)
+├── Stage 4: Conformity ───────────────────── Sonnet
+│   └── Search_Engine_CONFORMITY_REPORT.md (score /100)
+│
+├── Stage 5: Quality loop (max 2 iterations)
+│   └── score < 80/100 → executor fixes → -V2.md report
+│       (V2 < 80/100 → STOP, human intervention)
+│
+└── Stage 6: Wiki sync (if the wiki exists)
+    └── /mod-generate-docs Search_Engine
 ```
 
 ## Security Layers

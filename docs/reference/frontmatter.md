@@ -11,8 +11,8 @@ description: Implementation backend Test First
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 ```
 
@@ -25,7 +25,6 @@ skills:
 | `tools` | Non | string (CSV) | Outils autorisés : `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash`, `Agent(type)`. Défaut : tous |
 | `model` | Non | string | Modèle : `opus`, `sonnet`, `haiku`. Défaut : hérite du parent |
 | `skills` | Non | list | Skills héritées (noms de dossiers dans `.claude/skills/`) |
-| `allowed-tools` | Non | string (CSV) | Outils autorisés sans confirmation (ex: `Bash(docker *)`) |
 | `disallowedTools` | Non | list | Outils interdits pour cet agent |
 | `permissionMode` | Non | string | Mode de permission : `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
 | `maxTurns` | Non | number | Nombre max de tours (échanges outil/réponse) |
@@ -39,8 +38,8 @@ skills:
 
 | Valeur | Modèle | ID complet |
 |--------|--------|-----------|
-| `opus` | Claude Opus 4.6 | `claude-opus-4-6` |
-| `sonnet` | Claude Sonnet 4.6 | `claude-sonnet-4-6` |
+| `opus` | Claude Opus 5.5 | `claude-opus-5-5` |
+| `sonnet` | Claude Sonnet 5.5 | `claude-sonnet-5-5` |
 | `haiku` | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` |
 
 ### Outils disponibles
@@ -62,7 +61,7 @@ Les [skills](/concepts/skills) utilisent un frontmatter YAML en début de `SKILL
 
 ```yaml
 ---
-name: api-conventions
+name: sym-api-conventions
 description: Conventions backend Symfony pour ce projet
 user-invocable: false
 ---
@@ -131,7 +130,6 @@ Les [rules](/concepts/rules) utilisent un frontmatter YAML minimal :
 ---
 paths:
   - "api-rest-symfony-target/**"
-  - "api-rest-symfony-target/tests/**"
 ---
 ```
 

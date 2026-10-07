@@ -75,8 +75,8 @@ description: Backend Test First implementation
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 
 # Backend Tasks Executor
@@ -116,15 +116,15 @@ When an agent declares `skills:`, the **full** content of each SKILL.md is injec
 ```yaml
 # The agent receives ALL the content of these skills
 skills:
-  - symfony/api-conventions      # 14 references available
-  - symfony/testing-conventions  # 3 references available
+  - sym-api-conventions      # 15 references available
+  - sym-testing-conventions  # 3 references available
 ```
 
 ### How an Agent is Spawned
 
 | Method | Trigger | Example |
 |--------|---------|---------|
-| [Launcher skill](/en/concepts/skills) | `/modernization/migrate-feature X` | The skill orchestrates agents |
+| [Launcher skill](/en/concepts/skills) | `/mod-migrate-feature X` | The skill orchestrates agents |
 | Agent tool | Claude decides to delegate | `Agent(subagent_type: "Explore")` |
 
 ::: warning No nesting
@@ -230,7 +230,7 @@ Does the task require UNDERSTANDING undocumented code?
     └── NO
         Does the task follow a CLEAR TEMPLATE?
         ├── YES → Haiku ($)
-        │   (documentation, audit, diagnostics)
+        │   (audit, diagnostics)
         └── NO → Sonnet (default)
 ```
 
@@ -301,18 +301,18 @@ Giving an agent too many tools increases the risk of unexpected or destructive a
 
 ::: danger Problem
 ```yaml
-# ❌ — Analysis agent with Write/Edit
+# ❌ — Analysis agent with Edit (can modify the legacy)
 tools: Read, Glob, Grep, Write, Edit, Bash
 ```
-An analysis agent has no reason to write files.
+An analysis agent must never modify the analyzed source (`SOURCE_PROJECT`): `Edit` is useless.
 :::
 
 ::: info Solution
 ```yaml
-# ✅ — Read-only for analysis
-tools: Read, Glob, Grep
+# ✅ — Legacy read-only, Write for its output
+tools: Read, Glob, Grep, Write
 ```
-Limiting tools prevents unexpected actions.
+Limiting tools prevents unexpected actions. `Write` remains legitimate to produce deliverables in the output directory (e.g. `SOURCE_TECHNICAL_DIR`), never in the legacy.
 :::
 
 ---
@@ -323,7 +323,7 @@ Using Opus for every task multiplies costs with no quality gain on structured ta
 
 ::: danger Problem
 ```yaml
-# ❌ EXPENSIVE — Opus for documentation
+# ❌ EXPENSIVE — Opus for a templated audit or diagnostic
 model: opus
 ```
 Opus costs ~10x more than Haiku for identical results on templated tasks.
@@ -331,7 +331,7 @@ Opus costs ~10x more than Haiku for identical results on templated tasks.
 
 ::: info Solution
 ```yaml
-# ✅ ECONOMICAL — Haiku is sufficient
+# ✅ ECONOMICAL — Haiku is sufficient (cf. auditor, health-check)
 model: haiku
 ```
 Haiku is ~10x cheaper for structured tasks.
@@ -374,12 +374,12 @@ Usage: migration pipeline (each step depends on the previous one).
 #### Parallel
 
 ```
-         ┌── Backend Planner ──┐
-Spec ────┤                     ├──► Merge
-         └── Frontend Planner ─┘
+           ┌── Feature Analyzer (feature A) ──┐
+Inventory ─┤                                  ├──► specs/*.md
+           └── Feature Analyzer (feature B) ──┘
 ```
 
-Usage: simultaneous backend + frontend planning.
+Usage: `legacy-feature-analyzer` in BATCH MODE (step 4 of `/mod-analyze-legacy`). Backend and frontend planners stay sequential: the frontend builds on the `OPENAPI_SPEC` produced by the backend.
 
 #### Hierarchical
 
@@ -491,7 +491,7 @@ Or via CLI: `claude --disallowedTools "Agent(Explore)"`
 
 ## Concrete Examples
 
-### Example 1: Analysis agent (Opus, read-only)
+### Example 1: Analysis agent (Opus, read-only legacy, writes its output)
 
 ```yaml
 ---
@@ -532,8 +532,8 @@ description: Backend Test First implementation via Docker
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 
 # TDD Implementation

@@ -2,7 +2,7 @@
 
 ## Vue d'ensemble
 
-Le pipeline de migration transforme une feature legacy en implémentation moderne à travers 5 étapes, chacune avec un checkpoint de vérification.
+Le pipeline de migration transforme une feature legacy en implémentation moderne à travers 5 étapes principales (1 à 5), encadrées par une étape 0 de pré-requis (vérification des stacks cibles, sinon proposition de `/dev/install-stack`) et une étape 6 de synchronisation du wiki (`/mod-generate-docs`, si le dossier wiki existe). Chaque étape a un checkpoint de vérification.
 
 ```
 Spécification ──► Planification ──► Implémentation ──► Conformité ──► Boucle qualité
@@ -21,18 +21,20 @@ Spécification ──► Planification ──► Implémentation ──► Confo
 
 ### Les 12 sections
 
-1. Vue d'ensemble fonctionnelle
-2. Référence d'implémentation legacy
-3. Scénarios utilisateur
-4. Points d'interface (UI)
-5. Règles métier
-6. Validation et contraintes
-7. Gestion d'erreurs
-8. Sécurité et permissions
-9. Dépendances avec d'autres features
-10. Données et persistence
-11. Performance et scalabilité
-12. Critères d'acceptation
+1. Vue d'Ensemble
+2. Référence à l'Implémentation Source
+3. Scénarios Utilisateur
+4. Points d'Interaction
+5. Règles Métier
+6. Règles de Validation des Données
+7. Gestion de l'État
+8. Contrôle d'Accès & Autorisation
+9. Gestion des Erreurs
+10. Cas Limites & Scénarios Spéciaux
+11. Points d'Intégration
+12. Considérations pour les Tests
+
+Le format de sortie se termine par deux sections complémentaires : Notes de Migration et Annexe.
 
 ### Checkpoint
 
@@ -45,7 +47,7 @@ Spécification ──► Planification ──► Implémentation ──► Confo
 
 ### Affinement (optionnel)
 
-Si la spec nécessite des corrections, l'agent `legacy-feature-analyzer-refiner` (Sonnet) peut l'enrichir sans changer sa nature. Le fichier corrigé est suffixé `-corrected`.
+Si la spec nécessite des corrections, l'agent `legacy-feature-analyzer-refiner` (Sonnet) peut l'enrichir sans changer sa nature. Il enrichit directement `[Feature]_spec.md` (pas de nouveau fichier) et met à jour l'arbre des features.
 
 ## Étape 2 : Planification
 
@@ -131,6 +133,7 @@ Chaque tâche dans l'analyse passe de `Unprocessed` à `Processed` avec :
 ✅ Tous les tests d'intégration passent
 ✅ Tous les tests fonctionnels passent
 ✅ Toutes les tâches marquées "Processed"
+✅ L'application frontend compile sans erreur
 → Passer à l'étape 4
 ```
 
@@ -140,18 +143,20 @@ Chaque tâche dans l'analyse passe de `Unprocessed` à `Processed` avec :
 
 **Entrée** : Spécification + analyse + code implémenté
 
-**Sortie** : `output/reports/[Feature]_CONFORMITY_REPORT-V[N].md`
+**Sortie** : `output/reports/[Feature]_CONFORMITY_REPORT.md` (V1), puis `[Feature]_CONFORMITY_REPORT-V[N].md` (V2+)
 
 ### Système de scoring
 
 | Sévérité | Déduction |
 |----------|-----------|
 | Critique | -15 points |
-| Haute | -10 points |
+| Élevée | -10 points |
 | Moyenne | -5 points |
 | Basse | -2 points |
 
-Score initial : 100 points. Chaque non-conformité déduit selon sa sévérité.
+Score initial : 100 points par section. Chaque non-conformité déduit selon sa sévérité, avec un plafond par section pour les sévérités Moyenne (max 25 points) et Basse (max 10 points) ; Critique et Élevée ne sont pas plafonnées.
+
+Le score global pondère 4 catégories : Conformité aux guidelines projet (30 %), Cohérence de la codebase (25 %), Conformité aux spécifications (25 %), Alignement avec l'analyse (20 %).
 
 ### Versioning
 
@@ -159,10 +164,12 @@ Les rapports ne sont **jamais écrasés**. Chaque évaluation produit une nouvel
 
 ```
 output/reports/
-├── Search_Engine_CONFORMITY_REPORT-V1.md   # Première évaluation
-├── Search_Engine_CONFORMITY_REPORT-V2.md   # Après corrections
-└── Search_Engine_CONFORMITY_REPORT-V3.md   # Version finale
+├── Search_Engine_CONFORMITY_REPORT.md      # V1 : première évaluation (sans suffixe)
+├── Search_Engine_CONFORMITY_REPORT-V2.md   # Après corrections (boucle qualité)
+└── Search_Engine_CONFORMITY_REPORT-V3.md   # Uniquement après intervention manuelle
 ```
+
+La boucle qualité automatique s'arrête à V2 : une V3 n'est produite qu'après intervention humaine.
 
 La documentation utilise toujours la **dernière version**.
 
@@ -179,11 +186,11 @@ La documentation utilise toujours la **dernière version**.
 - ✅ Repository avec critères de recherche
 
 ### Non-conformités
-- ❌ HAUTE (-10) : Pagination non implémentée
+- ❌ ÉLEVÉE (-10) : Pagination non implémentée
 - ❌ MOYENNE (-5) : Tri par pertinence manquant
 
 ### Recommandation
-CORRECTIONS REQUIRED — Implémenter la pagination avant validation.
+APPROUVÉ AVEC CONDITIONS (80-89) — Implémenter la pagination avant merge.
 ```
 
 ## Étape 5 : Boucle qualité
@@ -214,11 +221,11 @@ CORRECTIONS REQUIRED — Implémenter la pagination avant validation.
 
 ### Reprise sur échec
 
-Chaque skill launcher accepte un argument de stage pour reprendre à une étape spécifique :
+Chaque étape vérifie ses fichiers de sortie avant de passer à la suivante. Relancer la même commande reprend le pipeline à l'étape qui a échoué :
 
 ```bash
-# Reprendre à l'étape 3 (implémentation)
-/modernization/migrate-feature Search_Engine stage=3
+# Reprend à l'étape échouée (ex : implémentation), sans refaire spec ni planification
+/mod-migrate-feature Search_Engine
 ```
 
 ### Fichiers intermédiaires = relais
@@ -227,6 +234,6 @@ Les agents sont isolés (pas de contexte partagé). Les fichiers intermédiaires
 
 ### Versions corrigées
 
-Si un fichier `Feature_spec.md` est corrigé, la version `-corrected` a priorité :
+Lors de la génération du wiki (`/mod-generate-docs`), si une version `-corrected` d'un fichier existe, elle a priorité :
 - `Search_Engine_spec.md` → version initiale
 - `Search_Engine_spec-corrected.md` → version à utiliser

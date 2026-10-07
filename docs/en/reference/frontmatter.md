@@ -11,8 +11,8 @@ description: Backend Test First implementation
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 skills:
-  - symfony/api-conventions
-  - symfony/testing-conventions
+  - sym-api-conventions
+  - sym-testing-conventions
 ---
 ```
 
@@ -25,7 +25,6 @@ skills:
 | `tools` | No | string (CSV) | Authorized tools: `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash`, `Agent(type)`. Default: all |
 | `model` | No | string | Model: `opus`, `sonnet`, `haiku`. Default: inherits from parent |
 | `skills` | No | list | Inherited skills (folder names in `.claude/skills/`) |
-| `allowed-tools` | No | string (CSV) | Tools allowed without confirmation (e.g.: `Bash(docker *)`) |
 | `disallowedTools` | No | list | Tools forbidden for this agent |
 | `permissionMode` | No | string | Permission mode: `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
 | `maxTurns` | No | number | Max number of turns (tool/response exchanges) |
@@ -39,8 +38,8 @@ skills:
 
 | Value | Model | Full ID |
 |-------|-------|---------|
-| `opus` | Claude Opus 4.6 | `claude-opus-4-6` |
-| `sonnet` | Claude Sonnet 4.6 | `claude-sonnet-4-6` |
+| `opus` | Claude Opus 5.5 | `claude-opus-5-5` |
+| `sonnet` | Claude Sonnet 5.5 | `claude-sonnet-5-5` |
 | `haiku` | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` |
 
 ### Available Tools
@@ -62,7 +61,7 @@ skills:
 
 ```yaml
 ---
-name: api-conventions
+name: sym-api-conventions
 description: Backend Symfony conventions for this project
 user-invocable: false
 ---
@@ -131,7 +130,6 @@ The command between `` !` `` and `` ` `` is executed before sending to the model
 ---
 paths:
   - "api-rest-symfony-target/**"
-  - "api-rest-symfony-target/tests/**"
 ---
 ```
 

@@ -123,9 +123,9 @@ docker compose exec -T app php bin/console cache:clear 2>&1 | cat
 
 | Model | ID | Strength | Cost |
 |-------|----|----------|------|
-| Opus 4.6 | `claude-opus-4-6` | Complex reasoning, analysis | $$$ |
-| Sonnet 4.6 | `claude-sonnet-4-6` | Implementation, planning | $$ |
-| Haiku 4.5 | `claude-haiku-4-5-20251001` | Documentation, lightweight tasks | $ |
+| Opus 5.5 | `claude-opus-5-5` | Complex reasoning, analysis | $$$ |
+| Sonnet 5.5 | `claude-sonnet-5-5` | Implementation, planning | $$ |
+| Haiku 4.5 | `claude-haiku-4-5-20251001` | Audit, checks (auditor, health-check) | $ |
 
 ## Quick Git
 

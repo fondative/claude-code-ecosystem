@@ -45,9 +45,6 @@ Fichier Markdown dans `.claude/commands/` invocable via `/nom`. Fusionné avec l
 ### Context (fork)
 Option frontmatter `context: fork` qui exécute une skill dans un sub-agent isolé, sans accès à l'historique de conversation.
 
-### conformity-conventions (skill)
-Skill passive contenant la méthodologie de scoring, les templates de rapport de conformité, la gestion de versions des rapports et le format d'issues. Héritée par le conformity-reporter. Voir [Skills](/concepts/skills).
-
 ### Conventional Commits
 Convention de format de messages de commit : `type(scope): description`. Types : feat, fix, refactor, docs, test, chore.
 
@@ -56,13 +53,13 @@ Convention de format de messages de commit : `type(scope): description`. Types :
 ### Deny (permission)
 Liste des outils et commandes que Claude ne peut jamais utiliser. Configuré dans `settings.json`. Priorité sur allow.
 
-### design-conventions (skill)
-Skill passive définissant les conventions de design (rem/em/%, breakpoints, design tokens, checklist fidélité). Héritée par le frontend-tasks-executor pour le traitement conditionnel des fichiers Figma JSON. Voir [Skills](/concepts/skills).
-
 ### disable-model-invocation
 Champ frontmatter qui empêche Claude de charger une skill automatiquement. Seul l'utilisateur peut l'invoquer via `/nom`.
 
 ## F
+
+### front-design-conventions (skill)
+Skill passive définissant les conventions de design (rem/em/%, breakpoints, design tokens, checklist fidélité). Héritée par le frontend-tasks-executor pour le traitement conditionnel des fichiers Figma JSON. Voir [Skills](/concepts/skills).
 
 ### Frontmatter
 Métadonnées YAML en début de fichier Markdown (entre `---`). Configure le comportement des agents, skills et rules.
@@ -75,7 +72,7 @@ Pattern de correspondance de fichiers utilisé dans les rules (`paths:`) et les 
 ## H
 
 ### Haiku
-Modèle Claude léger et rapide. Utilisé pour les tâches structurées : documentation, audit, diagnostics. Coût minimal.
+Modèle Claude léger et rapide. Utilisé pour les tâches structurées : audit d'inventaire, diagnostics. Coût minimal.
 
 ### Hook
 Script, endpoint HTTP ou prompt exécuté automatiquement en réponse à un événement de Claude. 18 événements disponibles : PreToolUse, PostToolUse, Notification, Stop, SubagentStop, etc. 3 types : command, http, prompt. Voir [Hooks](/concepts/hooks).
@@ -110,6 +107,9 @@ Configuration déployée au niveau enterprise, applicable à tous les utilisateu
 ### /memory
 Commande intégrée pour voir et éditer le fichier de mémoire automatique (`MEMORY.md`).
 
+### mod-conformity-conventions (skill)
+Skill passive contenant la méthodologie de scoring, les templates de rapport de conformité, la gestion de versions des rapports et le format d'issues. Héritée par le conformity-reporter. Voir [Skills](/concepts/skills).
+
 ## O
 
 ### Opus
@@ -124,7 +124,7 @@ Skill avec `user-invocable: false`, invisible dans le menu `/`. Claude la charge
 Niveau de confiance configuré pour Claude Code : Plan Mode (lecture seule), Default (confirmation), Accept Edits (auto-edits), Don't Ask (allowlist auto), Bypass Permissions (tout auto, danger).
 
 ### Plugin
-Package portable contenant skills, agents, hooks et/ou serveurs MCP dans un repertoire unique. Installe via `claude plugins add <source>`. Utilise un namespace `plugin-name:skill-name` pour eviter les conflits. Voir [Plugins](/concepts/plugins).
+Package portable contenant skills, agents, hooks et/ou serveurs MCP dans un repertoire unique. Installe depuis un marketplace via `/plugin install <nom>@<marketplace>` (ou `claude plugin install`). Utilise un namespace `plugin-name:skill-name` pour eviter les conflits. Voir [Plugins](/concepts/plugins).
 
 ### PreToolUse / PostToolUse
 Points d'exécution des hooks. PreToolUse s'exécute avant l'action (peut bloquer), PostToolUse après (pour logging/notification).

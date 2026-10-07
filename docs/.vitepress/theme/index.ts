@@ -1,57 +1,38 @@
 import DefaultTheme from 'vitepress/theme'
-import { onMounted, watch, nextTick } from 'vue'
-import { useRoute } from 'vitepress'
+import { onMounted } from 'vue'
+import { decorateZoomables, installZoomListener } from './zoom-viewer'
 import './custom.css'
 
 export default {
   extends: DefaultTheme,
   setup() {
-    const route = useRoute()
-
-    const initMermaidDiagrams = () => {
-      nextTick(() => {
-        document.querySelectorAll('.mermaid-zoom').forEach((el) => {
-          if (el.getAttribute('data-mermaid-init')) return
-          el.setAttribute('data-mermaid-init', 'true')
-
-          // Create fullscreen button
-          const btn = document.createElement('button')
-          btn.className = 'mermaid-fullscreen-btn'
-          btn.innerHTML = '&#x26F6; Plein écran'
-          btn.setAttribute('title', 'Afficher en plein écran')
-          el.appendChild(btn)
-
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation()
-            const isFullscreen = el.classList.toggle('fullscreen')
-            btn.innerHTML = isFullscreen ? '&#x2715; Fermer' : '&#x26F6; Plein écran'
-
-            if (isFullscreen) {
-              const onEsc = (ev: KeyboardEvent) => {
-                if (ev.key === 'Escape') {
-                  el.classList.remove('fullscreen')
-                  btn.innerHTML = '&#x26F6; Plein écran'
-                  document.removeEventListener('keydown', onEsc)
-                }
-              }
-              document.addEventListener('keydown', onEsc)
-            }
-          })
-        })
+    // Plan de page (colonne de droite) : retire les pastilles emoji colorées des titres (🟢🔵🟠🟣), sans toucher aux titres du corps
+    const stripOutlineEmojis = () => {
+      document.querySelectorAll('.VPDocAsideOutline .outline-link').forEach((link) => {
+        const node = link.firstChild
+        if (node?.nodeType === Node.TEXT_NODE && /[\u{1F534}\u{1F535}\u{1F7E0}-\u{1F7EB}]/u.test(node.nodeValue ?? '')) {
+          node.nodeValue = node.nodeValue!.replace(/[\u{1F534}\u{1F535}\u{1F7E0}-\u{1F7EB}]️?\s*/gu, '')
+        }
       })
     }
 
     onMounted(() => {
-      setTimeout(initMermaidDiagrams, 800)
+      installZoomListener()
 
-      watch(() => route.path, () => {
-        setTimeout(() => {
-          document.querySelectorAll('.mermaid-zoom').forEach((el) => {
-            el.removeAttribute('data-mermaid-init')
-          })
-          initMermaidDiagrams()
-        }, 800)
-      })
+      // Les diagrammes Mermaid sont rendus après le chargement et à chaque navigation :
+      // on décore au fil des mutations du DOM plutôt qu'après un délai fixe
+      let pending = false
+      new MutationObserver(() => {
+        if (pending) return
+        pending = true
+        requestAnimationFrame(() => {
+          pending = false
+          stripOutlineEmojis()
+          decorateZoomables()
+        })
+      }).observe(document.body, { childList: true, subtree: true })
+      stripOutlineEmojis()
+      decorateZoomables()
     })
   }
 }

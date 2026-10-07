@@ -31,15 +31,15 @@ disable-model-invocation: true
 # Migration $ARGUMENTS
 
 ## Etape 1 : Specification
-Lancer l'agent `feature-analyzer` sur $ARGUMENTS.
+Lancer l'agent `legacy-feature-analyzer` sur $ARGUMENTS.
 **Checkpoint** : verifier que `output/features/$ARGUMENTS_spec.md` existe.
 
 ## Etape 2 : Planification
-Lancer `backend-planner` puis `frontend-planner`.
+Lancer `backend-tasks-planner` puis `frontend-tasks-planner`.
 **Checkpoint** : verifier que les fichiers _analysis.md existent.
 
 ## Etape 3 : Implementation
-Lancer `backend-executor` puis `frontend-executor`.
+Lancer `backend-tasks-executor` puis `frontend-tasks-executor`.
 **Checkpoint** : tous les tests passent.
 
 ## Etape 4 : Conformite
@@ -59,13 +59,13 @@ Lancer `conformity-reporter`.
 Plusieurs agents travaillent simultanément sur des tâches indépendantes.
 
 ```
-         ┌── Agent A (backend) ──┐
-Input ───┤                       ├──► Merge
-         └── Agent B (frontend) ─┘
+         ┌── Agent A (feature X) ──┐
+Input ───┤                         ├──► Merge
+         └── Agent B (feature Y) ──┘
 ```
 
 ### Cas d'usage
-- Planification backend + frontend en parallèle
+- Specs de plusieurs features en batch (`legacy-feature-analyzer` en MODE BATCH dans `/mod-analyze-legacy`)
 - Analyse de sécurité + performance + qualité simultanée
 - Review multi-critères
 
@@ -124,21 +124,21 @@ disable-model-invocation: true
 
 # Modernisation complete
 
-## Phase 1 : Analyse (parallele)
-Lancer en parallele :
+## Phase 1 : Analyse (sequentielle)
+Lancer dans l'ordre (checkpoint entre chaque) :
 - `legacy-technical-analyzer`
-- `legacy-functional-analyzer`
+- puis `legacy-functional-analyzer`
 
 ## Phase 2 : Audit
 Lancer `legacy-functional-analyzer-auditor`
 
 ## Phase 3 : Migration par feature
 Pour chaque feature dans 0-index.md :
-  Lancer `/modernization/migrate-feature [feature]`
-  (qui lui-meme orchestre 4 agents)
+  Lancer `/mod-migrate-feature [feature]`
+  (qui lui-meme orchestre 6 agents)
 
 ## Phase 4 : Documentation
-Lancer `/modernization/generate-docs all`
+Lancer `/mod-generate-docs all`
 ```
 
 ## Pattern 4 : LLM-as-Judge (Évaluation)
@@ -165,11 +165,11 @@ name: implement-and-validate
 
 # Boucle implementation-validation
 
-1. Lancer `backend-executor` pour la tache $ARGUMENTS
+1. Lancer `backend-tasks-executor` pour la tache $ARGUMENTS
 2. Lancer `conformity-reporter` sur le resultat
 3. Si score < 80% :
    - Identifier les deductions majeures
-   - Relancer `backend-executor` avec les corrections
+   - Relancer `backend-tasks-executor` avec les corrections
    - Re-evaluer (max 2 iterations)
 4. Si score >= 80% : DONE
 ```
@@ -193,14 +193,14 @@ La tache suivante depend-elle de la precedente ?
 En pratique, les projets réels combinent plusieurs patterns :
 
 ```
-Phase 1 : Analyse (PARALLELE)
-├── Technique (sequentiel interne)
-└── Fonctionnel (sequentiel interne)
+Phase 1 : Analyse (SEQUENTIEL : Technique → Fonctionnel → Audit)
+└── Specs des features en batch (PARALLELE, optionnel)
+    └── N × legacy-feature-analyzer (MODE BATCH)
 
 Phase 2 : Migration par feature (SEQUENTIEL entre features)
 ├── Spec → Plan → Impl → Conformite (SEQUENTIEL par feature)
-│         ├── Backend (PARALLELE avec Frontend si possible)
-│         └── Frontend
+│         ├── Backend (d'abord : produit openapi.yaml)
+│         └── Frontend (ensuite, SEQUENTIEL : lit openapi.yaml)
 └── Evaluation (LLM-AS-JUDGE)
 
 Phase 3 : Documentation (SEQUENTIEL)
