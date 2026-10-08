@@ -23,6 +23,10 @@
   --fondative-blue: #00287F;
   --fondative-blue-light: #003CBE;
   --fondative-pink: #eb286e;
+
+  /* Dégradé Fondative éclairci pour le texte sur fond sombre (le bleu de marque y est illisible) */
+  --fondative-text-grad-dark-from: #8ab4ff;
+  --fondative-text-grad-dark-to: #ff7aa8;
 }
 
 /* ---- Brand colors (neon green accent) ---- */
@@ -127,9 +131,8 @@
 }
 
 /* AI-Driven Modernisation — navbar link with Fondative colors */
-a[href*="methodology"].VPNavBarMenuLink,
-a[href*="methodology"].VPNavBarMenuLink:hover,
-a[href*="methodology"].VPNavBarMenuLink.active {
+/* Menu « Modernisation » (groupe qui contient la méthodologie) : libellé en dégradé Fondative */
+.VPNavBarMenuGroup:has(a[href*="/guide/methodology"]) > .button .text {
   background: linear-gradient(135deg, var(--fondative-blue), var(--fondative-pink)) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -138,14 +141,38 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   color: transparent !important;
 }
 
-.dark a[href*="methodology"].VPNavBarMenuLink,
-.dark a[href*="methodology"].VPNavBarMenuLink:hover,
-.dark a[href*="methodology"].VPNavBarMenuLink.active {
-  background: linear-gradient(135deg, var(--fondative-blue-light), var(--fondative-pink)) !important;
+.dark .VPNavBarMenuGroup:has(a[href*="/guide/methodology"]) > .button .text {
+  /* Mêmes teintes de marque (bleu → rose), éclaircies : le bleu #003CBE est illisible sur fond sombre */
+  background: linear-gradient(135deg, #5b8cff, #ff4f8b) !important;
   -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  color: transparent !important;
+}
+
+/* Liens mis en avant dans le menu et la barre latérale Modernisation : méthodologie et cas d'usage réel */
+.VPMenuLink a[href*="/guide/methodology"] > span,
+.VPMenuLink a[href*="exemple-wiki-legacy"] > span,
+.VPSidebarItem a[href*="/guide/methodology"] .text,
+.VPSidebarItem a[href*="exemple-wiki-legacy"] .text {
+  background: linear-gradient(135deg, var(--fondative-blue), var(--fondative-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.dark .VPMenuLink a[href*="/guide/methodology"] > span,
+.dark .VPMenuLink a[href*="exemple-wiki-legacy"] > span,
+.dark .VPSidebarItem a[href*="/guide/methodology"] .text,
+.dark .VPSidebarItem a[href*="exemple-wiki-legacy"] .text {
+  background: linear-gradient(135deg, var(--fondative-text-grad-dark-from), var(--fondative-text-grad-dark-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Le chevron est une icône masquée colorée par currentColor : on lui rend une couleur visible */
+.VPNavBarMenuGroup:has(a[href*="/guide/methodology"]) > .button .text .vpi-chevron-down {
+  color: var(--fondative-pink) !important;
+  -webkit-text-fill-color: currentColor !important;
 }
 
 /* ---- Buttons ---- */
@@ -193,19 +220,33 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   opacity: 1;
 }
 
+/* Mode clair : bleu Fondative sur fond blanc (le jaune était illisible sur fond clair) */
 .VPButton.alt {
-  border-color: var(--fondative-yellow-dim) !important;
-  color: var(--fondative-yellow-dim) !important;
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  color: var(--fondative-blue) !important;
+  font-weight: 600;
   border-radius: 8px;
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.VPButton.alt:hover {
+  border-color: var(--fondative-pink) !important;
+  color: var(--fondative-pink) !important;
+  box-shadow: 0 2px 12px rgba(235, 40, 110, 0.12);
 }
 
 .dark .VPButton.alt {
   border-color: var(--fondative-yellow) !important;
+  background: transparent !important;
   color: var(--fondative-yellow) !important;
 }
 
-.VPButton.alt:hover {
+.dark .VPButton.alt:hover {
+  border-color: var(--fondative-yellow) !important;
+  color: var(--fondative-yellow) !important;
   background: rgba(221, 255, 0, 0.08) !important;
+  box-shadow: none;
 }
 
 /* ---- Code blocks ---- */
@@ -764,5 +805,148 @@ a[href*="methodology"].VPNavBarMenuLink.active {
   .recode-wide .VPDoc .container,
   .recode-wide .VPDoc .content-container {
     max-width: 1080px !important;
+  }
+}
+
+/* Barre du haut : la recherche vient après le menu (VitePress la place avant et l'étire) */
+@media (min-width: 768px) {
+  .VPNavBar .content-body > * {
+    order: 2;
+  }
+
+  .VPNavBar .content-body > .VPNavBarMenu {
+    order: 0;
+  }
+
+  .VPNavBar .content-body > .VPNavBarSearch {
+    order: 1;
+    flex-grow: 0;
+    padding-left: 12px;
+  }
+}
+
+/* Écrans moyens : recherche réduite à la loupe pour que le menu tienne sur une ligne */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .VPNavBar .VPNavBarSearch .DocSearch-Button-Placeholder,
+  .VPNavBar .VPNavBarSearch .DocSearch-Button-Keys {
+    display: none;
+  }
+
+  .VPNavBar .VPNavBarSearch .DocSearch-Button {
+    padding: 0 10px;
+  }
+}
+
+/* Espace entre le titre du site et le menu */
+@media (min-width: 1100px) {
+  .VPNavBar .content-body > .VPNavBarMenu {
+    margin-left: 24px;
+  }
+}
+
+/* Entre 768 et 1099 px, le menu complet ne tient pas : on passe au menu hamburger comme sur mobile */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .VPNavBar .content-body > .VPNavBarMenu,
+  .VPNavBar .content-body > .VPNavBarExtra {
+    display: none;
+  }
+
+  .VPNavBar .VPNavBarHamburger {
+    display: flex !important;
+  }
+
+  /* La barre de navigation a un backdrop-filter : un enfant en position fixe y est mesuré
+     par rapport à la barre, d'où une hauteur nulle sans hauteur explicite */
+  .VPNavScreen {
+    display: block !important;
+    bottom: auto !important;
+    height: calc(100vh - var(--vp-nav-height));
+  }
+}
+
+/* ---- Accueil : la modernisation au premier plan ---- */
+.VPHero .text {
+  background: linear-gradient(135deg, var(--fondative-blue-light), var(--fondative-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .VPHero .text {
+  background: linear-gradient(135deg, #5b8cff, #ff4f8b);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Cartes de la modernisation : liseré dégradé Fondative en haut, icône colorée */
+.VPHome .VPFeatures .VPFeature {
+  background:
+    linear-gradient(90deg, var(--fondative-blue-light), var(--fondative-pink)) top / 100% 3px no-repeat,
+    var(--vp-c-bg-soft);
+}
+
+.VPHome .VPFeatures .VPFeature .icon {
+  color: var(--fondative-blue-light);
+  background: var(--vp-c-bg);
+}
+
+.dark .VPHome .VPFeatures .VPFeature .icon {
+  color: #8ab4ff;
+}
+
+.VPHome .VPFeatures .VPFeature:hover {
+  box-shadow: 0 8px 24px rgba(235, 40, 110, 0.12);
+}
+
+/* Hero compact : nom et accroche sur une ligne chacun, moins de hauteur */
+/* La marge haute inclut la barre de navigation fixe (comme le style VitePress d'origine) */
+.VPHome .VPHero.VPHomeHero {
+  padding-top: calc(var(--vp-nav-height) + var(--vp-layout-top-height, 0px) + 32px);
+  padding-bottom: 32px;
+}
+
+.VPHero .main {
+  max-width: none !important;
+}
+
+.VPHero .name,
+.VPHero .text {
+  max-width: none !important;
+}
+
+.VPHero .tagline {
+  max-width: 900px !important;
+  padding-top: 12px !important;
+  font-size: 18px !important;
+  line-height: 28px !important;
+}
+
+.VPHero .actions {
+  padding-top: 24px !important;
+}
+
+@media (min-width: 640px) {
+  .VPHero .name,
+  .VPHero .text {
+    font-size: 40px !important;
+    line-height: 48px !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHome .VPHero.VPHomeHero {
+    padding-top: calc(var(--vp-nav-height) + var(--vp-layout-top-height, 0px) + 40px);
+    padding-bottom: 32px;
+  }
+
+  .VPHero .name,
+  .VPHero .text {
+    font-size: 48px !important;
+    line-height: 56px !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 20px !important;
+    line-height: 30px !important;
   }
 }

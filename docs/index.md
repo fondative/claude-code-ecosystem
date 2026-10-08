@@ -2,58 +2,49 @@
 layout: home
 hero:
   name: Claude Code Ecosystem
-  text: Fondative
-  tagline: Référentiel complet pour maîtriser agents, skills, rules, hooks et MCP
+  text: AI-Driven Modernisation
+  tagline: 'Moderniser un projet legacy avec l''IA, étape par étape, sous le contrôle d''un architecte.'
   actions:
+    - theme: brand
+      text: AI-Driven Modernisation
+      link: /guide/methodology
     - theme: alt
-      text: Concepts
-      link: /concepts/claude-md
-    - theme: alt
-      text: Cas d'usage réel
-      link: /examples/
-    - theme: alt
-      text: Exemple de wiki généré ↗
+      text: Cas d'usage réel (wiki) ↗
       link: /exemple-wiki-legacy/
       target: _blank
       rel: noopener
     - theme: alt
+      text: Manuel d'utilisation
+      link: /examples/
+    - theme: alt
       text: Plugin recode
       link: /recode/
-    - theme: brand
-      text: AI-Driven Modernisation
-      link: /guide/methodology
+    - theme: alt
+      text: Concepts
+      link: /concepts/claude-md
 
 features:
-  - icon: 🚀
-    title: Démarrage rapide
-    details: Installer Claude Code, configurer votre premier projet et lancer votre première commande en 5 minutes.
-    link: /guide/getting-started
-  - icon: 🤖
-    title: Agents
-    details: Instances spécialisées de Claude avec outils, modèle et instructions dédiées. Orchestration séquentielle, parallèle ou hiérarchique.
-    link: /concepts/agents
-  - icon: 🛠️
-    title: Skills
-    details: Connaissances et workflows réutilisables — passifs (conventions) ou lanceurs (pipelines). Standard ouvert Agent Skills.
-    link: /concepts/skills
-  - icon: 📏
-    title: Rules
-    details: Instructions injectées automatiquement selon les fichiers manipulés. Contexte sans effort.
-    link: /concepts/rules
-  - icon: ⚡
-    title: Hooks
-    details: Scripts exécutés avant/après les actions de Claude. Validation, sécurité, notifications.
-    link: /concepts/hooks
-  - icon: 🔌
-    title: MCP
-    details: Model Context Protocol — connecter Claude à des outils et sources de données externes via des serveurs standardisés.
-    link: /concepts/mcp
-  - icon: 📝
-    title: CLAUDE.md
-    details: Mémoire persistante du projet. Source de vérité pour les conventions, chemins et instructions.
-    link: /concepts/claude-md
-  - icon: 📦
-    title: Plugins
-    details: Packages portables de skills, agents, hooks et MCP. Distribution cross-projets avec namespace isolé.
-    link: /concepts/plugins
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.8 5.4a2 2 0 0 1-1.28 1.28l-5.4 1.8 1.8-5.4a2 2 0 0 1 1.28-1.28z"/></svg>'
+    title: "Méthodologie AI-Driven"
+    details: "Les phases, les garde-fous et le pilotage humain pour réécrire un legacy vers une stack moderne."
+    link: /guide/methodology
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></svg>'
+    title: "Cas d'usage réel (wiki)"
+    details: "Le wiki généré pour un vrai projet legacy : analyses, specs, cartographie et suivi de la migration."
+    link: /exemple-wiki-legacy/
+    target: _blank
+    rel: noopener
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>'
+    title: "Manuel d'utilisation"
+    details: "Structure du projet, pipeline de migration, stratégie de modèles et templates prêts à l'emploi."
+    link: /examples/
 ---
+
+<script setup>
+import HomeRecodeFlow from './.vitepress/theme/components/HomeRecodeFlow.vue'
+import HomeBricks from './.vitepress/theme/components/HomeBricks.vue'
+</script>
+
+<HomeRecodeFlow />
+
+<HomeBricks />

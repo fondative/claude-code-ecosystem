@@ -1,4 +1,4 @@
-# Real-World Use Case: Legacy Modernization
+# User Manual: Legacy Modernization
 
 ## Context
 

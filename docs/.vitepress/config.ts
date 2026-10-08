@@ -11,6 +11,99 @@ const SITE_BASE = '/claude-code-ecosystem/'
 const EXAMPLE_WIKI = `${SITE_BASE}exemple-wiki-legacy/`
 const publicDir = join(__dirname, '..', 'public')
 
+// ---- Menu et barres latérales : comprendre → appliquer → outiller → consulter ----
+// Les pages gardent leurs URLs ; seuls les regroupements changent.
+
+const conceptsFr = [
+  { text: 'CLAUDE.md', link: '/concepts/claude-md' },
+  { text: 'Settings', link: '/concepts/settings' },
+  { text: 'Rules', link: '/concepts/rules' },
+  { text: 'Skills', link: '/concepts/skills' },
+  { text: 'Agents', link: '/concepts/agents' },
+  { text: 'Commands', link: '/concepts/commands' },
+  { text: 'Hooks', link: '/concepts/hooks' },
+  { text: 'MCP', link: '/concepts/mcp' },
+  { text: 'Plugins', link: '/concepts/plugins' }
+]
+
+const guideFr = [
+  { text: 'Démarrage rapide', link: '/guide/getting-started' },
+  { text: 'Bonnes pratiques', link: '/guide/best-practices' },
+  { text: 'Patterns multi-agents', link: '/guide/patterns' },
+  { text: 'Sécurité & Permissions', link: '/guide/security' },
+  { text: 'Menaces de sécurité', link: '/guide/security-threats' },
+  { text: 'Diagrammes', link: '/guide/diagrams' },
+  { text: 'Workflow Boris Tane', link: '/guide/workflow-boris-tane' }
+]
+
+// Les deux premiers liens sont mis en avant (dégradé Fondative, voir custom.css)
+const modernisationFr = [
+  { text: 'Méthodologie AI-Driven', link: '/guide/methodology' },
+  // Sous-site statique construit par scripts/sync-example-wiki.sh (docs/public/exemple-wiki-legacy/)
+  { text: 'Cas d\'usage réel (wiki)', link: '/exemple-wiki-legacy/', target: '_blank' },
+  {
+    text: 'Manuel d\'utilisation',
+    items: [
+      { text: 'Vue d\'ensemble', link: '/examples/' },
+      { text: 'Structure du projet', link: '/examples/project-structure' },
+      { text: 'Pipeline de migration', link: '/examples/pipeline' },
+      { text: 'Stratégie de modèles', link: '/examples/model-strategy' },
+      { text: 'Templates', link: '/examples/templates' }
+    ]
+  }
+]
+
+const referenceFr = [
+  { text: 'Glossaire', link: '/reference/glossary' },
+  { text: 'Frontmatter', link: '/reference/frontmatter' },
+  { text: 'Standard Agent Skills', link: '/reference/agent-skills-standard' },
+  { text: 'Cheatsheet', link: '/guide/cheatsheet' }
+]
+
+const conceptsEn = [
+  { text: 'CLAUDE.md', link: '/en/concepts/claude-md' },
+  { text: 'Settings', link: '/en/concepts/settings' },
+  { text: 'Rules', link: '/en/concepts/rules' },
+  { text: 'Skills', link: '/en/concepts/skills' },
+  { text: 'Agents', link: '/en/concepts/agents' },
+  { text: 'Commands', link: '/en/concepts/commands' },
+  { text: 'Hooks', link: '/en/concepts/hooks' },
+  { text: 'MCP', link: '/en/concepts/mcp' },
+  { text: 'Plugins', link: '/en/concepts/plugins' }
+]
+
+const guideEn = [
+  { text: 'Getting Started', link: '/en/guide/getting-started' },
+  { text: 'Best Practices', link: '/en/guide/best-practices' },
+  { text: 'Multi-agent Patterns', link: '/en/guide/patterns' },
+  { text: 'Security & Permissions', link: '/en/guide/security' },
+  { text: 'Security Threats', link: '/en/guide/security-threats' },
+  { text: 'Diagrams', link: '/en/guide/diagrams' },
+  { text: 'Boris Tane Workflow', link: '/en/guide/workflow-boris-tane' }
+]
+
+const modernisationEn = [
+  { text: 'AI-Driven Methodology', link: '/en/guide/methodology' },
+  { text: 'Real-world use case (wiki, FR)', link: '/exemple-wiki-legacy/', target: '_blank' },
+  {
+    text: 'User Manual',
+    items: [
+      { text: 'Overview', link: '/en/examples/' },
+      { text: 'Project Structure', link: '/en/examples/project-structure' },
+      { text: 'Migration Pipeline', link: '/en/examples/pipeline' },
+      { text: 'Model Strategy', link: '/en/examples/model-strategy' },
+      { text: 'Templates', link: '/en/examples/templates' }
+    ]
+  }
+]
+
+const referenceEn = [
+  { text: 'Glossary', link: '/en/reference/glossary' },
+  { text: 'Frontmatter', link: '/en/reference/frontmatter' },
+  { text: 'Standard Agent Skills', link: '/en/reference/agent-skills-standard' },
+  { text: 'Cheatsheet', link: '/en/guide/cheatsheet' }
+]
+
 export default withMermaid(defineConfig({
   base: SITE_BASE,
 
@@ -48,20 +141,24 @@ export default withMermaid(defineConfig({
       description: 'Référentiel complet pour maîtriser Agents, Skills, Rules, Hooks et MCP',
       themeConfig: {
         nav: [
-          { text: 'Accueil', link: '/' },
-          { text: 'Concepts', link: '/concepts/claude-md' },
-          { text: 'Guide', link: '/guide/getting-started' },
-          { text: 'Plugin recode', link: '/recode/' },
-          { text: 'AI-Driven Modernisation', link: '/guide/methodology' },
+          { text: 'AI-Driven Modernisation', activeMatch: '^/(guide/methodology|examples/)', items: modernisationFr },
+          { text: 'Plugin recode', activeMatch: '^/recode/', items: recodeSidebar[0].items },
           {
-            text: 'Cas d\'usage réel',
+            text: 'Concepts',
+            activeMatch: '^/(concepts|introduction)/',
             items: [
-              { text: 'Vue d\'ensemble', link: '/examples/' },
-              // Sous-site statique construit par scripts/sync-example-wiki.sh (docs/public/exemple-wiki-legacy/)
-              { text: 'Exemple de wiki généré (projet legacy)', link: '/exemple-wiki-legacy/', target: '_blank' }
+              {
+                text: 'Introduction',
+                items: [
+                  { text: 'Philosophie & Vision', link: '/introduction/' },
+                  { text: 'Architecture .claude/', link: '/introduction/architecture' }
+                ]
+              },
+              { text: 'Concepts fondamentaux', items: conceptsFr }
             ]
           },
-          { text: 'Référence', link: '/reference/glossary' }
+          { text: 'Guide', activeMatch: '^/guide/(?!methodology|cheatsheet)', items: guideFr },
+          { text: 'Référence', activeMatch: '^/(reference/|guide/cheatsheet)', items: referenceFr }
         ],
         sidebar: {
           '/introduction/': [
@@ -73,62 +170,15 @@ export default withMermaid(defineConfig({
               ]
             }
           ],
-          '/concepts/': [
-            {
-              text: 'Concepts fondamentaux',
-              items: [
-                { text: 'CLAUDE.md', link: '/concepts/claude-md' },
-                { text: 'Settings', link: '/concepts/settings' },
-                { text: 'Rules', link: '/concepts/rules' },
-                { text: 'Skills', link: '/concepts/skills' },
-                { text: 'Agents', link: '/concepts/agents' },
-                { text: 'Commands', link: '/concepts/commands' },
-                { text: 'Hooks', link: '/concepts/hooks' },
-                { text: 'MCP', link: '/concepts/mcp' },
-                { text: 'Plugins', link: '/concepts/plugins' }
-              ]
-            }
-          ],
-          '/guide/': [
-            {
-              text: 'Guide pratique',
-              items: [
-                { text: 'Démarrage rapide', link: '/guide/getting-started' },
-                { text: 'Bonnes pratiques', link: '/guide/best-practices' },
-                { text: 'Patterns multi-agents', link: '/guide/patterns' },
-                { text: 'Sécurité & Permissions', link: '/guide/security' },
-                { text: 'Menaces de sécurité', link: '/guide/security-threats' },
-                { text: 'Diagrammes', link: '/guide/diagrams' },
-                { text: 'Cheatsheet', link: '/guide/cheatsheet' },
-                { text: 'Workflow Boris Tane', link: '/guide/workflow-boris-tane' },
-                { text: 'AI-Driven Modernisation', link: '/guide/methodology' }
-              ]
-            }
-          ],
+          '/concepts/': [{ text: 'Concepts fondamentaux', items: conceptsFr }],
+          // Méthodologie et Cheatsheet gardent leur URL /guide/ mais vivent dans Modernisation et Référence.
+          // À déclarer AVANT '/guide/' : VitePress départage par nombre de segments, puis par ordre de déclaration
+          '/guide/methodology': modernisationFr,
+          '/guide/cheatsheet': [{ text: 'Référence', items: referenceFr }],
+          '/guide/': [{ text: 'Guide pratique', items: guideFr }],
+          '/examples/': modernisationFr,
           '/recode/': recodeSidebar,
-          '/examples/': [
-            {
-              text: 'Cas d\'usage réel',
-              items: [
-                { text: 'Vue d\'ensemble', link: '/examples/' },
-                { text: 'Structure du projet', link: '/examples/project-structure' },
-                { text: 'Pipeline de migration', link: '/examples/pipeline' },
-                { text: 'Stratégie de modèles', link: '/examples/model-strategy' },
-                { text: 'Templates', link: '/examples/templates' },
-                { text: 'Exemple de wiki généré', link: '/exemple-wiki-legacy/', target: '_blank' }
-              ]
-            }
-          ],
-          '/reference/': [
-            {
-              text: 'Référence',
-              items: [
-                { text: 'Glossaire', link: '/reference/glossary' },
-                { text: 'Frontmatter', link: '/reference/frontmatter' },
-                { text: 'Standard Agent Skills', link: '/reference/agent-skills-standard' }
-              ]
-            }
-          ]
+          '/reference/': [{ text: 'Référence', items: referenceFr }]
         },
         outline: {
           level: [2, 3],
@@ -154,18 +204,23 @@ export default withMermaid(defineConfig({
       description: 'Complete reference for mastering Agents, Skills, Rules, Hooks and MCP',
       themeConfig: {
         nav: [
-          { text: 'Home', link: '/en/' },
-          { text: 'Concepts', link: '/en/concepts/claude-md' },
-          { text: 'Guide', link: '/en/guide/getting-started' },
-          { text: 'AI-Driven Modernisation', link: '/en/guide/methodology' },
+          { text: 'AI-Driven Modernisation', activeMatch: '^/en/(guide/methodology|examples/)', items: modernisationEn },
           {
-            text: 'Real-world Use Cases',
+            text: 'Concepts',
+            activeMatch: '^/en/(concepts|introduction)/',
             items: [
-              { text: 'Overview', link: '/en/examples/' },
-              { text: 'Generated wiki example (legacy project, FR)', link: '/exemple-wiki-legacy/', target: '_blank' }
+              {
+                text: 'Introduction',
+                items: [
+                  { text: 'Philosophy & Vision', link: '/en/introduction/' },
+                  { text: 'Architecture .claude/', link: '/en/introduction/architecture' }
+                ]
+              },
+              { text: 'Core Concepts', items: conceptsEn }
             ]
           },
-          { text: 'Reference', link: '/en/reference/glossary' }
+          { text: 'Guide', activeMatch: '^/en/guide/(?!methodology|cheatsheet)', items: guideEn },
+          { text: 'Reference', activeMatch: '^/en/(reference/|guide/cheatsheet)', items: referenceEn }
         ],
         sidebar: {
           '/en/introduction/': [
@@ -177,61 +232,12 @@ export default withMermaid(defineConfig({
               ]
             }
           ],
-          '/en/concepts/': [
-            {
-              text: 'Core Concepts',
-              items: [
-                { text: 'CLAUDE.md', link: '/en/concepts/claude-md' },
-                { text: 'Settings', link: '/en/concepts/settings' },
-                { text: 'Rules', link: '/en/concepts/rules' },
-                { text: 'Skills', link: '/en/concepts/skills' },
-                { text: 'Agents', link: '/en/concepts/agents' },
-                { text: 'Commands', link: '/en/concepts/commands' },
-                { text: 'Hooks', link: '/en/concepts/hooks' },
-                { text: 'MCP', link: '/en/concepts/mcp' },
-                { text: 'Plugins', link: '/en/concepts/plugins' }
-              ]
-            }
-          ],
-          '/en/guide/': [
-            {
-              text: 'Practical Guide',
-              items: [
-                { text: 'Getting Started', link: '/en/guide/getting-started' },
-                { text: 'Best Practices', link: '/en/guide/best-practices' },
-                { text: 'Multi-agent Patterns', link: '/en/guide/patterns' },
-                { text: 'Security & Permissions', link: '/en/guide/security' },
-                { text: 'Security Threats', link: '/en/guide/security-threats' },
-                { text: 'Diagrams', link: '/en/guide/diagrams' },
-                { text: 'Cheatsheet', link: '/en/guide/cheatsheet' },
-                { text: 'Boris Tane Workflow', link: '/en/guide/workflow-boris-tane' },
-                { text: 'AI-Driven Modernisation', link: '/en/guide/methodology' }
-              ]
-            }
-          ],
-          '/en/examples/': [
-            {
-              text: 'Real-world Use Cases',
-              items: [
-                { text: 'Overview', link: '/en/examples/' },
-                { text: 'Project Structure', link: '/en/examples/project-structure' },
-                { text: 'Migration Pipeline', link: '/en/examples/pipeline' },
-                { text: 'Model Strategy', link: '/en/examples/model-strategy' },
-                { text: 'Templates', link: '/en/examples/templates' },
-                { text: 'Generated wiki example (FR)', link: '/exemple-wiki-legacy/', target: '_blank' }
-              ]
-            }
-          ],
-          '/en/reference/': [
-            {
-              text: 'Reference',
-              items: [
-                { text: 'Glossary', link: '/en/reference/glossary' },
-                { text: 'Frontmatter', link: '/en/reference/frontmatter' },
-                { text: 'Standard Agent Skills', link: '/en/reference/agent-skills-standard' }
-              ]
-            }
-          ]
+          '/en/concepts/': [{ text: 'Core Concepts', items: conceptsEn }],
+          '/en/guide/methodology': modernisationEn,
+          '/en/guide/cheatsheet': [{ text: 'Reference', items: referenceEn }],
+          '/en/guide/': [{ text: 'Practical Guide', items: guideEn }],
+          '/en/examples/': modernisationEn,
+          '/en/reference/': [{ text: 'Reference', items: referenceEn }]
         },
         outline: {
           level: [2, 3],
@@ -254,10 +260,6 @@ export default withMermaid(defineConfig({
 
   themeConfig: {
     logo: '/favicon-192x192.png',
-
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/agentskills/agentskills' }
-    ],
 
     search: {
       provider: 'local',

@@ -629,7 +629,7 @@ graph TB
 ```
 
 :::tip Exemple réel
-Le wiki généré par `/mod-generate-docs` pour le projet legacy *Classified Ads* (analyses, spécifications, cartographie interactive, suivi de la modernisation) est consultable ici : <a :href="withBase('/exemple-wiki-legacy/')" target="_blank" rel="noopener">exemple de wiki généré ↗</a>.
+Le wiki généré par `/mod-generate-docs` pour le projet legacy *Classified Ads* (analyses, spécifications, cartographie interactive, suivi de la modernisation) est consultable ici : <a :href="withBase('/exemple-wiki-legacy/')" target="_blank" rel="noopener">cas d'usage réel (wiki) ↗</a>.
 :::
 
 :::tip Documentation incrémentale

@@ -1,10 +1,15 @@
 import DefaultTheme from 'vitepress/theme'
-import { onMounted } from 'vue'
+import { h, onMounted } from 'vue'
 import { decorateZoomables, installZoomListener } from './zoom-viewer'
+import HomeSteps from './components/HomeSteps.vue'
 import './custom.css'
 
 export default {
   extends: DefaultTheme,
+  // Page d'accueil : bandeau « La modernisation en 4 étapes » juste sous le hero
+  Layout: () => h(DefaultTheme.Layout, null, {
+    'home-hero-after': () => h(HomeSteps)
+  }),
   setup() {
     // Plan de page (colonne de droite) : retire les pastilles emoji colorées des titres (🟢🔵🟠🟣), sans toucher aux titres du corps
     const stripOutlineEmojis = () => {

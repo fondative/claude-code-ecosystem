@@ -1,4 +1,4 @@
-# Cas d'usage réel : Modernisation Legacy
+# Manuel d'utilisation : Modernisation Legacy
 
 ## Contexte
 
