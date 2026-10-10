@@ -1,242 +1,72 @@
 # CLAUDE.md
 
-## TL;DR
+## In short
 
 | Aspect | Detail |
 |--------|--------|
 | **What** | Persistent instructions file loaded in full at every session |
-| **Where** | `./CLAUDE.md` or `./.claude/CLAUDE.md` (project), `~/.claude/CLAUDE.md` (personal) |
-| **Role** | Single source of truth: paths, commands, workflow, conventions |
-| **Loading** | Full (no size limit), survives `/compact` |
-| **Relationship** | Orchestrates everything — agents, skills and rules read CLAUDE.md |
+| **Where** | `./CLAUDE.md` or `./.claude/CLAUDE.md` (project), `./CLAUDE.local.md` (personal, not versioned), `~/.claude/CLAUDE.md` (personal) |
+| **Role** | What Claude can't guess: commands, project-specific conventions, paths, gotchas. <span class="chez-nous">In our project</span> it also serves as the "single source of truth" for paths (in-house convention) |
+| **Loading** | Full (up to 4 MiB), concatenated with the other levels, survives `/compact` |
+| **Relationship** | Always-loaded foundation; [rules](/en/concepts/rules) and [skills](/en/concepts/skills) add detail only when it's needed |
+| **What this page adds** | What to put (and not put) in CLAUDE.md, the actual file of a modernization project and the gotchas it illustrates |
 
 ---
 
-## What is CLAUDE.md?
+## The essentials in 2 minutes
 
-`CLAUDE.md` is the **first file Claude loads** at every session. It contains the project's permanent instructions: paths, conventions, available commands and workflow. It is Claude's "working memory" for your project.
+CLAUDE.md is a Markdown file that Claude Code loads **in full at the start of every session**. It holds what Claude can't guess by reading the code: commands, project-specific conventions, paths, gotchas. CLAUDE.md files from different levels **stack** instead of replacing each other.
 
-::: warning Context, not enforcement
-CLAUDE.md provides **context and instructions** that Claude follows to the best of its ability, but it is not an enforcement mechanism. To block actions, use **permissions** in [`settings.json`](/en/concepts/settings) (deny) or the [**sandbox**](https://docs.anthropic.com/en/docs/claude-code/security#sandbox).
-:::
-
-```mermaid
-flowchart LR
-    A([Session]) --> B[CLAUDE.md] --> C[settings.json] --> D[Skills] --> E[Rules] --> F([Ready])
-
-    B -.-> G[Agents]
-    B -.-> H[Skills]
-    B -.-> I[Rules]
-
-    style A fill:#1e3a8a,stroke:#0f172a,color:#fff
-    style B fill:#115e59,stroke:#0d4f4a,color:#fff
-    style C fill:#334155,stroke:#1e293b,color:#e2e8f0
-    style D fill:#334155,stroke:#1e293b,color:#e2e8f0
-    style E fill:#334155,stroke:#1e293b,color:#e2e8f0
-    style F fill:#15803d,stroke:#0f172a,color:#fff
-    style G fill:#fbbf24,stroke:#d97706,color:#0f172a
-    style H fill:#fbbf24,stroke:#d97706,color:#0f172a
-    style I fill:#fbbf24,stroke:#d97706,color:#0f172a
+```
+~/.claude/CLAUDE.md      personal, all projects          ─┐
+./CLAUDE.md              project, versioned (git)         ├─► session context
+./CLAUDE.local.md        personal, not versioned          │   (root re-read after /compact)
+./src/CLAUDE.md          loaded when Claude touches src/ ─┘
 ```
 
-| Step | File | What is loaded |
-|:----:|------|----------------|
-| 1 | **CLAUDE.md** | Paths, commands, workflow (full + `@imports`) |
-| 2 | **[settings.json](/en/concepts/settings)** | Permissions allow/deny, sandbox, hooks |
-| 3 | **[Skills](/en/concepts/skills)** | Passive + launcher skill descriptions |
-| 4 | **[Rules](/en/concepts/rules)** | Content injected based on manipulated files (glob match) |
-
-::: tip Who consumes CLAUDE.md?
-**[Agents](/en/concepts/agents)** read paths (`SOURCE_PROJECT`, `BACKEND_TARGET`...), **[skills](/en/concepts/skills)** use it as reference context, and **[rules](/en/concepts/rules)** complement with targeted detail.
-:::
-
----
-
-## How It Works
-
-### Discovery and Loading
-
-#### Locations
-
-Claude discovers CLAUDE.md files through a **directory tree walk** — it traverses the tree from the project root:
-
-| Location | Scope | Shared |
-|----------|-------|--------|
-| `~/.claude/CLAUDE.md` | Personal (all projects) | No |
-| `./CLAUDE.md` | Project (root) | Yes (git) |
-| `./.claude/CLAUDE.md` | Project (alternate) | Yes (git) |
-| `./src/CLAUDE.md` | Subfolder | Yes (git) |
-| `./src/components/CLAUDE.md` | Sub-subfolder | Yes (git) |
-
-::: info Directory tree walk (top-down)
-Claude traverses the tree **from root to subfolders**. Root files (`~/.claude/CLAUDE.md`, `./CLAUDE.md`) are loaded **at session start**. Subfolder files (`src/CLAUDE.md`) are loaded **on demand**, when Claude works in that directory.
-:::
-
-::: warning Two root files?
-If both `./CLAUDE.md` **and** `./.claude/CLAUDE.md` exist, `./CLAUDE.md` takes precedence. Prefer a single location to avoid ambiguity.
-:::
-
-#### Loading Priority
-
-```mermaid
-flowchart TB
-    M[Managed Policy] -->|stacks| P[Personal] -->|stacks| R[Project root] -->|stacks| S[Subfolder]
-
-    style M fill:#7f1d1d,stroke:#450a0a,color:#fecaca
-    style P fill:#1e3a8a,stroke:#0f172a,color:#bfdbfe
-    style R fill:#115e59,stroke:#0d4f4a,color:#ccfbf1
-    style S fill:#334155,stroke:#1e293b,color:#e2e8f0
-```
-
-| Priority | Level | Location | Shared |
-|:--------:|-------|----------|--------|
-| Highest | **Managed Policy** | `/etc/claude-code/CLAUDE.md` | Organization (not excludable) |
-| High | **Personal** | `~/.claude/CLAUDE.md` | No (local) |
-| Normal | **Project root** | `./CLAUDE.md` | Yes (git) |
-| Contextual | **Subfolder** | `./src/CLAUDE.md` | Yes (git) |
-
-::: info Stacking, not replacing
-All CLAUDE.md levels are loaded **simultaneously** — they **stack**, they don't replace each other. Priority only applies when **conflicting instructions** exist between levels: the higher level wins.
-:::
-
-### Content and Organization
-
-#### Recommended Structure
+Minimal example, from the [official best practices](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md):
 
 ```markdown
-# Project Name
+# Code style
+- Use ES modules (import/export) syntax, not CommonJS (require)
+- Destructure imports when possible (eg. import { foo } from 'bar')
 
-## Configuration
-
-### Paths (PATHS)
-| Alias | Path | Description |
-|-------|------|-------------|
-| `SRC` | `./src/` | Source code |
-| `TESTS` | `./tests/` | Tests |
-
-### Commands
-- `npm test` : Run tests
-- `npm run lint` : Check style
-
-## Workflow
-### Available Skills
-- `/migrate <name>` : E2E Migration
-
-### Order
-1. Analysis → 2. Migration → 3. Documentation
+# Workflow
+- Be sure to typecheck when you're done making a series of code changes
+- Prefer running single tests, and not the whole test suite, for performance
 ```
 
-#### @import: Including Files
+Four facts change how you design a CLAUDE.md:
 
-CLAUDE.md supports importing files to keep the main file short:
+1. **It is context, not a barrier.** Claude follows instructions as best it can; to block an action, use a [`deny`](/en/reference/glossary#regles-de-permission) rule in [settings.json](/en/concepts/settings), a `PreToolUse` [hook](/en/concepts/hooks) or the [sandbox](/en/reference/glossary#sandbox).
+2. **Every line is paid for on every request.** The file is loaded in full: target under 200 lines and move detail into [skills](/en/concepts/skills) or [`paths`-scoped rules](/en/concepts/rules). `@path` imports lighten nothing, they load at launch.
+3. **Files stack, none "wins".** Two conflicting instructions (across files or levels): Claude may follow either one arbitrarily ([memory](https://code.claude.com/docs/en/memory#audit-your-instruction-files)); `/doctor prompt-audit` finds them (see [Maintenance](#maintenance)).
+4. **After `/compact`, the file is re-read, not the conversation.** An instruction given in chat can disappear; one written in the root CLAUDE.md comes back.
 
-```markdown
-# My Project
-
-@import ./docs/conventions.md
-@import ./docs/api-guide.md
-@import .claude/project-context.md
-```
-
-| Aspect | Detail |
-|--------|--------|
-| **Syntax** | `@import <relative-path>` |
-| **Max depth** | 5 levels of nested imports |
-| **Resolution** | Relative to the file containing the import |
-| **Failure** | Missing file = silently ignored (no error) |
-
-#### CLAUDE.md vs MEMORY.md
-
-Claude also maintains an automatic memory file:
-
-```
-~/.claude/projects/<project>/memory/MEMORY.md
-```
-
-| Aspect | CLAUDE.md | MEMORY.md |
-|--------|-----------|-----------|
-| **Nature** | Stable instructions, written by human | Evolving notes, written by Claude |
-| **Loading** | Full (no limit) | Truncated after 200 lines |
-| **Survives `/compact`** | Yes — re-read from disk | Yes — reloaded (first 200 lines) |
-| **Persistence** | In the repo (git) | Local (`~/.claude/projects/`) |
-| **Content** | Paths, commands, workflow, conventions | Discovered patterns, corrections, decisions |
-| **Modified by** | The user (manually) | Claude (automatically) |
-| **Command** | `/init` (initial generation) | `/memory` (view/edit) |
-
-::: info 200 lines = MEMORY.md, not CLAUDE.md
-The 200-line limit applies to **MEMORY.md**, not CLAUDE.md. MEMORY.md is written **automatically by Claude** — without a limit, it would grow indefinitely. Claude compensates by moving detailed notes into separate topic files loaded on demand. CLAUDE.md is written **by you** (intentional content), so no limit — but keeping < 200 lines remains a best practice for adherence.
-:::
-
-### Configuration
-
-#### claudeMdExcludes
-
-To prevent Claude from loading CLAUDE.md files in certain folders (e.g. `node_modules`, `vendor`):
-
-```json
-{
-  "claudeMdExcludes": ["node_modules", "vendor", "dist", ".git"]
-}
-```
-
-Configurable in [`settings.json`](/en/concepts/settings) at any scope.
-
-#### --add-dir
-
-To add directories outside the current project to Claude's scope:
-
-```bash
-claude --add-dir /path/to/other/project
-```
-
-Claude will also load CLAUDE.md files found in these additional directories, with the same discovery rules.
-
-### Runtime Behavior
-
-#### Full loading
-
-CLAUDE.md is loaded **in full** on every request, with no size limit. `@import` files are **expanded at load time** and become part of the content. Use `/status` to verify which CLAUDE.md files are currently loaded in your session.
-
-::: tip Official recommendation
-While there is **no technical limit**, the official docs recommend targeting **< 200 lines**. A file that's too long consumes context on every request and **reduces adherence** — Claude follows instructions less well when they're buried in a massive file. Extract detail into skills or `@import`.
-:::
-
-#### Surviving /compact
-
-CLAUDE.md **survives compaction** through a **reconstruction** mechanism (not preservation):
-
-1. Compaction is triggered (auto or manual via `/compact`)
-2. The `PreCompact` hook fires (if configured)
-3. Conversation context is compressed: old outputs removed, messages summarized
-4. **CLAUDE.md is re-read from disk** and re-injected fresh into the new context
-5. `@import` files are also re-expanded
-
-| Element | During compaction |
-|---------|-------------------|
-| **CLAUDE.md** | Re-read from disk, re-injected at 100% |
-| **Conversation** | Summarized (old outputs removed, key messages kept) |
-| **MEMORY.md** | Reloaded (first 200 lines) |
-| **Skills / Rules** | Descriptions available, unchanged |
-| **MCP Servers** | Connections maintained |
-
-::: warning If an instruction disappears after /compact...
-It was in the **conversation**, not in CLAUDE.md. Put persistent instructions in CLAUDE.md, not in chat.
-:::
-
-#### Initialization with /init
-
-The `/init` command generates an initial CLAUDE.md for your project:
-
-```bash
-# In Claude Code
-/init
-```
-
-Claude analyzes the project (structure, stack, commands) and generates an appropriate CLAUDE.md. Useful for quickly getting started on a new project.
+→ How it all works (locations, load order, imports, [auto memory](/en/reference/glossary#auto-memory), exclusions, [compaction](/en/reference/glossary#compaction)): [official documentation — Memory](https://code.claude.com/docs/en/memory).
 
 ---
 
-## Practical Guide: Designing Your CLAUDE.md
+## Designing your CLAUDE.md well
+
+### Writing Good Instructions
+
+For each line, ask: **"Would removing this cause Claude to make mistakes?"** If not, cut it ([best practices](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)).
+
+| ✅ Include | ❌ Exclude |
+|-----------|-----------|
+| Bash commands Claude can't guess | Anything Claude can figure out by reading code |
+| Code style rules that differ from defaults | Standard language conventions |
+| Testing instructions and preferred test runners | Detailed API documentation (link instead) |
+| Repository etiquette (branches, PRs) | Information that changes frequently |
+| Project-specific architectural decisions | Long explanations, tutorials |
+| Environment quirks (required variables) | File-by-file descriptions of the code |
+| Non-obvious gotchas | Self-evident practices ("write clean code") |
+
+- **Concrete and verifiable**: "Use 2-space indentation" rather than "Format code properly"; "Run `npm test` before committing" rather than "Test your changes".
+- **When to add a line**: when Claude gets something wrong that it couldn't infer from the code. If it asks a question already answered in CLAUDE.md, the wording is ambiguous: rephrase rather than add.
+- **Rare emphasis**: if Claude skips one specific instruction, add "IMPORTANT" to **that line alone**. Emphasizing everything emphasizes nothing.
+- **Guarantee ≠ instruction**: anything that must happen every time (blocking, formatting, running a test) belongs in a [hook](/en/concepts/hooks) or a [permission](/en/concepts/settings), not a sentence.
 
 ### Usage Matrix: What Goes Where?
 
@@ -248,12 +78,48 @@ Claude analyzes the project (structure, stack, commands) and generates an approp
 | Detailed conventions | **[Passive skill](/en/concepts/skills)** | Too long for CLAUDE.md |
 | Short contextual reminder | **[Rule](/en/concepts/rules)** | Injected based on files |
 | Personal preferences | **~/.claude/CLAUDE.md** | Not in the repo |
-| Session notes | **MEMORY.md** | Evolves automatically |
-| Security (deny/allow) | **[settings.json](/en/concepts/settings)** | Real enforcement (not just context) |
+| Claude's learnings | **MEMORY.md** (auto memory) | Written and pruned by Claude |
+| In-progress tasks, TODOs | **Plan file** (`PLAN.md`…) or conversation | Temporary, driven by you |
+| Security (deny/allow) | **[settings.json](/en/concepts/settings)** | Real blocking (not just context) |
 
-### Warnings
+### The project's actual configuration
 
-#### ⚠️ `WARN-001`: File too long / monolithic
+<span class="chez-nous">In our project</span> The modernization project's root `CLAUDE.md`:
+
+| Element | In the project |
+|---------|----------------|
+| Files | Only one: `./CLAUDE.md`. No `.claude/CLAUDE.md`, no `CLAUDE.local.md`, no subfolder CLAUDE.md, no `@` import |
+| Size | **82 lines**, 5.4 KB — under the recommended 200-line threshold |
+| Structure | 2 sections: *Configuration du Projet* (stack, PATHS, commands, conventions) and *Workflow de Modernisation* (launcher skills, technical commands, agents/skills/rules, workflow order) |
+| PATHS table | **11 aliases** (`SOURCE_PROJECT` → `./php-legacy`, `BACKEND_TARGET`, `OPENAPI_SPEC`, `REPORTS_DIR`, `WIKI_TARGET`…); all 11 agents point to CLAUDE.md for their paths |
+| Conventions | No detailed code rules: **pointers** to the `sym-*` and `front-*` skills |
+| Inventories | Lists of the 4 launcher skills and the 8 technical commands; for agents, skills and rules, a plain pointer to their `.claude/` folder |
+
+::: info This project's convention: PATHS alias table
+Agents and skills read `SOURCE_PROJECT`, `BACKEND_TARGET`… from the table instead of hardcoding paths. This is an **in-house convention**, useful when many agents share the same paths — not a Claude Code feature.
+:::
+
+What to take from it: the PATHS table is not the only copy of the paths. `php-legacy` also appears in the `settings.json` `deny` and in the `legacy-readonly` rule glob. The CLAUDE.md note lists these copies (`settings.json`, the rules' `paths:`, `STACK_DIRS` in `.claude/scripts/install-stack.sh`) and asks, after a rename, for a `grep` over `.claude/` followed by the `health-check` agent. The technical commands are written in their actual invocation form, `/dev:commit` (the subfolder becomes a namespace separated by `:`).
+
+### Gotchas
+
+- **Subfolder CLAUDE.md files only load on demand**, when Claude reads or modifies a file in that folder (including a `cat` through Bash). At launch, only those of the current directory and its parents load.
+- **`@path` imports load at launch**, along with the file containing them (max depth: 4 hops). An import pointing outside the project triggers an approval dialog.
+- **Auto memory is not CLAUDE.md**: it is notes Claude writes itself (corrections, preferences) in `~/.claude/projects/<project>/memory/`, with a `MEMORY.md` index. The "200 lines or 25KB" limit applies to that index; CLAUDE.md loads in full up to 4 MiB (beyond that, it is skipped). `/memory` lets you browse or disable it.
+- **A [managed](/en/reference/glossary#managed) CLAUDE.md** (deployed by the organization to a system location, e.g. `/etc/claude-code/CLAUDE.md` on Linux) adds to all the others and **cannot be excluded**. Other CLAUDE.md files (e.g. other teams' in a monorepo) can be skipped with the [`claudeMdExcludes`](/en/reference/glossary#claudemdexcludes) setting: a list of [globs](/en/reference/glossary#glob) matched against absolute paths.
+- **Block-level HTML comments are stripped** before injection: they cost nothing and suit maintainer notes.
+- **`CLAUDE.local.md` must be in `.gitignore`** and only exists in the worktree where it was created.
+- **If an instruction disappears after `/compact`**, it was in the conversation, or in a subfolder CLAUDE.md (or a `paths` rule) that hasn't reloaded yet.
+
+Details and sources: [official documentation — Memory](https://code.claude.com/docs/en/memory).
+
+### Common mistakes to avoid
+
+→ Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
+
+#### ⚠️ `WARN-001`: File too long / monolithic {#warn-001}
+
+*Origin: official documentation (target under 200 lines per file).*
 
 A 200+ line CLAUDE.md drowns essential information and reduces Claude's adherence.
 
@@ -273,18 +139,17 @@ Symfony 7.4, PostgreSQL, Docker
 
 ## Conventions
 See skill `sym-api-conventions` for details.
-
-## Architecture
-@import ./docs/architecture.md
 ```
-Keep CLAUDE.md **short and factual** (< 200 lines). Delegate details to skills, rules or `@import`.
+Keep CLAUDE.md **short and factual** (< 200 lines). Delegate details to skills (loaded on demand) and `paths`-scoped rules. Splitting into `@path` imports organizes the file but **doesn't reduce** context.
 :::
 
 ---
 
-#### ⚠️ `WARN-002`: Hardcoded paths in agents
+#### ⚠️ `WARN-002`: Hardcoded paths in agents {#warn-002}
 
-If a folder is renamed, you have to update every agent one by one.
+*Origin: project rule (PATHS section); experienced on this project: hardcoded paths had to be removed from the `documentation-generator` agent (commit `847ccc2`).*
+
+If a folder is renamed, you have to update every agent one by one. <span class="chez-nous">In our project</span> agents read the path aliases from CLAUDE.md.
 
 ::: danger Problem
 ```markdown
@@ -302,30 +167,36 @@ The agent reads the path from CLAUDE.md. If the folder is renamed, **only one pl
 
 ---
 
-#### ⚠️ `WARN-003`: Duplicated conventions
+#### ⚠️ `WARN-003`: Duplicated conventions {#warn-003}
+
+*Origin: experienced on this project: the Docker command, written in both CLAUDE.md and the `symfony-api` rule, diverged: the `-T` flag was missing from CLAUDE.md for a long time (commits `e0b87b5`, `dfb52db`).*
 
 The same conventions written in two places will inevitably diverge.
 
 ::: danger Problem
 ```markdown
-## Conventions
-- PSR-12 strict
-- camelCase methods
+<!-- CLAUDE.md -->
+- Toutes les commandes backend via Docker Compose : `docker compose exec -T app [commande] 2>&1 | cat`
+
+<!-- .claude/rules/symfony-api.md -->
+- Commandes via `docker compose exec -T app [cmd] 2>&1 | cat`
 ```
-Duplicated in CLAUDE.md **and** in the skill — which one is authoritative?
+The same instruction in two places: when one changes (adding `-T`), the other lags behind — which one is authoritative?
 :::
 
 ::: info Solution
-```markdown
-## Conventions
-See skill `sym-api-conventions`.
-```
-A single source of truth. CLAUDE.md **points** to the skill, without duplicating.
+Write the instruction **in one place only**. A command valid for the whole project stays in CLAUDE.md (always loaded); the `symfony-api` rule keeps only what is backend-specific (TDD, PSR-12) or **points** to CLAUDE.md. Same principle for detailed conventions: CLAUDE.md points to the skill (`See skill sym-api-conventions`) without copying them.
+:::
+
+::: info In our project
+The duplicate **is resolved**: the Docker command is written only in CLAUDE.md, and the `symfony-api` rule points to it (« voir CLAUDE.md, section Commandes »).
 :::
 
 ---
 
-#### ⚠️ `WARN-004`: Temporary instructions
+#### ⚠️ `WARN-004`: Temporary instructions {#warn-004}
+
+*Origin: official documentation (exclude information that changes frequently).*
 
 CLAUDE.md is loaded at **every session**. In-progress tasks don't belong here.
 
@@ -339,12 +210,14 @@ These notes pollute the permanent file and become stale.
 :::
 
 ::: info Solution
-Use **MEMORY.md** (`/memory`) for session notes and in-progress tasks. CLAUDE.md is reserved for **permanent** instructions only.
+Track in-progress tasks in a **plan file** in the repo (e.g. `PLAN.md`, read on demand) or simply in the **conversation**. Don't send them to **MEMORY.md**: that's the memory **Claude** writes and prunes itself, loaded every session — TODOs there would go stale without you noticing. CLAUDE.md is reserved for **permanent** instructions only.
 :::
 
 ---
 
-#### ⚠️ `WARN-005`: Confusing CLAUDE.md with permissions
+#### ⚠️ `WARN-005`: Confusing CLAUDE.md with permissions {#warn-005}
+
+*Origin: official documentation (CLAUDE.md is not enforced); the project backs its instructions with a `deny` ([Methodology — Phase 0](/en/guide/methodology#phase-0-build-the-infrastructure)).*
 
 CLAUDE.md is **context**, not a blocking mechanism.
 
@@ -357,75 +230,76 @@ Claude will try its best, but nothing **technically** prevents it from modifying
 :::
 
 ::: info Solution
-Use `deny` in **[settings.json](/en/concepts/settings)** for actual blocking:
+Use `deny` in **[settings.json](/en/concepts/settings)** for actual blocking (`Edit(...)` covers all write tools):
 ```json
-{ "deny": ["Edit(/php-legacy/**)", "Write(/php-legacy/**)"] }
+{
+  "permissions": {
+    "deny": ["Edit(/php-legacy/**)"]
+  }
+}
 ```
 CLAUDE.md provides the **why**, settings.json enforces the **block**.
 :::
 
 ---
 
-## Advanced Control
+#### ⚠️ `WARN-006`: Believing an `@` import lightens the context {#warn-006}
 
-### InstructionsLoaded Hook
+*Origin: experienced on this wiki: it wrongly presented `@` imports as a way to reduce context.*
 
-The `InstructionsLoaded` [hook](/en/concepts/hooks) fires after CLAUDE.md and all instructions are loaded:
+Splitting CLAUDE.md into imported files makes it more readable, not lighter.
 
-```json
-{
-  "hooks": {
-    "InstructionsLoaded": [{
-      "type": "command",
-      "command": "echo 'Instructions loaded for the project'"
-    }]
-  }
-}
+::: danger Problem
+```markdown
+# "Slimmed-down" CLAUDE.md: 10 visible lines
+## Conventions
+- @docs/backend-conventions.md    <!-- 400 lines -->
+- @docs/frontend-conventions.md   <!-- 300 lines -->
 ```
-
-Useful for logging, custom validations, or dynamic context injection.
-
-### Enterprise: Managed CLAUDE.md
-
-Organizations can enforce instructions via managed settings. These instructions have **highest priority** and cannot be overridden by project or user files.
-
-| OS | Path |
-|----|------|
-| macOS | `/Library/Application Support/ClaudeCode/CLAUDE.md` |
-| Linux | `/etc/claude-code/CLAUDE.md` |
-| Windows | `C:\Program Files\ClaudeCode\CLAUDE.md` |
-
-::: warning Not excludable
-Managed instructions **cannot** be ignored via `claudeMdExcludes`. This is by design to ensure organization standards.
+The 700 imported lines are expanded and loaded at launch, every session, as if they were written in CLAUDE.md.
 :::
 
-### Troubleshooting
-
-| Problem | Diagnosis | Solution |
-|---------|----------|----------|
-| Instructions ignored | `/status` → check loading | Verify file location |
-| Subfolder CLAUDE.md not loaded | File is in an excluded folder | Check `claudeMdExcludes` |
-| @import not working | Incorrect relative path | Verify path from parent file |
-| Instructions lost after /compact | Should not happen | CLAUDE.md survives /compact — check that it's not conversation context |
-| MEMORY.md truncated | Normal beyond 200 lines | Keep MEMORY.md concise, archive old notes |
+::: info Solution
+```markdown
+## Conventions
+- Backend: skill `sym-api-conventions`
+- Frontend: skill `front-app-conventions`
+```
+Detail goes into skills (content loaded when the task needs it) or `paths`-scoped rules (loaded when Claude touches the matching files). `/context` (*Memory files* section) shows what is actually loaded.
+:::
 
 ---
 
-## Concrete Examples
+### Maintenance
+
+Treat CLAUDE.md like code: review it when things go wrong, prune it regularly, and check that a change actually shifts Claude's behavior ([best practices](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)).
+
+| Need | Tool / practice |
+|------|-----------------|
+| Cut what Claude can derive from the code | `/doctor` proposes cuts for a checked-in CLAUDE.md |
+| Find outdated or **conflicting** instructions across CLAUDE.md, nested CLAUDE.md, rules, skills, agents | `/doctor prompt-audit` (report + proposed edits, nothing changes without your approval) |
+| Check what is loaded | `/context` (*Memory files* section), size warning at startup and in `/status` |
+| Keep the essentials through compaction | Add an instruction such as "When compacting, always preserve the full list of modified files and any test commands" |
+
+---
+
+## Ready-to-use examples
 
 ### Example 1: Modernization project
 
-Excerpt from this project's actual `CLAUDE.md` (intermediate sections omitted):
+<span class="chez-nous">In our project</span> Excerpt from this project's actual `CLAUDE.md` (intermediate sections omitted). The alias table and the skills list are **this project's conventions** (see above):
 
+::: details See the CLAUDE.md excerpt
 ````markdown
 # Projet de Modernisation Legacy
 
 ## Configuration du Projet
 
-> **Stack** : PHP 8.2 + Symfony 7.4 + PostgreSQL + Docker (backend) | React 19 + TypeScript + Vite + Tailwind CSS 4 (frontend)
+> **Stack** : PHP 8.5 + Symfony 7.4 + PostgreSQL + Docker (backend) | React 19 + TypeScript + Vite + Tailwind CSS 4 (frontend)
 
-> **SOURCE UNIQUE DE VERITE** : Tous les subagents et skills DOIVENT lire leurs chemins depuis cette section.
-> En cas de changement de repertoire, modifier UNIQUEMENT ici. Ne JAMAIS hardcoder de chemins dans les subagents.
+> **SOURCE UNIQUE DE VERITE** : subagents et skills lisent leurs chemins dans cette table, par alias, jamais en dur.
+> Seuls `.claude/settings.json` (regles `Edit(...)`, dont `Edit(/output/**)` et `Edit(/legacy-wiki/**)` pour `WIKI_TARGET`) et le `paths:` des `.claude/rules/*.md` contiennent des chemins reels (globs obligatoires), ainsi que `STACK_DIRS` de `.claude/scripts/install-stack.sh` (chemins reels, a mettre a jour lors d'un renommage).
+> Apres un renommage : mettre a jour la table, puis `grep -rn "<ancien-chemin>" .claude/` (script `.claude/scripts/install-stack.sh` compris) et corriger chaque resultat ; enfin lancer l'agent `health-check` (section « Chemins en dur ») pour verifier l'alignement.
 
 ### Chemins (PATHS)
 
@@ -439,24 +313,23 @@ Excerpt from this project's actual `CLAUDE.md` (intermediate sections omitted):
 | `OPENAPI_SPEC` | `./api-rest-symfony-target/docs/openapi.yaml` | Specification OpenAPI |
 | `BACKEND_ANALYSIS_DIR` | `./output/analysis/backend/` | Analyses backend |
 | `FRONTEND_ANALYSIS_DIR` | `./output/analysis/frontend/` | Analyses frontend |
-| `FRONTEND_DOCS_DIR` | `./output/analysis/frontend/` | Documentation frontend generee |
 | `REPORTS_DIR` | `./output/reports/` | Rapports de conformite |
 | `DESIGN_DIR` | `./output/design/` | Fichiers design Figma |
-
-> **Note** : Le fichier `.claude/settings.json` utilise des chemins reels (pas des alias) car le systeme de permissions Claude Code requiert des glob patterns. En cas de changement de repertoire, mettre a jour **ici** ET dans `settings.json`.
+| `WIKI_TARGET` | `./legacy-wiki/` | Wiki VitePress genere (mod-analyze-legacy, mod-generate-docs) |
 
 ### Commandes
 
-- Toutes les commandes backend via Docker Compose : `docker compose exec -T app [commande] 2>&1 | cat`
+- Toutes les commandes backend via Docker Compose : `cd <BACKEND_TARGET> && docker compose exec -T app <commande> 2>&1` (sans `| cat`, pour garder le code de sortie)
 - Ne jamais executer de commandes PHP ou Composer directement sur l'hote
+...
 
 ## Workflow de Modernisation
 
 ### Skills lanceurs (slash commands)
 
-- `/mod-analyze-legacy` : Pipeline d'analyse (technique + inventaire + audit)
+- `/mod-analyze-legacy` : Pipeline d'analyse en 6 etapes (technique → inventaire → audit → specs detaillees (optionnel) → visualisations → synchro wiki si `WIKI_TARGET` existe)
 - `/mod-generate-visualization` : Visualisations interactives (arbre + graphe de dependances)
-- `/mod-migrate-feature <nom>` : Migration E2E d'une feature (specs → planif → implementation → conformite)
+- `/mod-migrate-feature <nom>` : Migration E2E d'une feature (specs → arbitrage des ecarts → synchro wiki spec → planif → synchro wiki planif → implementation (synchro wiki a chaque lot) → conformite (synchro wiki) → boucle qualite → synchro wiki)
 - `/mod-generate-docs` : Generation documentation VitePress
 
 ...
@@ -465,20 +338,21 @@ Excerpt from this project's actual `CLAUDE.md` (intermediate sections omitted):
 
 ```
 1. /mod-analyze-legacy
-   └── Analyse technique → Inventaire → Audit
-
-1.5. /mod-generate-visualization
-     └── Arbre fonctionnel + Graphe de dependances
+   └── Analyse technique → Inventaire → Audit → Specs detaillees (optionnel)
+       → Visualisations (/mod-generate-visualization, etape 5) → Synchro wiki (si WIKI_TARGET existe)
+   (/mod-generate-visualization peut aussi etre relance seul apres un enrichissement de l'inventaire)
 
 2. /mod-migrate-feature <nom>  (pour chaque feature)
-   └── Specs → Planif Backend → Planif Frontend → Implem Backend → Implem Frontend → Conformite
+   └── Specs → Arbitrage ecarts → Synchro wiki spec → Planif Backend → Planif Frontend → Synchro wiki planif → Implem Backend → Implem Frontend → Conformite
+       → Boucle qualite → Synchro wiki (si WIKI_TARGET existe)
 
 3. /mod-generate-docs
    └── Documentation VitePress complete
 ```
 ````
+:::
 
-### Example 2: Project with @import
+### Example 2: Project with `@path` imports
 
 ```markdown
 # API Platform
@@ -486,75 +360,119 @@ Excerpt from this project's actual `CLAUDE.md` (intermediate sections omitted):
 ## Stack
 Node.js 22, TypeScript, PostgreSQL, Docker
 
-## Paths
-| Alias | Path | Description |
-|-------|------|-------------|
-| `SRC` | `./src/` | Source code |
-| `TESTS` | `./tests/` | Tests |
-
 ## Conventions
-@import ./docs/coding-standards.md
-@import ./docs/api-design.md
+- Coding standards: @docs/coding-standards.md
+- API design: @docs/api-design.md
 
 ## Commands
 - `npm test` : Tests
 - `npm run build` : Build
 ```
 
+Both imported files load **every session**. If they only concern part of the code (e.g. `src/api/`), a `paths`-scoped rule is cheaper.
+
 ### Example 3: Personal CLAUDE.md
 
-`~/.claude/CLAUDE.md`:
+Whatever a **setting can guarantee** moves out of CLAUDE.md: response language, commit attribution, confirmation before `git push`. In `~/.claude/settings.json` ([`language`, `attribution`](https://code.claude.com/docs/en/settings), [`ask` rules](https://code.claude.com/docs/en/permissions)):
+
+```json
+{
+  "language": "french",
+  "attribution": { "commit": "", "pr": "" },
+  "permissions": {
+    "ask": ["Bash(git push *)"]
+  }
+}
+```
+
+Only the preferences no setting can express stay in `~/.claude/CLAUDE.md`:
 
 ```markdown
 # Personal Preferences
+- Conventional Commits (`type(scope): description`), atomic commits
+- No comments that restate the code
+```
 
-## Language
-Always respond in French.
+### Example 4: Starter skeleton
+
+Starting point for a new project: fill in the brackets, then delete any line Claude would guess on its own (see [WARN-001](#warn-001)).
+
+```markdown
+# [Project name]
+
+## Stack
+[Runtime + version], [framework], [database], [test framework]
+
+## Commands
+- `[test command]`: Tests
+- `[lint command]`: Lint
+- `[build command]`: Build
+
+## Conventions
+- [Only what differs from the language's standards]
 
 ## Workflow
-- Always use Conventional Commits
-- Prefer atomic commits
-- Never push without confirmation
-
-## Style
-- Concise code, no obvious comments
-- Explicit variable names
+1. Explore in plan mode before changing anything
+2. Tests first, then implementation
+3. Commit with `/<namespace>:<command>` (Conventional Commits)
 ```
+
+### Reference Examples
+
+| Source | What you learn |
+|--------|----------------|
+| [Anthropic best practices](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md) | Short file, include / exclude table, "would removing this line…?" test |
+| [Trail of Bits — claude-code-config](https://github.com/trailofbits/claude-code-config) | **Two layers**: a ~100-line always-loaded `~/.claude/CLAUDE.md` + per-language `~/.claude/rules/` loaded via `paths` |
+| [HumanLayer — Writing a good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md) | **WHAT** (stack, structure) / **WHY** (project purpose) / **HOW** (how to work) structure; "never send an LLM to do a linter's job" |
 
 ---
 
-## Launch Checklist
+## Before going live
 
 ### Content
 
-- [ ] Paths centralized in a single table
-- [ ] "SINGLE SOURCE OF TRUTH" note visible
-- [ ] Commands and skills documented
+- [ ] Commands Claude can't guess are documented
+- [ ] <span class="chez-nous">In our project</span> Paths centralized in an alias table, "SINGLE SOURCE OF TRUTH" note visible
 - [ ] Tech stack in 1 line
+- [ ] Agents and skills read paths through the CLAUDE.md aliases, no hardcoded path ([WARN-002](#warn-002))
 
 ### Organization
 
-- [ ] CLAUDE.md short — details in skills or `@import`
+- [ ] CLAUDE.md short (< 200 lines) — details in skills or `paths`-scoped rules (`@path` imports don't reduce context)
+- [ ] Every line passes the "would removing it cause a mistake?" test
 - [ ] No detailed conventions (those go in skills)
-- [ ] No temporary instructions (those go in MEMORY.md)
-- [ ] No security rules (those go in settings.json deny)
+- [ ] No temporary instructions (plan file or conversation, not MEMORY.md)
+- [ ] What a setting guarantees (`language`, `attribution`, permissions, security rules as `deny`) lives in settings.json, not in CLAUDE.md
+- [ ] Each PATHS path searched for in `settings.json`, `.claude/rules/` and the skills before a rename
+- [ ] Commands written in their actual invocation form (`/dev:commit`, not `/dev/commit`)
 
 ### Discovery
 
 - [ ] CLAUDE.md at root (`./` or `./.claude/`)
-- [ ] `claudeMdExcludes` for folders to ignore (`node_modules`, `vendor`)
-- [ ] Subfolder CLAUDE.md files if needed (contextual)
-- [ ] `@import` with max depth of 5
+- [ ] `claudeMdExcludes` (globs on absolute paths) for CLAUDE.md files to ignore; managed CLAUDE.md for organization standards (cannot be excluded)
+- [ ] Instructions specific to a subfolder in its own CLAUDE.md or a `paths`-scoped rule (loaded on demand, not at launch)
+- [ ] `@path` imports with max depth of 4 hops
+- [ ] `CLAUDE.local.md` listed in `.gitignore`
 
 ### Verification
 
 - [ ] `/init` to generate an initial CLAUDE.md
-- [ ] `/status` to verify loading
+- [ ] `/context` (*Memory files* section) to verify loading
 - [ ] `/memory` to check auto-memory
-- [ ] CLAUDE.md survives `/compact` — test it
+- [ ] Lasting instructions in the root CLAUDE.md (re-read after `/compact`, unlike subfolder CLAUDE.md files and `paths`-scoped rules) — test it
+- [ ] `/doctor prompt-audit` run regularly (outdated or conflicting instructions)
 
 ---
 
-## Resources
+## Going further
 
+- [Rules](/en/concepts/rules) — detail tied to an area of the code, loaded only when it matters
+- [Skills](/en/concepts/skills) — where detailed conventions belong
+- [Settings](/en/concepts/settings) — what must be guaranteed rather than asked for
+- [Methodology](/en/guide/methodology) — the pipeline that consumes the PATHS table
 - [Official Documentation — Memory](https://code.claude.com/docs/en/memory)
+- [Best practices — Write an effective CLAUDE.md](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)
+
+---
+
+*Checked with **Claude Code v2.1.295** against the official documentation on October 10, 2026. A newer feature may be missing: see the [changelog](https://code.claude.com/docs/en/changelog).*

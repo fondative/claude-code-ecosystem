@@ -1,133 +1,37 @@
 # Stratégie de modèles
 
-## Principe
+Cette page justifie le modèle de chacun des 11 agents du projet. La stratégie générale (quel modèle pour quelle tâche, heuristique de décision, coûts) est décrite dans [Agents — Quel modèle choisir ?](/concepts/agents#quel-modele-choisir) ; la vue d'ensemble de la répartition dans [Méthodologie — Répartition des modèles](/guide/methodology#repartition-des-modeles).
 
-Le choix du modèle pour chaque agent est une décision architecturale qui impacte directement la qualité, la vitesse et le coût. La règle : **utiliser le modèle le moins coûteux qui produit la qualité requise**.
+## Justification par agent
 
-## Matrice de sélection
+Valeurs `model` et `maxTurns` relevées dans le frontmatter des fichiers `.claude/agents/*.md` du projet.
 
-| Critère | Opus | Sonnet | Haiku |
-|---------|------|--------|-------|
-| Raisonnement complexe | ⭐⭐⭐ | ⭐⭐ | ⭐ |
-| Suivi d'instructions | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| Vitesse | ⭐ | ⭐⭐ | ⭐⭐⭐ |
-| Coût | $$$ | $$ | $ |
-| Fenêtre de contexte | 1M tokens | 200k tokens | 200k tokens |
+| Agent | `model` | `maxTurns` | Justification |
+|-------|---------|------------|---------------|
+| `legacy-technical-analyzer` | `opus` | 100 | Reverse engineering d'un code brut non documenté : déduire l'architecture, les flux et les patterns implicites |
+| `legacy-functional-analyzer` | `sonnet` | 50 | Inventaire features / rôles / flux à partir du rapport technique déjà généré, pas du code brut |
+| `legacy-functional-analyzer-auditor` | `haiku` | 35 | Comparaison d'un inventaire existant avec le legacy : vérification, pas création |
+| `legacy-feature-analyzer` | `opus` | 50 | Spécification en 14 sections depuis du code non documenté : règles métier implicites, cas limites |
+| `legacy-feature-analyzer-refiner` | `sonnet` | 35 | Enrichissement d'une spec existante, qui demande de comprendre le contexte métier et pas seulement de reformuler |
+| `backend-tasks-planner` | `sonnet` | 35 | Décomposition structurée à partir de la spec : la spec Opus fournit le contexte |
+| `frontend-tasks-planner` | `sonnet` | 35 | Décomposition à partir de la spec et du contrat OpenAPI défini côté backend |
+| `backend-tasks-executor` | `sonnet` | 60 | TDD guidé par les références des skills (`create-entity.md`, `create-dto.md`…) : les patterns sont donnés ; `maxTurns` dimensionné pour un lot de 3 tâches (le launcher découpe) |
+| `frontend-tasks-executor` | `sonnet` | 60 | TDD guidé par les skills frontend, y compris l'intégration conditionnelle du design Figma ; `maxTurns` dimensionné pour un lot de 3 tâches |
+| `conformity-reporter` | `sonnet` | 45 | Évaluation avec une grille de déduction définie (skill `mod-conformity-conventions`) |
+| `health-check` | `haiku` | 50 | Lecture de toute la configuration (11 agents, 12 skills, 7 rules, `settings.json`, script d'installation) et vérifications de cohérence, dont les chemins en dur |
 
-## Répartition du projet
+Deux choix ne suivent pas l'intuition « plus c'est important, plus le modèle est gros » : `legacy-functional-analyzer` est sur Sonnet parce qu'il lit le rapport technique et non le code brut, et `legacy-feature-analyzer-refiner` est sur Sonnet plutôt que Haiku parce qu'un affinement doit enrichir la spec, pas seulement la reformuler. → [Méthodologie — Répartition des modèles](/guide/methodology#repartition-des-modeles)
 
-### Opus — Analyse approfondie (2 agents)
-
-```yaml
-# legacy-technical-analyzer.md
-model: opus
-# Justification : reverse engineering complet d'un codebase inconnu
-# Nécessite : raisonnement multi-étapes, déduction d'architecture
-
-# legacy-feature-analyzer.md
-model: opus
-# Justification : spécification 12 sections depuis du code non documenté
-# Nécessite : compréhension profonde du métier et des flux
-```
-
-**Pourquoi Opus ?** Ces tâches demandent de comprendre un codebase entier sans documentation, déduire l'architecture, les patterns et les règles métier implicites. Sonnet ne produit pas la même profondeur d'analyse.
-
-### Sonnet — Implémentation et planification (7 agents)
+::: info Convention de ce projet
+`maxTurns` = budget estimé (fichiers lus + fichiers écrits + commandes) + 10 de marge, noté en commentaire YAML à côté de la valeur. Exemple, `backend-tasks-planner.md` :
 
 ```yaml
-# backend-tasks-planner.md / frontend-tasks-planner.md
-model: sonnet
-# Justification : décomposition structurée avec spec en entrée
-# La spec Opus fournit le contexte — Sonnet exécute
-
-# backend-tasks-executor.md / frontend-tasks-executor.md
-model: sonnet
-# Justification : TDD avec conventions claires (skills)
-# Les skills fournissent les patterns — Sonnet applique
-# Note : frontend-tasks-executor gère aussi le design Figma (step conditionnel)
-
-# conformity-reporter.md
-model: sonnet
-# Justification : évaluation avec grille de scoring définie
-# Le framework est clair — Sonnet juge et score
-
-# legacy-feature-analyzer-refiner.md
-model: sonnet
-# Justification : affinement d'une spec existante (pas création)
-
-# legacy-functional-analyzer.md
-model: sonnet
-# Justification : inventaire structuré avec patterns connus
-# Passé d'Opus à Sonnet car il lit de la documentation déjà générée, pas du code brut
+maxTurns: 35   # ~20 lus (CLAUDE.md, spec, index, OPENAPI_SPEC, references, docs techniques) + 1 ecrit (analyse, section OpenAPI incluse) + 10 = 31
 ```
 
-**Pourquoi Sonnet ?** Ces agents ont un contexte clair (spécifications, conventions, analyses) et appliquent des patterns définis. Le raisonnement créatif d'Opus n'est pas nécessaire.
+Pour les executors, le calcul porte sur un lot : `3 x 12 + 4 fixes + 3 doc + 10 marge = 53`, arrondi à 60. Si un agent est coupé, le launcher le reprend (SendMessage) jusqu'à la fin du lot ; si cela se répète, il passe à des lots de 2 tâches plutôt que d'augmenter `maxTurns`. Voir [Agents, WARN-006](/concepts/agents#warn-006) et la skill `claude-code-parallel-agents`.
+:::
 
-### Haiku — Tâches légères (2 agents)
+---
 
-```yaml
-# legacy-functional-analyzer-auditor.md
-model: haiku
-# Justification : vérification d'un inventaire existant
-# Tâche de comparaison, pas de création
-
-# health-check.md
-model: haiku
-# Justification : vérification d'existence de fichiers
-# Diagnostics simples et rapides
-```
-
-**Pourquoi Haiku ?** Ces tâches sont structurées, répétitives et ne demandent pas de raisonnement complexe. Haiku est 10x moins cher que Sonnet pour un résultat équivalent.
-
-> **L'agent `documentation-generator` a été supprimé** et remplacé par le skill launcher `/mod-generate-docs`. La génération de documentation est désormais orchestrée comme un workflow, pas un agent isolé.
-
-## Impact sur les coûts
-
-### Estimation par feature migrée
-
-| Étape | Agent | Modèle | Tokens estimés |
-|-------|-------|--------|----------------|
-| Spécification | legacy-feature-analyzer | Opus | ~50k input + ~10k output |
-| Planification backend | backend-tasks-planner | Sonnet | ~30k input + ~8k output |
-| Planification frontend | frontend-tasks-planner | Sonnet | ~25k input + ~6k output |
-| Implémentation backend | backend-tasks-executor | Sonnet | ~40k input + ~20k output |
-| Implémentation frontend | frontend-tasks-executor | Sonnet | ~35k input + ~15k output |
-| Conformité | conformity-reporter | Sonnet | ~30k input + ~5k output |
-
-### Optimisation
-
-1. **Opus seulement quand nécessaire** — L'analyse technique se fait une seule fois pour tout le projet
-2. **Skills comme contexte** — Les références évitent à Sonnet de "deviner" les conventions
-3. **Haiku pour le répétitif** — Audits et diagnostics (auditor, health-check)
-
-## Decision tree
-
-```
-La tâche nécessite-t-elle de comprendre du code non documenté ?
-├── OUI → Opus
-└── NON
-    La tâche produit-elle du code ou des spécifications ?
-    ├── OUI → Sonnet
-    └── NON
-        La tâche suit-elle un template clair ?
-        ├── OUI → Haiku
-        └── NON → Sonnet (par défaut)
-```
-
-## Quand monter en puissance
-
-Signaux qu'un agent Haiku devrait être Sonnet :
-- Sorties incomplètes ou mal structurées
-- Oubli de sections dans les templates
-- Mauvaise interprétation des instructions complexes
-
-Signaux qu'un agent Sonnet devrait être Opus :
-- Analyse superficielle de code complexe
-- Spécifications qui manquent des cas limites
-- Mauvaise déduction d'architecture implicite
-
-## Leçons apprises
-
-> **Le refiner est passé de Haiku à Sonnet** après avoir constaté que Haiku produisait des affinements trop superficiels. L'affinement de spécifications nécessite de comprendre le contexte métier, pas juste de reformuler.
-
-> **Le functional-analyzer est passé d'Opus à Sonnet** car il lit de la documentation déjà générée (rapport technique), pas du code brut. La synthèse documentaire ne nécessite pas le raisonnement profond d'Opus.
+*Vérifié avec **Claude Code v2.1.295** contre la documentation officielle le 10 octobre 2026. Une fonctionnalité plus récente peut manquer : voir le [journal des modifications](https://code.claude.com/docs/en/changelog).*

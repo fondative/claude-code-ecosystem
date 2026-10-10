@@ -13,23 +13,23 @@ const doc = lane('doc')
 <template>
   <section class="hr">
     <div class="hr-head">
-      <div class="hr-intro">
-        <span class="hr-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.47 2.5 2.5 0 1 1 3.01 3.01 1 1 0 0 0-.47 1.68l1.68 1.68a2.4 2.4 0 0 1 0 3.42l-1.68 1.68a1 1 0 0 1-1.68-.47 2.5 2.5 0 1 0-3.01 3.01 1 1 0 0 1 .47 1.68l-1.68 1.68a2.4 2.4 0 0 1-3.42 0l-1.68-1.68a1 1 0 0 0-1.68.47 2.5 2.5 0 1 1-3.01-3.01 1 1 0 0 0 .47-1.68l-1.68-1.68a2.4 2.4 0 0 1 0-3.42l1.68-1.68a1 1 0 0 1 1.68.47 2.5 2.5 0 1 0 3.01-3.01 1 1 0 0 1-.47-1.68l1.68-1.68a2.4 2.4 0 0 1 3.42 0z"/></svg>
-        </span>
-        <div>
-          <p class="hr-eyebrow"><a :href="withBase('/recode/')">Plugin recode</a></p>
-          <h2 class="hr-title">Du besoin ou du legacy jusqu'au code livré</h2>
-          <p class="hr-desc">Le plugin Claude Code qui outille développement et migration, du besoin au code testé.</p>
+      <div class="hr-head-main">
+        <p class="home-eyebrow">2 · L'outil recommandé</p>
+        <div class="hr-intro">
+          <span class="hr-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.47 2.5 2.5 0 1 1 3.01 3.01 1 1 0 0 0-.47 1.68l1.68 1.68a2.4 2.4 0 0 1 0 3.42l-1.68 1.68a1 1 0 0 1-1.68-.47 2.5 2.5 0 1 0-3.01 3.01 1 1 0 0 1 .47 1.68l-1.68 1.68a2.4 2.4 0 0 1-3.42 0l-1.68-1.68a1 1 0 0 0-1.68.47 2.5 2.5 0 1 1-3.01-3.01 1 1 0 0 0 .47-1.68l-1.68-1.68a2.4 2.4 0 0 1 0-3.42l1.68-1.68a1 1 0 0 1 1.68.47 2.5 2.5 0 1 0 3.01-3.01 1 1 0 0 1-.47-1.68l1.68-1.68a2.4 2.4 0 0 1 3.42 0z"/></svg>
+          </span>
+          <h2 class="hr-title">recode : la méthode, prête à l'emploi</h2>
         </div>
+        <p class="hr-desc">Le plugin Claude Code qui applique la méthode, du besoin ou du legacy jusqu'au code livré. On l'installe une fois ; chaque étape est lancée et validée par vous.</p>
       </div>
-      <a class="hr-link" :href="withBase('/recode/workflows')">Explorer les workflows →</a>
+      <a class="hr-link" :href="withBase('/recode/')">Découvrir recode →</a>
     </div>
 
     <div class="hr-flow">
       <!-- Entrées -->
       <div class="hr-col">
-        <span class="hr-col-label">1 · Point de départ</span>
+        <span class="hr-col-label">Point de départ</span>
         <a v-for="l in entries" :key="l.key" class="hr-lane" :class="`rc-${l.key}`" :href="withBase(l.page)">
           <span class="hr-lane-name">{{ l.name }}</span>
           <span class="hr-lane-tagline">{{ l.tagline }}</span>
@@ -43,7 +43,7 @@ const doc = lane('doc')
 
       <!-- Convergence -->
       <div class="hr-col">
-        <span class="hr-col-label">2 · Commun aux deux</span>
+        <span class="hr-col-label">Commun aux deux</span>
         <a class="hr-lane hr-merge rc-real" :href="withBase(real.page)">
           <span class="hr-lane-name">{{ real.name }}</span>
           <span class="hr-lane-tagline">{{ real.tagline }}</span>
@@ -61,7 +61,7 @@ const doc = lane('doc')
 
       <!-- Résultat -->
       <div class="hr-col">
-        <span class="hr-col-label">3 · Résultat</span>
+        <span class="hr-col-label">Résultat</span>
         <div class="hr-result">
           <span class="hr-check" aria-hidden="true">✓</span>
           <span>
@@ -85,7 +85,7 @@ const doc = lane('doc')
 
 <style scoped>
 .hr {
-  margin: 56px 0 8px;
+  margin: 56px 0 0;
   padding-top: 40px;
   border-top: 1px solid var(--vp-c-divider);
 }
@@ -101,16 +101,21 @@ const doc = lane('doc')
 
 .hr-intro {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hr-head-main {
+  flex: 1 1 520px;
 }
 
 .hr-icon {
   display: grid;
   place-items: center;
   flex: none;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
   background: var(--recode-surface);
   border: 1px solid var(--vp-c-divider);
@@ -122,12 +127,12 @@ const doc = lane('doc')
 }
 
 .hr-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
 }
 
 .vp-doc .hr-desc {
-  margin: 6px 0 0;
+  margin: 10px 0 0;
   font-size: 15px;
   color: var(--vp-c-text-2);
 }

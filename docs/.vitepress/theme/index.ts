@@ -2,13 +2,27 @@ import DefaultTheme from 'vitepress/theme'
 import { h, onMounted } from 'vue'
 import { decorateZoomables, installZoomListener } from './zoom-viewer'
 import HomeSteps from './components/HomeSteps.vue'
+import SiteFooter from './components/SiteFooter.vue'
+import CasUsage from './components/CasUsage.vue'
+import CasUsageCard from './components/CasUsageCard.vue'
+import CasUsageCards from './components/CasUsageCards.vue'
 import './custom.css'
 
 export default {
   extends: DefaultTheme,
+  // Liens vers le wiki exemple, utilisables dans toutes les pages Markdown :
+  // <CasUsage page="…">libellé</CasUsage> en ligne (tableaux) ;
+  // <CasUsageCards><CasUsageCard page="…" title="…" desc="…" /></CasUsageCards> sous une phase ou une étape
+  enhanceApp({ app }) {
+    app.component('CasUsage', CasUsage)
+    app.component('CasUsageCard', CasUsageCard)
+    app.component('CasUsageCards', CasUsageCards)
+  },
   // Page d'accueil : bandeau « La modernisation en 4 étapes » juste sous le hero
+  // Pied de page du site (copyright), sur toutes les pages : le pied natif de VitePress est masqué dès qu'il y a une barre latérale
   Layout: () => h(DefaultTheme.Layout, null, {
-    'home-hero-after': () => h(HomeSteps)
+    'home-hero-after': () => h(HomeSteps),
+    'layout-bottom': () => h(SiteFooter)
   }),
   setup() {
     // Plan de page (colonne de droite) : retire les pastilles emoji colorées des titres (🟢🔵🟠🟣), sans toucher aux titres du corps

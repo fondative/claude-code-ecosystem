@@ -272,6 +272,67 @@
   color: var(--fondative-yellow-dim);
 }
 
+/* ---- Contenu propre au projet de modernisation ----
+   Encadré : « ::: info Chez nous » (icône bâtiment, style Lucide) (et « Convention de ce projet ») — classe ajoutée dans config.ts
+   Badge en ligne : <span class="chez-nous">Chez nous</span> */
+.custom-block.project-block {
+  border: 1px solid rgba(0, 60, 190, 0.25);
+  border-left: 5px solid var(--fondative-blue-light);
+  background: linear-gradient(90deg, rgba(0, 60, 190, 0.07), rgba(235, 40, 110, 0.04));
+}
+
+.custom-block.project-block .custom-block-title {
+  color: var(--fondative-blue-light);
+  font-weight: 700;
+}
+
+.custom-block.project-block .custom-block-title,
+.chez-nous {
+  --project-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z'/><path d='M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2'/><path d='M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2'/><path d='M10 6h4'/><path d='M10 10h4'/><path d='M10 14h4'/><path d='M10 18h4'/></svg>");
+}
+
+.custom-block.project-block .custom-block-title::before,
+.chez-nous::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.35em;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  -webkit-mask: var(--project-icon) no-repeat center / contain;
+  mask: var(--project-icon) no-repeat center / contain;
+}
+
+.dark .custom-block.project-block {
+  border-color: rgba(138, 180, 255, 0.3);
+  border-left-color: var(--fondative-text-grad-dark-from);
+  background: linear-gradient(90deg, rgba(138, 180, 255, 0.1), rgba(255, 122, 168, 0.05));
+}
+
+.dark .custom-block.project-block .custom-block-title {
+  color: var(--fondative-text-grad-dark-from);
+}
+
+.chez-nous {
+  display: inline-block;
+  padding: 0 8px;
+  margin-right: 4px;
+  border-radius: 10px;
+  background: var(--fondative-blue-light);
+  color: #ffffff;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1.6;
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+
+
+.dark .chez-nous {
+  background: #2a4fa8;
+}
+
 /* ---- Role highlight cards ---- */
 .role-cards {
   display: grid;
@@ -800,6 +861,362 @@
   }
 }
 
+/* Zone centrale élargie sur toutes les pages : tableaux et textes moins tassés (VitePress limite le texte à 688px) */
+:root {
+  --vp-layout-max-width: 1680px;
+}
+
+@media (min-width: 960px) {
+  .VPDoc .container,
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container {
+    max-width: 1080px !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .VPDoc .container {
+    max-width: 1360px !important;
+  }
+
+  .VPDoc .content-container,
+  .VPDoc.has-aside .content-container {
+    max-width: 1080px !important;
+  }
+}
+
+/* Tableaux sur toute la largeur de la zone centrale (VitePress les réduit à leur contenu) ;
+   sur mobile, défilement horizontal conservé */
+@media (min-width: 768px) {
+  .vp-doc table {
+    display: table;
+    width: 100%;
+  }
+}
+
+/* Liens vers le wiki exemple (<CasUsage>) : icône « lien externe » (Lucide) en masque, couleur du thème */
+.vp-doc a.cas-usage-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.vp-doc a.cas-usage-link::after {
+  content: '';
+  flex: none;
+  width: 0.85em;
+  height: 0.85em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 3h6v6'/><path d='M10 14 21 3'/><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/></svg>") no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 3h6v6'/><path d='M10 14 21 3'/><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/></svg>") no-repeat center / contain;
+}
+
+/* Bloc « Dans le cas d'usage » (<CasUsageCards>) : grille de cartes livrables (<CasUsageCard>),
+   aux couleurs Fondative (bleu → rose), survol qui soulève la carte */
+.vp-doc .cas-usage-cards {
+  margin: 20px 0 28px;
+}
+
+.vp-doc .cas-usage-cards .cuc-eyebrow {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fondative-blue-light);
+}
+
+.vp-doc .cas-usage-cards .cuc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.vp-doc a.cas-usage-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 36px 14px 14px;
+  border: 1px solid rgba(0, 60, 190, 0.22);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 60, 190, 0.06), rgba(235, 40, 110, 0.04));
+  color: var(--vp-c-text-1);
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.vp-doc a.cas-usage-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--fondative-blue-light);
+  box-shadow: 0 10px 24px -12px rgba(0, 60, 190, 0.55);
+}
+
+.vp-doc a.cas-usage-card:focus-visible {
+  outline: 2px solid var(--fondative-blue-light);
+  outline-offset: 2px;
+}
+
+.vp-doc .cas-usage-card .cuc-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--fondative-blue-light), #eb286e);
+  color: #fff;
+}
+
+.vp-doc .cas-usage-card .cuc-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.vp-doc .cas-usage-card .cuc-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vp-doc .cas-usage-card .cuc-title {
+  font-weight: 650;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.vp-doc .cas-usage-card .cuc-desc {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc .cas-usage-card .cuc-arrow {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--vp-c-text-3);
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.vp-doc a.cas-usage-card:hover .cuc-arrow {
+  color: var(--fondative-blue-light);
+  transform: translate(2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-doc a.cas-usage-card,
+  .vp-doc a.cas-usage-card .cuc-arrow {
+    transition: none;
+  }
+
+  .vp-doc a.cas-usage-card:hover {
+    transform: none;
+  }
+}
+
+/* Encadrés d'intervention humaine : une ligne par rôle, précédée d'un badge
+   <div class="role-line"><span class="role-badge architecte">Architecte</span> …</div> (badge client : .client) */
+.vp-doc .validation-checkpoint .role-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.vp-doc .role-badge {
+  flex: none;
+  min-width: 96px;
+  padding: 1px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  background: var(--fondative-blue-light);
+}
+
+.vp-doc .role-badge.client {
+  background: #eb286e;
+}
+
+/* Point d'arrêt du pipeline : <p class="stop-note">…</p> — icône « stop » (Lucide octagon-x) en masque, rouge */
+.vp-doc .stop-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.vp-doc .stop-note::before {
+  content: '';
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  margin-top: 0.2em;
+  background-color: var(--vp-c-danger-1);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z'/><path d='m15 9-6 6'/><path d='m9 9 6 6'/></svg>") no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z'/><path d='m15 9-6 6'/><path d='m9 9 6 6'/></svg>") no-repeat center / contain;
+}
+
+.vp-doc .stop-note strong {
+  color: var(--vp-c-danger-1);
+}
+
+/* Idée clé : <p class="key-note">…</p> — icône lampe (Lucide lightbulb) en masque, jaune Fondative */
+.vp-doc .key-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.vp-doc .key-note::before {
+  content: '';
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  margin-top: 0.2em;
+  background-color: var(--fondative-yellow-dim);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5'/><path d='M9 18h6'/><path d='M10 22h4'/></svg>") no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5'/><path d='M9 18h6'/><path d='M10 22h4'/></svg>") no-repeat center / contain;
+}
+
+/* ---- Accueil : sections numérotées (1 · La méthode … 5 · L'outil), même gabarit que .VPFeatures ---- */
+.home-sec {
+  margin: 56px 0 0;
+  padding-top: 40px;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+/* Les « Trois principes » prolongent la section 1 (4 étapes) : pas de séparateur */
+.home-sec.home-sec--first {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.home-sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-bottom: 16px;
+}
+
+/* Numéro de section bien visible : pastille rose (« 3 · La preuve ») */
+.vp-doc p.home-eyebrow,
+.home-eyebrow {
+  display: inline-block;
+  margin: 0 0 10px !important;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, var(--fondative-blue-light), var(--fondative-pink));
+}
+
+.vp-doc .home-sec h2.home-title,
+.home-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--vp-c-text-1);
+}
+
+.home-desc {
+  margin: 6px 0 0 !important;
+  max-width: 760px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc a.home-link,
+a.home-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fondative-pink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.vp-doc a.home-link:hover,
+a.home-link:hover {
+  text-decoration: underline;
+}
+
+/* Accueil : titre de section précédé de son icône (<HomeIcon>), même pastille que le bloc recode */
+.home-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--recode-surface);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--fondative-blue-light);
+}
+
+.dark .home-icon {
+  color: #8ab4ff;
+}
+
+.home-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Accueil : cartes du cas d'usage plus étroites, pour en aligner 5 sur une rangée */
+.vp-doc .home-sec .cas-usage-cards .cuc-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+
+/* Pied de page du site (<SiteFooter> dans le slot layout-bottom) : pleine largeur, décalé de la barre latérale
+   comme le contenu (mêmes seuils que VPContent), centré sur l'accueil */
+.site-footer {
+  position: relative;
+  z-index: var(--vp-z-index-footer);
+  border-top: 1px solid var(--vp-c-gutter);
+  padding: 24px;
+  background-color: var(--vp-c-bg);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vp-c-text-2);
+}
+
+@media (min-width: 960px) {
+  .Layout:has(.VPSidebar) .site-footer {
+    padding-left: calc(var(--vp-sidebar-width) + 24px);
+  }
+}
+
+@media (min-width: 1440px) {
+  .Layout:has(.VPSidebar) .site-footer {
+    padding-right: calc((100vw - var(--vp-layout-max-width)) / 2 + 24px);
+    padding-left: calc((100vw - var(--vp-layout-max-width)) / 2 + var(--vp-sidebar-width) + 24px);
+  }
+}
+
 /* Pages recode larges (frontmatter pageClass: recode-wide) : place pour la carte des workflows */
 @media (min-width: 960px) {
   .recode-wide .VPDoc .container,
@@ -814,8 +1231,11 @@
     order: 2;
   }
 
+  /* Menu centré dans la barre : il prend l'espace libre et centre ses entrées */
   .VPNavBar .content-body > .VPNavBarMenu {
     order: 0;
+    flex: 1;
+    justify-content: center;
   }
 
   .VPNavBar .content-body > .VPNavBarSearch {
@@ -948,5 +1368,20 @@
   .VPHero .tagline {
     font-size: 20px !important;
     line-height: 30px !important;
+  }
+}
+
+/* Sous-titre du hero (« Une méthodologie pour… ») plus petit que le nom, pour tenir sur une ligne */
+@media (min-width: 640px) {
+  .VPHero .text {
+    font-size: 30px !important;
+    line-height: 38px !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero .text {
+    font-size: 36px !important;
+    line-height: 44px !important;
   }
 }

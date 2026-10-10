@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import HomeIcon from './HomeIcon.vue'
 import { computed } from 'vue'
 import { useData, withBase } from 'vitepress'
 
@@ -21,12 +22,13 @@ const ICONS: Record<string, string> = {
 type Brick = { icon: string; title: string; text: string; link: string }
 type Group = { label: string; bricks: Brick[] }
 
-const t = computed<{ title: string; subtitle: string; groups: Group[] }>(() => {
+const t = computed<{ eyebrow: string; title: string; subtitle: string; groups: Group[] }>(() => {
   const p = en.value ? '/en' : ''
   return en.value
     ? {
-        title: 'Claude Code building blocks',
-        subtitle: 'The components the methodology relies on, each documented in detail.',
+        eyebrow: '5 · The tool',
+        title: 'Claude Code, the tool behind the method',
+        subtitle: 'The building blocks recode and the pipeline rely on: read them to understand or adapt the tooling.',
         groups: [
           { label: 'Get started', bricks: [
             { icon: 'rocket', title: 'Quick Start', text: 'Install Claude Code, set up a first project and run a first command in 5 minutes.', link: `${p}/guide/getting-started` },
@@ -47,8 +49,9 @@ const t = computed<{ title: string; subtitle: string; groups: Group[] }>(() => {
         ],
       }
     : {
-        title: 'Les briques Claude Code',
-        subtitle: 'Les composants sur lesquels repose la méthode, chacun documenté en détail.',
+        eyebrow: "5 · L'outil",
+        title: "Claude Code, l'outil derrière la méthode",
+        subtitle: "Les briques sur lesquelles reposent recode et le pipeline : à lire pour comprendre ou adapter l'outillage.",
         groups: [
           { label: 'Démarrer', bricks: [
             { icon: 'rocket', title: 'Démarrage rapide', text: 'Installer Claude Code, configurer un premier projet et lancer une première commande en 5 minutes.', link: '/guide/getting-started' },
@@ -73,7 +76,8 @@ const t = computed<{ title: string; subtitle: string; groups: Group[] }>(() => {
 
 <template>
   <section class="hb">
-    <h2 class="hb-title">{{ t.title }}</h2>
+    <p class="home-eyebrow">{{ t.eyebrow }}</p>
+    <div class="home-title-row"><HomeIcon name="tool" /><h2 class="hb-title">{{ t.title }}</h2></div>
     <p class="hb-subtitle">{{ t.subtitle }}</p>
     <div class="hb-groups">
       <div v-for="group in t.groups" :key="group.label" class="hb-group">

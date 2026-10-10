@@ -1,20 +1,21 @@
 # Rules
 
-## TL;DR
+## In short
 
 | Aspect | Detail |
 |--------|--------|
 | **What** | Instructions automatically injected into Claude's context |
 | **Where** | `.claude/rules/<name>.md` (project) or `~/.claude/rules/` (user) |
-| **Trigger** | By glob pattern (`paths:`) or global (without paths) |
-| **Size** | < 30 lines — delegate details to skills |
-| **Relationship** | Rules remind, skills detail |
+| **Trigger** | By [glob](/en/reference/glossary#glob) pattern (`paths:`) or global (without `paths`) |
+| **Size** | Short, one topic per file — delegate procedures to skills |
+| **Relationship** | Rules remind, [skills](/en/concepts/skills) detail |
+| **What this page adds** | When to choose a rule over CLAUDE.md or a skill, and the project's 7 actual rules with their globs |
 
 ---
 
-## What is a Rule?
+## The essentials in 2 minutes
 
-A rule is a Markdown file whose content is **automatically injected into Claude's context** when the files being manipulated match a glob pattern. No manual invocation, no command — it is transparent.
+A rule is a Markdown file in `.claude/rules/` whose content is **automatically injected** into context: at startup if it has no `paths`, or as soon as Claude touches a file matching its glob. No invocation, no command.
 
 ```
 ┌───────────────────────────────────────────────────────┐
@@ -28,23 +29,13 @@ A rule is a Markdown file whose content is **automatically injected into Claude'
 │         ▼                                             │
 │  ┌──────────────────────┐                             │
 │  │ rules/symfony-api.md │  <── injected               │
-│  │  "PSR-12, Docker,    │                             │
-│  │   TDD mandatory"     │                             │
+│  │  "Docker, TDD,       │                             │
+│  │   Controller→Service"│                             │
 │  └──────────────────────┘                             │
 │                                                       │
 │  git.md (no paths) ───── always active                │
 └───────────────────────────────────────────────────────┘
 ```
-
-::: info Rules vs Skills
-Rules are loaded **at every session** (or when a file matches). For one-off instructions that don't need to be in context permanently, use a [skill](/en/concepts/skills) instead.
-:::
-
----
-
-## How It Works
-
-### Format
 
 ```markdown
 ---
@@ -54,173 +45,134 @@ paths:
 
 # Backend Conventions
 
-- Commands via `docker compose exec -T app [cmd] 2>&1 | cat`
+- Commands via `docker compose exec -T app [cmd]`
 - Architecture: Controller → Service → Repository
-- PSR-12, TDD mandatory
+- TDD: write the test before the code
 ```
 
-### Two Types
+Four facts change how you design a rule:
 
-| Type | Frontmatter | Trigger |
-|------|------------|---------|
-| **Targeted** | `paths: ["src/**"]` | When a file matches |
-| **Global** | No `paths` | Always active (same priority as [`.claude/CLAUDE.md`](/en/concepts/claude-md)) |
+1. **A `paths` rule loads on first contact** (Read, Write, Edit, or `cat`/`head` through Bash on a matching file), then **stays in context** until the next [compaction](/en/reference/glossary#compaction).
+2. **Without `paths`, it costs as much as a CLAUDE.md line**, every session. And invalid YAML [frontmatter](/en/reference/glossary#frontmatter) silently makes it global.
+3. **It is context, not a barrier**: a "read only" rule blocks nothing without a [`deny`](/en/reference/glossary#regles-de-permission) rule in [settings.json](/en/concepts/settings).
+4. **A glob that matches nothing raises no error**: the rule is simply inactive.
 
-### Scopes and Priority
-
-Rules exist at multiple levels. The most specific wins:
-
-| Scope | Location | Priority | Shared |
-|-------|----------|----------|--------|
-| **Managed policy** | `/etc/claude-code/CLAUDE.md` (Linux) | Highest (cannot be excluded) | Entire organization |
-| **Project** | `.claude/rules/*.md` | High | Team (git) |
-| **User** | `~/.claude/rules/*.md` | Low | Personal (all projects) |
-
-::: tip User-level rules
-`~/.claude/rules/` lets you define personal preferences (code style, workflows) that apply to **all** your projects without polluting the repo's rules.
-:::
-
-### Recursive Discovery
-
-`.md` files in `rules/` subdirectories are automatically discovered (hypothetical tree — this project uses 7 flat rules: `legacy-readonly`, `symfony-api`, `frontend`, `output-format`, `design`, `docs`, `git`):
-
-```
-.claude/rules/
-├── security.md
-├── git.md
-├── backend/
-│   ├── api.md
-│   └── database.md
-└── frontend/
-    └── components.md
-```
-
-### Advanced Glob Patterns
-
-Brace expansion for matching multiple extensions:
-
-```yaml
-paths:
-  - "src/**/*.{ts,tsx}"    # TypeScript + JSX
-  - "lib/**/*.ts"
-  - "tests/**/*.test.ts"
-```
-
-| Pattern | Matches |
-|---------|---------|
-| `**/*.ts` | All `.ts` files recursively |
-| `src/**/*` | Everything under `src/` |
-| `*.md` | Markdown at root only |
-| `src/components/*.tsx` | Components in a specific folder |
-
-### Symlinks
-
-Symlinks are supported for sharing rules between projects. Circular links are detected and ignored.
-
-```bash
-# Share a common rules folder
-ln -s ~/shared-claude-rules .claude/rules/shared
-
-# Share an individual rule
-ln -s ~/company-standards/security.md .claude/rules/security.md
-```
+→ How it all works (format, project and user [scopes](/en/reference/glossary#scope), recursive discovery, globs, symlinks, exclusions, debugging): [official documentation — Memory (rules)](https://code.claude.com/docs/en/memory#path-specific-rules).
 
 ---
 
-## Practical Guide: Designing Your Rules
+## Designing your rules well
 
 ### When to Use a Rule?
 
+The criterion is **scope**, not length: a rule is tied to an **area of the code**, a skill to a **procedure**.
+
 ```
-Information < 30 lines?
-├── YES → Subset of files? → TARGETED RULE
-│         Everywhere? → GLOBAL RULE
-│
-└── NO → Workflow? → [LAUNCHER SKILL](/en/concepts/skills)
-          Conventions? → [PASSIVE SKILL](/en/concepts/skills) + references
+Must it be guaranteed (block, format, test)?
+└── YES → settings.json (deny) or hook — not text
+Otherwise, what is the information tied to?
+├── An area of the code (folder, file type) → RULE with paths
+├── The whole project, every session        → CLAUDE.md (or global rule)
+└── An occasional task / procedure          → SKILL (loaded on demand)
 ```
 
 | Information | Component | Reason |
 |-------------|-----------|--------|
-| "PSR-12 strict" | Rule | Short, contextual |
-| PSR-12 guide with 50 examples | [Passive skill](/en/concepts/skills) | Too long for a rule |
-| "Always use /dev/commit" | Global rule | Applies everywhere |
-| Project paths | [CLAUDE.md](/en/concepts/claude-md) | Single source of truth |
+| "No HTTP adapters in `app-react-target/`" | Targeted rule | Tied to an area of the code |
+| PSR-12 formatting | `PostToolUse` [hook](/en/concepts/hooks) (e.g. `php-cs-fixer`) or `/dev:php-lint` | A formatter guarantees, a sentence doesn't ([official example](https://code.claude.com/docs/en/hooks-guide#auto-format-code-after-edits)) |
+| Feature migration guide | [Skill](/en/concepts/skills) | Occasional procedure |
+| "Always use `/dev:commit`" | Global rule or CLAUDE.md | Applies everywhere |
+| Project paths | [CLAUDE.md](/en/concepts/claude-md) | Always loaded; <span class="chez-nous">In our project</span> the "single source of truth" for paths |
 
-### Warnings
-
-#### ⚠️ `WARN-001`: Glob `*` vs `**`
-
-The `*` glob only covers the first level of files, not subdirectories.
-
-::: danger Problem
-```yaml
-# ❌ — Only covers 1st level
-paths: ["php-legacy/*"]
-```
-Files in subdirectories are not covered by the rule.
+::: tip One topic per file
+One rule = one topic (`git.md`, `frontend.md`…), named after that topic: it stays easy to target, review and delete.
 :::
 
-::: info Solution
-```yaml
-# ✅ — Recursive
-paths: ["php-legacy/**"]
-```
-The double `**` covers all levels of the directory tree.
-:::
+### The project's actual configuration
+
+<span class="chez-nous">In our project</span> The modernization project's 7 rules, in `.claude/rules/`:
+
+| Rule | `paths` | Lines | Content |
+|------|---------|:-----:|---------|
+| `legacy-readonly` | `php-legacy/**` | 10 | The legacy code is read-only (backed by `deny: Edit(/php-legacy/**)` in `settings.json`) |
+| `symfony-api` | `api-rest-symfony-target/**` | 14 | Points to the `sym-*` skills + 4 reminders (Docker, TDD, UUID, OpenAPI) |
+| `docs` | `api-rest-symfony-target/docs/**` | 9 | `OPENAPI_SPEC` (`openapi.yaml`) is the source of truth for API contracts |
+| `frontend` | `app-react-target/**` | 15 | Points to the `front-*` skills + 3 reminders |
+| `output-format` | `output/**` | 15 | Language and format of deliverables |
+| `design` | `output/design/**` | 8 | Figma JSON design files |
+| `git` | none (no frontmatter) | 5 | The only global rule: commits offered through `/dev:commit` |
+
+What to take from it:
+
+- **6 of the 7 rules are targeted**, none exceeds 15 lines, and the code-related rules **delegate** detail to skills.
+- **The globs overlap on purpose**: a file in `api-rest-symfony-target/docs/` loads `symfony-api` **and** `docs`, a file in `output/design/` loads `output-format` **and** `design`.
+- **The targeted folders don't exist in the stack repository**: `api-rest-symfony-target/` and `app-react-target/` are created by `install-stack.sh`, `php-legacy/` is dropped in by the team and `output/` is produced by the pipeline. Until then, the targeted rules never fire, without any error.
+
+### Gotchas
+
+- **`paths` is the only field read** in a rule's frontmatter: `description` or any other field is ignored without an error.
+- **Invalid YAML = global rule**: if the frontmatter doesn't parse, the rule loads as if it had no `paths`. `claude --debug` shows the error.
+- **After `/compact`**, rules without `paths` come back with CLAUDE.md; `paths` rules only when Claude touches a matching file again.
+- **User and project rules stack**: a project rule appears after a user rule but doesn't cancel it. Two conflicting instructions: Claude may follow either one.
+- **`*` covers one level, `**` every level.** Braces (`*.{ts,tsx}`) multiply patterns, within a budget of 1,000 patterns per rule.
+- **A symlink to a target outside the project** is treated as an external import: approval required, and only rules **without** `paths` then load.
+
+Details and sources: [official documentation — Memory (rules)](https://code.claude.com/docs/en/memory#path-specific-rules).
+
+### Common mistakes to avoid
+
+→ Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
+
+#### ⚠️ `WARN-001`: Glob `*` vs `**` {#warn-001}
+
+*Origin: general good practice (glob semantics).*
+
+Same pitfall as for permissions, detailed in [Settings — WARN-003](/en/concepts/settings#warn-003): in `paths`, `"php-legacy/*"` only covers the first level; write `"php-legacy/**"` to include subfolders.
 
 ---
 
-#### ⚠️ `WARN-002`: Rule without settings enforcement
+#### ⚠️ `WARN-002`: Rule without settings enforcement {#warn-002}
 
-A text-only "read only" rule does not prevent Claude from writing — a technical block in [`settings.json`](/en/concepts/settings) is required.
+*Origin: experienced on this project ([Methodology — Phase 0](/en/guide/methodology#phase-0-build-the-infrastructure): "A rule alone can be bypassed"); the legacy code was first protected by the rule alone, before a `settings.json` was added.*
 
-::: danger Problem
-```markdown
-# ❌ — "Read only" without enforcement
-NEVER modify these files
-```
-Without a deny in `settings.json`, this instruction can be ignored.
-:::
+A "read only" rule is only text: it doesn't prevent Claude from writing. The block comes from an `Edit(/php-legacy/**)` `deny` in `settings.json` — full example in [Settings — WARN-002](/en/concepts/settings#warn-002), same pitfall on the CLAUDE.md side in [CLAUDE.md — WARN-005](/en/concepts/claude-md#warn-005).
 
-::: info Solution
-```json
-// ✅ — settings.json enforces
-{ "deny": ["Write(/php-legacy/**)", "Edit(/php-legacy/**)"] }
-```
-The `deny` blocks the Write and Edit tools at the engine level, independently of the rule text.
-:::
+This `deny` covers Claude's write tools **and** the Bash writes Claude Code recognizes: redirections (`>`, `>>`), `tee`, `sed -i`… However, a command that writes without Claude Code identifying the target (for example a Python or Node script that opens its files itself) gets through: for those, a `PreToolUse` [hook](/en/concepts/hooks) or the [sandbox](/en/reference/glossary#sandbox) ([source](https://code.claude.com/docs/en/permissions#read-and-edit)).
 
 ---
 
-#### ⚠️ `WARN-003`: Rule too long
+#### ⚠️ `WARN-003`: Rule too long {#warn-003}
 
-Rules are injected at every interaction — a large rule permanently pollutes the context.
+*Origin: experienced on this project: `symfony-api` went from 29 to 14 lines by delegating its conventions to skills (commit `e0b87b5`).*
+
+Once loaded, a rule stays in context for the rest of the session — a large rule permanently pollutes the context.
 
 ::: danger Problem
 ```markdown
 # ❌ — 80 lines of detailed conventions
 ```
-80 lines injected at every exchange unnecessarily saturate the context window.
+80 lines that stay in context for the whole session unnecessarily saturate the context window.
 :::
 
 ::: info Solution
 ```markdown
 # ✅ — Short rule + delegation
-Load skill `sym-api-conventions`. Reminders: Docker, TDD, PSR-12.
+Load skill `sym-api-conventions`. Reminders: Docker, TDD.
 ```
 The rule recalls the essentials, the skill carries the detail. No duplication.
 :::
 
 ---
 
-#### ⚠️ `WARN-004`: Glob `**` alone
+#### ⚠️ `WARN-004`: Glob `**` alone {#warn-004}
 
-A `**` glob without a folder prefix is equivalent to a global rule, but more expensive to evaluate.
+*Origin: general good practice.*
+
+A `**` glob without a folder prefix is almost the same as a global rule, only less readable.
 
 ::: danger Problem
 ```yaml
-# ❌ — Injected EVERYWHERE (equivalent to global but heavier)
+# ❌ — Injected EVERYWHERE (almost equivalent to a global rule)
 paths: ["**"]
 ```
 The rule is injected for every file in the entire project, without discrimination.
@@ -236,7 +188,9 @@ Targeting a specific folder limits injection to files that are actually relevant
 
 ---
 
-#### ⚠️ `WARN-005`: Obsolete path
+#### ⚠️ `WARN-005`: Obsolete path {#warn-005}
+
+*Origin: experienced on this project: when it was created, `legacy-readonly` targeted `php-classified-ads-legacy/**` while CLAUDE.md declared `./php-legacy` (fixed, commit `847ccc2`).*
 
 If the targeted folder is renamed, the glob matches nothing — with no error message.
 
@@ -258,48 +212,7 @@ Verify that the path matches the current folder name after each rename.
 
 ---
 
-## Advanced Control
-
-### Excluding Rules (monorepo)
-
-In a monorepo, rules from other teams may be loaded. `claudeMdExcludes` in [`settings.local.json`](/en/concepts/settings) lets you ignore them:
-
-```json
-{
-  "claudeMdExcludes": [
-    "**/monorepo/CLAUDE.md",
-    "/home/user/monorepo/other-team/.claude/rules/**"
-  ]
-}
-```
-
-::: warning Managed policy
-Rules deployed via managed policy (`/etc/claude-code/CLAUDE.md`) **cannot** be excluded. This is intentional to guarantee organization standards.
-:::
-
-### Debugging with the InstructionsLoaded [Hook](/en/concepts/hooks)
-
-The `InstructionsLoaded` [hook](/en/concepts/hooks) lets you log exactly which rules are loaded, when, and why:
-
-```json
-{
-  "hooks": {
-    "InstructionsLoaded": [{
-      "matcher": "",
-      "hooks": [{
-        "type": "command",
-        "command": "echo \"$CLAUDE_INSTRUCTIONS_FILE\" >> /tmp/rules-loaded.log"
-      }]
-    }]
-  }
-}
-```
-
-Useful for diagnosing why a targeted rule isn't triggering.
-
----
-
-## Concrete Examples
+## Ready-to-use examples
 
 ### Example 1: Read-only protection
 
@@ -309,44 +222,50 @@ paths:
   - "php-legacy/**"
 ---
 
-# Code Legacy - LECTURE SEULE
+# Legacy code — read only
 
-**Ne JAMAIS modifier le code dans ce repertoire.**
-
-Ce code est la source de verite pour l'analyse. Il doit rester intact
-pour permettre la comparaison avec l'implementation cible.
-
-Actions autorisees :
-- Lire et analyser le code
-- Extraire des informations
-- Documenter le comportement
-
-Actions INTERDITES :
-- Modifier des fichiers
-- Ajouter des fichiers
-- Supprimer des fichiers
+This code is the reference for the analysis: it must stay intact so it can be
+compared with the target implementation. Document its gaps in `output/`, never here.
 ```
 
 ::: warning Double protection
-The rule reminds. The `settings.json` enforces:
+The prohibition is already enforced by `deny`: the rule doesn't need to repeat it in capitals, it gives the **why** and the alternative. (<span class="chez-nous">In our project</span> the actual rule is this one, except that it names the output folders by their PATHS table aliases: `SOURCE_TECHNICAL_DIR`, `FEATURE_SPECS_DIR`…) The `settings.json` applies the prohibition:
 ```json
-{ "deny": ["Write(/php-legacy/**)", "Edit(/php-legacy/**)"] }
+{
+  "permissions": {
+    "deny": ["Edit(/php-legacy/**)"]
+  }
+}
 ```
 :::
 
 ### Example 2: Global rule (git)
 
-```markdown
----
----
+<span class="chez-nous">In our project</span> `.claude/rules/git.md` (no frontmatter, so no `paths`: loaded every session):
 
+```markdown
 # Git - Conventions
 
-- **Pour tout commit** : TOUJOURS utiliser la commande `/dev/commit`. Ne JAMAIS commiter manuellement avec `git commit`.
-- Suivre le format Conventional Commits : `type(scope): description`
+- Ne pas lancer `git commit` : quand un commit est pertinent, proposer a l'utilisateur de taper `/dev:commit` (commande reservee a l'utilisateur).
+- Exception : le launcher `/mod-migrate-feature` commite chaque lot verifie (commit soumis a `ask`).
+- Format Conventional Commits : `type(scope): description`
 ```
 
+::: tip What a setting does better
+- Without `paths`, this rule costs like a CLAUDE.md line: keep it short.
+- Claude Code already injects its own commit/PR instructions. If an in-house skill (`/dev:commit`) replaces them, `"includeGitInstructions": false` avoids two competing instructions.
+- The `Co-Authored-By` trailer is set with `attribution` (e.g. `{ "commit": "", "pr": "" }` to remove it), not with a sentence.
+
+See [`includeGitInstructions`, `attribution`](https://code.claude.com/docs/en/settings) and [Settings](/en/concepts/settings).
+:::
+
+::: info In our project: `/dev/commit` vs `/dev:commit` notation
+This excerpt reproduces the project rule verbatim, which writes **`/dev:commit`**: since the command lives in `.claude/commands/dev/commit.md`, that is its actual invocation (each subfolder becomes a prefix followed by `:`). The `/dev/commit` notation is the old form, not to be reproduced — see [official documentation — Skills](https://code.claude.com/docs/en/skills#how-a-skill-gets-its-command-name).
+:::
+
 ### Example 3: Delegation to skill
+
+<span class="chez-nous">In our project</span> The actual `frontend` rule, quoted verbatim:
 
 ```markdown
 ---
@@ -363,7 +282,7 @@ Les conventions frontend completes sont definies dans les skills :
 Rappels critiques :
 - Appels HTTP directs (pas d'adaptateurs)
 - Responsive obligatoire, pas de pixels hardcodes
-- Consulter la spec OpenAPI avant integration
+- Consulter `OPENAPI_SPEC` (table PATHS de CLAUDE.md) avant integration
 ```
 
 ::: tip Delegation pattern
@@ -371,6 +290,8 @@ The rule reminds 3-4 points. The skill details. No duplication.
 :::
 
 ### Example 4: Output format
+
+<span class="chez-nous">In our project</span> The actual `output-format` rule, quoted verbatim (in French, without accents in the original):
 
 ```markdown
 ---
@@ -388,46 +309,54 @@ paths:
 ## Format
 - Markdown avec diagrammes Mermaid pour les flux et architectures
 - Donnees structurees en tableaux Markdown (pas de listes quand un tableau est plus lisible)
-
-## Ton
-- Factuel, objectif, constructif
-- Pas de jugements de valeur, uniquement des constats
-
-## Classification dette technique
-- CRITIQUE > ELEVEE > MOYENNE > BASSE
-- Toujours justifier le niveau avec des exemples concrets
 ```
+
+### Reference Examples
+
+[Trail of Bits — claude-code-config](https://github.com/trailofbits/claude-code-config) publishes personal per-language rules (`rules/python.md`, `typescript.md`, `rust.md`, `bash.md`, `github-actions.md`): each targets its files via `paths` and fits in a "purpose → tool" table (lint, format, tests), alongside a short `~/.claude/CLAUDE.md`.
 
 ---
 
-## Launch Checklist
+## Before going live
 
 ### Content
 
-- [ ] < 30 lines (delegate to skills beyond that)
+- [ ] One topic per file, tied to an area of the code (otherwise CLAUDE.md or skill)
+- [ ] No repetition of what a `deny` or a hook already guarantees
 - [ ] No duplication between rule and skill
-- [ ] Specific and verifiable instructions (not "format code nicely")
+- [ ] Short rule; detailed conventions delegated to a skill ([WARN-003](#warn-003))
+- [ ] Specific and verifiable instructions (not "format the code nicely")
+- [ ] Commands cited in their actual invocation form (`/dev:commit`)
 
 ### Globs
 
 - [ ] Precise and tested globs (`**` recursive, `*` one level)
-- [ ] Brace expansion for multi-extension (`*.{ts,tsx}`)
-- [ ] Verify the path matches the current folder (no old names)
+- [ ] Braces for several extensions (`*.{ts,tsx}`), without stacking groups
+- [ ] No `paths: ["**"]` (same as a rule without `paths`) ([WARN-004](#warn-004))
+- [ ] `/context` for rules without `paths`; `InstructionsLoaded` hook for `paths`-scoped rules (loaded on demand)
+- [ ] Valid YAML frontmatter (`claude --debug`) — otherwise the rule becomes global
+- [ ] `paths` match the current folders: after a rename, search for the old name in CLAUDE.md, `settings.json`, `.claude/rules/` and the skills
 
 ### Protection
 
 - [ ] "Read only" rule doubled with a `deny` in [`settings.json`](/en/concepts/settings)
-- [ ] Managed policy for organization standards (cannot be excluded)
 
 ### Organization
 
-- [ ] Naming: `{domain}-{context}.md`
-- [ ] Subfolders if > 10 rules (`backend/`, `frontend/`)
+- [ ] File named after its topic; subfolders allowed (recursive discovery)
 - [ ] User rules in `~/.claude/rules/` for personal preferences
-- [ ] Symlinks if rules are shared between projects
+- [ ] Symlinks if rules are shared between projects (approval required if target is outside the project; then only rules without `paths` load)
 
 ---
 
-## Resources
+## Going further
 
-- [Official Documentation — Memory](https://code.claude.com/docs/en/memory)
+- [CLAUDE.md](/en/concepts/claude-md) — what applies to the whole project, every session
+- [Skills](/en/concepts/skills) — the detail rules point to
+- [Settings](/en/concepts/settings) — the `deny` that makes a prohibition effective
+- [Methodology — Phase 0](/en/guide/methodology#phase-0-build-the-infrastructure) — where the "rule + deny" principle comes from
+- [Official Documentation — Memory (rules)](https://code.claude.com/docs/en/memory#path-specific-rules)
+
+---
+
+*Checked with **Claude Code v2.1.295** against the official documentation on October 10, 2026. A newer feature may be missing: see the [changelog](https://code.claude.com/docs/en/changelog).*

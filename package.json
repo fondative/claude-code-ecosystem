@@ -1,13 +1,14 @@
 {
-  "name": "wiki-claude-code-ecosystem",
+  "name": "modernize-legacy",
   "version": "1.0.0",
   "type": "module",
   "description": "Wiki Guidelines - Ecosysteme Claude Code",
   "scripts": {
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:dev": "npm run docs:generate && vitepress dev docs",
+    "docs:build": "npm run docs:generate && vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:sync-example": "SITE_BASE=/claude-code-ecosystem/ ./scripts/sync-example-wiki.sh ../legacy-poc/classified-ads-wiki"
+    "docs:sync-example": "SITE_BASE=/modernize-legacy/ ./scripts/sync-example-wiki.sh ../legacy-poc-v2-08102026/classified-ads-wiki",
+    "docs:generate": "node scripts/generate-warn-catalog.mjs && node scripts/generate-checklist.mjs && node scripts/check-example-links.mjs"
   },
   "devDependencies": {
     "mermaid": "^11.13.0",

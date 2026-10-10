@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import HomeIcon from './HomeIcon.vue'
 import { computed } from 'vue'
 import { useData, withBase } from 'vitepress'
 
@@ -8,25 +9,27 @@ const en = computed(() => lang.value.startsWith('en'))
 
 const t = computed(() => en.value
   ? {
+      eyebrow: '1 · The method',
       title: 'Modernisation in 4 steps',
       note: 'An architect validates every step.',
       link: 'See the methodology',
       href: '/en/guide/methodology',
       steps: [
         { name: 'Analyse', text: 'Reverse-engineer the legacy: architecture, feature inventory' },
-        { name: 'Specify', text: 'One 12-section spec per feature, validated by a human' },
+        { name: 'Specify', text: 'One 14-section spec per feature, validated by a human' },
         { name: 'Code with TDD', text: 'Tests first, backend then frontend, on the target stack' },
         { name: 'Verify', text: 'Scored conformity report, 80/100 threshold, quality loop' },
       ],
     }
   : {
+      eyebrow: '1 · La méthode',
       title: 'La modernisation en 4 étapes',
       note: 'Un architecte valide chaque étape.',
       link: 'Voir la méthodologie',
       href: '/guide/methodology',
       steps: [
         { name: 'Analyser', text: 'Rétro-ingénierie du legacy : architecture, inventaire des features' },
-        { name: 'Spécifier', text: 'Une spec en 12 sections par feature, validée par l\'humain' },
+        { name: 'Spécifier', text: 'Une spec en 14 sections par feature, validée par l\'humain' },
         { name: 'Coder en TDD', text: 'Tests d\'abord, backend puis frontend, sur la stack cible' },
         { name: 'Vérifier', text: 'Rapport de conformité noté, seuil 80/100, boucle qualité' },
       ],
@@ -37,8 +40,8 @@ const t = computed(() => en.value
   <section class="hs">
     <div class="hs-inner">
     <div class="hs-head">
-      <h2 class="hs-title">{{ t.title }}</h2>
-      <a class="hs-link" :href="withBase(t.href)">{{ t.link }} →</a>
+      <p class="home-eyebrow">{{ t.eyebrow }}</p>
+      <div class="home-title-row"><HomeIcon name="method" /><h2 class="hs-title">{{ t.title }}</h2></div>
     </div>
     <ol class="hs-steps">
       <li v-for="(step, i) in t.steps" :key="step.name" class="hs-step">
@@ -47,7 +50,6 @@ const t = computed(() => en.value
         <span class="hs-text">{{ step.text }}</span>
       </li>
     </ol>
-    <p class="hs-note">{{ t.note }}</p>
     </div>
   </section>
 </template>
@@ -72,10 +74,9 @@ const t = computed(() => en.value
 
 .hs-head {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
   margin-bottom: 16px;
 }
 

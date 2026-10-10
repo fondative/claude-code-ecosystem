@@ -4,8 +4,8 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import recodeSidebar from './recode-sidebar.json'
 
-// Chemin de base du site (GitHub Pages : servi sous /claude-code-ecosystem/)
-const SITE_BASE = '/claude-code-ecosystem/'
+// Chemin de base du site (GitHub Pages : servi sous /modernize-legacy/)
+const SITE_BASE = '/modernize-legacy/'
 
 // Wiki d'exemple (sous-site statique dans public/, construit par scripts/sync-example-wiki.sh)
 const EXAMPLE_WIKI = `${SITE_BASE}exemple-wiki-legacy/`
@@ -15,25 +15,22 @@ const publicDir = join(__dirname, '..', 'public')
 // Les pages gardent leurs URLs ; seuls les regroupements changent.
 
 const conceptsFr = [
+  { text: 'L\'essentiel : quelle brique ?', link: '/concepts/which-mechanism' },
   { text: 'CLAUDE.md', link: '/concepts/claude-md' },
   { text: 'Settings', link: '/concepts/settings' },
   { text: 'Rules', link: '/concepts/rules' },
   { text: 'Skills', link: '/concepts/skills' },
   { text: 'Agents', link: '/concepts/agents' },
-  { text: 'Commands', link: '/concepts/commands' },
   { text: 'Hooks', link: '/concepts/hooks' },
   { text: 'MCP', link: '/concepts/mcp' },
-  { text: 'Plugins', link: '/concepts/plugins' }
+  { text: 'Plugins', link: '/concepts/plugins' },
+  { text: 'Commands (ancien format)', link: '/concepts/commands' }
 ]
 
 const guideFr = [
   { text: 'Démarrage rapide', link: '/guide/getting-started' },
-  { text: 'Bonnes pratiques', link: '/guide/best-practices' },
-  { text: 'Patterns multi-agents', link: '/guide/patterns' },
-  { text: 'Sécurité & Permissions', link: '/guide/security' },
-  { text: 'Menaces de sécurité', link: '/guide/security-threats' },
-  { text: 'Diagrammes', link: '/guide/diagrams' },
-  { text: 'Workflow Boris Tane', link: '/guide/workflow-boris-tane' }
+  { text: 'Règles d\'or', link: '/guide/best-practices' },
+  { text: 'Catalogue des pièges', link: '/guide/warns' }
 ]
 
 // Les deux premiers liens sont mis en avant (dégradé Fondative, voir custom.css)
@@ -47,39 +44,34 @@ const modernisationFr = [
       { text: 'Vue d\'ensemble', link: '/examples/' },
       { text: 'Structure du projet', link: '/examples/project-structure' },
       { text: 'Pipeline de migration', link: '/examples/pipeline' },
-      { text: 'Stratégie de modèles', link: '/examples/model-strategy' },
-      { text: 'Templates', link: '/examples/templates' }
+      { text: 'Contrôle qualité', link: '/examples/quality-review' },
+      { text: 'Stratégie de modèles', link: '/examples/model-strategy' }
     ]
   }
 ]
 
 const referenceFr = [
   { text: 'Glossaire', link: '/reference/glossary' },
-  { text: 'Frontmatter', link: '/reference/frontmatter' },
-  { text: 'Standard Agent Skills', link: '/reference/agent-skills-standard' },
-  { text: 'Cheatsheet', link: '/guide/cheatsheet' }
+  { text: 'Cheatsheet', link: '/reference/cheatsheet' }
 ]
 
 const conceptsEn = [
+  { text: 'Essentials: which building block?', link: '/en/concepts/which-mechanism' },
   { text: 'CLAUDE.md', link: '/en/concepts/claude-md' },
   { text: 'Settings', link: '/en/concepts/settings' },
   { text: 'Rules', link: '/en/concepts/rules' },
   { text: 'Skills', link: '/en/concepts/skills' },
   { text: 'Agents', link: '/en/concepts/agents' },
-  { text: 'Commands', link: '/en/concepts/commands' },
   { text: 'Hooks', link: '/en/concepts/hooks' },
   { text: 'MCP', link: '/en/concepts/mcp' },
-  { text: 'Plugins', link: '/en/concepts/plugins' }
+  { text: 'Plugins', link: '/en/concepts/plugins' },
+  { text: 'Commands (former format)', link: '/en/concepts/commands' }
 ]
 
 const guideEn = [
   { text: 'Getting Started', link: '/en/guide/getting-started' },
-  { text: 'Best Practices', link: '/en/guide/best-practices' },
-  { text: 'Multi-agent Patterns', link: '/en/guide/patterns' },
-  { text: 'Security & Permissions', link: '/en/guide/security' },
-  { text: 'Security Threats', link: '/en/guide/security-threats' },
-  { text: 'Diagrams', link: '/en/guide/diagrams' },
-  { text: 'Boris Tane Workflow', link: '/en/guide/workflow-boris-tane' }
+  { text: 'Golden Rules', link: '/en/guide/best-practices' },
+  { text: 'Pitfall Catalog', link: '/en/guide/warns' }
 ]
 
 const modernisationEn = [
@@ -91,17 +83,15 @@ const modernisationEn = [
       { text: 'Overview', link: '/en/examples/' },
       { text: 'Project Structure', link: '/en/examples/project-structure' },
       { text: 'Migration Pipeline', link: '/en/examples/pipeline' },
-      { text: 'Model Strategy', link: '/en/examples/model-strategy' },
-      { text: 'Templates', link: '/en/examples/templates' }
+      { text: 'Quality control', link: '/en/examples/quality-review' },
+      { text: 'Model Strategy', link: '/en/examples/model-strategy' }
     ]
   }
 ]
 
 const referenceEn = [
   { text: 'Glossary', link: '/en/reference/glossary' },
-  { text: 'Frontmatter', link: '/en/reference/frontmatter' },
-  { text: 'Standard Agent Skills', link: '/en/reference/agent-skills-standard' },
-  { text: 'Cheatsheet', link: '/en/guide/cheatsheet' }
+  { text: 'Cheatsheet', link: '/en/reference/cheatsheet' }
 ]
 
 export default withMermaid(defineConfig({
@@ -126,7 +116,8 @@ export default withMermaid(defineConfig({
   },
 
   title: 'Claude Code Ecosystem',
-  lastUpdated: true,
+  // Pas de « Dernière mise à jour » en bas des pages (le tampon de version suffit)
+  lastUpdated: false,
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
@@ -141,8 +132,6 @@ export default withMermaid(defineConfig({
       description: 'Référentiel complet pour maîtriser Agents, Skills, Rules, Hooks et MCP',
       themeConfig: {
         nav: [
-          { text: 'AI-Driven Modernisation', activeMatch: '^/(guide/methodology|examples/)', items: modernisationFr },
-          { text: 'Plugin recode', activeMatch: '^/recode/', items: recodeSidebar[0].items },
           {
             text: 'Concepts',
             activeMatch: '^/(concepts|introduction)/',
@@ -157,8 +146,10 @@ export default withMermaid(defineConfig({
               { text: 'Concepts fondamentaux', items: conceptsFr }
             ]
           },
-          { text: 'Guide', activeMatch: '^/guide/(?!methodology|cheatsheet)', items: guideFr },
-          { text: 'Référence', activeMatch: '^/(reference/|guide/cheatsheet)', items: referenceFr }
+          { text: 'Bonnes pratiques', activeMatch: '^/guide/(?!methodology)', items: guideFr },
+          { text: 'AI-Driven Modernisation', activeMatch: '^/(guide/methodology|examples/)', items: modernisationFr },
+          { text: 'Plugin recode', activeMatch: '^/recode/', items: recodeSidebar[0].items },
+          { text: 'Référence', activeMatch: '^/reference/', items: referenceFr }
         ],
         sidebar: {
           '/introduction/': [
@@ -174,8 +165,7 @@ export default withMermaid(defineConfig({
           // Méthodologie et Cheatsheet gardent leur URL /guide/ mais vivent dans Modernisation et Référence.
           // À déclarer AVANT '/guide/' : VitePress départage par nombre de segments, puis par ordre de déclaration
           '/guide/methodology': modernisationFr,
-          '/guide/cheatsheet': [{ text: 'Référence', items: referenceFr }],
-          '/guide/': [{ text: 'Guide pratique', items: guideFr }],
+          '/guide/': [{ text: 'Bonnes pratiques', items: guideFr }],
           '/examples/': modernisationFr,
           '/recode/': recodeSidebar,
           '/reference/': [{ text: 'Référence', items: referenceFr }]
@@ -187,9 +177,6 @@ export default withMermaid(defineConfig({
         editLink: {
           pattern: '#',
           text: 'Suggérer une modification'
-        },
-        lastUpdated: {
-          text: 'Dernière mise à jour'
         },
         docFooter: {
           prev: 'Page précédente',
@@ -204,7 +191,6 @@ export default withMermaid(defineConfig({
       description: 'Complete reference for mastering Agents, Skills, Rules, Hooks and MCP',
       themeConfig: {
         nav: [
-          { text: 'AI-Driven Modernisation', activeMatch: '^/en/(guide/methodology|examples/)', items: modernisationEn },
           {
             text: 'Concepts',
             activeMatch: '^/en/(concepts|introduction)/',
@@ -219,8 +205,9 @@ export default withMermaid(defineConfig({
               { text: 'Core Concepts', items: conceptsEn }
             ]
           },
-          { text: 'Guide', activeMatch: '^/en/guide/(?!methodology|cheatsheet)', items: guideEn },
-          { text: 'Reference', activeMatch: '^/en/(reference/|guide/cheatsheet)', items: referenceEn }
+          { text: 'Best Practices', activeMatch: '^/en/guide/(?!methodology)', items: guideEn },
+          { text: 'AI-Driven Modernisation', activeMatch: '^/en/(guide/methodology|examples/)', items: modernisationEn },
+          { text: 'Reference', activeMatch: '^/en/reference/', items: referenceEn }
         ],
         sidebar: {
           '/en/introduction/': [
@@ -234,8 +221,7 @@ export default withMermaid(defineConfig({
           ],
           '/en/concepts/': [{ text: 'Core Concepts', items: conceptsEn }],
           '/en/guide/methodology': modernisationEn,
-          '/en/guide/cheatsheet': [{ text: 'Reference', items: referenceEn }],
-          '/en/guide/': [{ text: 'Practical Guide', items: guideEn }],
+          '/en/guide/': [{ text: 'Best Practices', items: guideEn }],
           '/en/examples/': modernisationEn,
           '/en/reference/': [{ text: 'Reference', items: referenceEn }]
         },
@@ -246,9 +232,6 @@ export default withMermaid(defineConfig({
         editLink: {
           pattern: '#',
           text: 'Suggest a change'
-        },
-        lastUpdated: {
-          text: 'Last updated'
         },
         docFooter: {
           prev: 'Previous page',
@@ -322,6 +305,17 @@ export default withMermaid(defineConfig({
       const defaultImage = md.renderer.rules.image!
       md.renderer.rules.image = (tokens, idx, options, env, self) =>
         `<span class="mermaid-zoom img-zoom">${defaultImage(tokens, idx, options, env, self)}</span>`
+
+      // Encadrés propres au projet (« ::: info Chez nous », « ::: info Convention de ce projet »…) :
+      // même syntaxe que les encadrés VitePress, mais un style dédié (classe project-block, voir custom.css)
+      const PROJECT_TITLE = /^info\s+(Chez nous|Convention de ce projet|Heuristique de ce projet|In our project|This project's (convention|heuristic))/
+      const defaultInfoOpen = md.renderer.rules.container_info_open!
+      md.renderer.rules.container_info_open = (tokens, idx, options, env, self) => {
+        const html = defaultInfoOpen(tokens, idx, options, env, self)
+        return PROJECT_TITLE.test(tokens[idx].info.trim())
+          ? html.replace('class="info custom-block"', 'class="info custom-block project-block"')
+          : html
+      }
     }
   },
 
