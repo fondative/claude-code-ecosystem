@@ -6,6 +6,7 @@ import SiteFooter from './components/SiteFooter.vue'
 import CasUsage from './components/CasUsage.vue'
 import CasUsageCard from './components/CasUsageCard.vue'
 import CasUsageCards from './components/CasUsageCards.vue'
+import Icone from './components/Icone.vue'
 import './custom.css'
 
 export default {
@@ -17,6 +18,7 @@ export default {
     app.component('CasUsage', CasUsage)
     app.component('CasUsageCard', CasUsageCard)
     app.component('CasUsageCards', CasUsageCards)
+    app.component('Icone', Icone)
   },
   // Page d'accueil : bandeau « La modernisation en 4 étapes » juste sous le hero
   // Pied de page du site (copyright), sur toutes les pages : le pied natif de VitePress est masqué dès qu'il y a une barre latérale

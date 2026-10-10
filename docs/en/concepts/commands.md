@@ -135,8 +135,7 @@ Details and sources: [official documentation — Skills](https://code.claude.com
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001`: Command and Skill with the same name {#warn-001}
-
+#### `WARN-001`: Command and Skill with the same name {#warn-001 .warn-title}
 *Origin: official documentation.*
 
 Having a command and a skill with the same name creates a silent conflict: the skill always wins.
@@ -157,8 +156,7 @@ Choose one or the other, not both. If both exist, delete the command or rename i
 
 ---
 
-#### ⚠️ `WARN-002`: Forgetting Docker flags (this project's convention) {#warn-002}
-
+#### `WARN-002`: Forgetting Docker flags (this project's convention) {#warn-002 .warn-title}
 *Origin: a project rule (CLAUDE.md: "All backend commands via Docker Compose").*
 
 When commands go through `docker compose exec`, leaving out `-T` makes Docker request a TTY, which blocks or garbles the output in a non-interactive context such as Claude's.
@@ -185,8 +183,7 @@ The project's `CLAUDE.md` mandates the form `cd <BACKEND_TARGET> && docker compo
 
 ---
 
-#### ⚠️ `WARN-003`: Command without description {#warn-003}
-
+#### `WARN-003`: Command without description {#warn-003 .warn-title}
 *Origin: official documentation (the description feeds the `/` menu and Claude's choice).*
 
 A command without a description doesn't appear correctly in autocompletion and Claude doesn't know when to use it.
@@ -214,8 +211,7 @@ The description guides autocompletion and automatic delegation.
 
 ---
 
-#### ⚠️ `WARN-004`: Logic too complex {#warn-004}
-
+#### `WARN-004`: Logic too complex {#warn-004 .warn-title}
 *Origin: general good practice.*
 
 A command with branching, conditions, and hundreds of lines becomes unmanageable and hard to maintain.
@@ -253,8 +249,7 @@ A command = a single file. If the logic overflows, it's a skill.
 
 ---
 
-#### ⚠️ `WARN-005`: Hidden dependencies {#warn-005}
-
+#### `WARN-005`: Hidden dependencies {#warn-005 .warn-title}
 *Origin: general good practice.*
 
 A command that requires external tools without documenting them fails silently depending on the environment.
@@ -286,8 +281,7 @@ The `description` is used to pick the command: say what it does, not what it dep
 
 ---
 
-#### ⚠️ `WARN-006`: `name:` in a command {#warn-006}
-
+#### `WARN-006`: `name:` in a command {#warn-006 .warn-title}
 *Origin: experienced on this project (all 8 commands declared `name:`; corrected form: no `name:`).*
 
 The field suggests the command name is chosen in the frontmatter. It is not: only the path counts.
@@ -314,8 +308,7 @@ For a name independent of the path, migrate to a skill (`.claude/skills/dev-comm
 
 ---
 
-#### ⚠️ `WARN-007`: Checks reserved for the user {#warn-007}
-
+#### `WARN-007`: Checks reserved for the user {#warn-007 .warn-title}
 *Origin: experienced on this project (`php-test`, `php-lint`, `front-test`, `front-lint` used `disable-model-invocation: true`; corrected form: without this field).*
 
 A test or lint command with manual-only invocation deprives Claude of a way to verify its own work, and cannot be run by a scheduled task (`/loop`, `/schedule`). Anthropic recommends the opposite: give Claude a check it can run itself ("Give Claude a check it can run: tests, a build…", [Best practices](https://code.claude.com/docs/en/best-practices#give-claude-a-way-to-verify-its-work)).
@@ -343,8 +336,7 @@ Without `disable-model-invocation`, Claude can run the tests and iterate until g
 
 ---
 
-#### ⚠️ `WARN-008`: Documenting an invocation that doesn't exist {#warn-008}
-
+#### `WARN-008`: Documenting an invocation that doesn't exist {#warn-008 .warn-title}
 *Origin: experienced on this project (CLAUDE.md, the `git` rule and `commit.md` wrote `/dev/commit`; corrected form: `/dev:commit`).*
 
 The instruction "ALWAYS use `/dev/commit`" refers to a name Claude Code does not expose: in the `/` menu as for Claude, the command is called `/dev:commit`.

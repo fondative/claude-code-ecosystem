@@ -125,8 +125,7 @@ Details and sources: [official documentation — MCP](https://code.claude.com/do
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001` : Hardcoded token {#warn-001}
-
+#### `WARN-001` : Hardcoded token {#warn-001 .warn-title}
 *Origin: general good practice; the OAuth → `headersHelper` → variables order comes from the official documentation.*
 
 Writing a token in plaintext in a configuration file exposes credentials in git history.
@@ -158,8 +157,7 @@ jq -nc --arg t "$(pass show mcp/example)" '{Authorization: ("Bearer " + $t)}'
 
 ---
 
-#### ⚠️ `WARN-002` : No deny for destructive actions {#warn-002}
-
+#### `WARN-002` : No deny for destructive actions {#warn-002 .warn-title}
 *Origin: general good practice, based on the official MCP permission syntax.*
 
 An `allow` covering every tool of a server (`mcp__github__*`) also auto-approves its writes and irreversible actions (merge, deletion).
@@ -170,8 +168,7 @@ An `allow` covering every tool of a server (`mcp__github__*`) also auto-approves
 
 ---
 
-#### ⚠️ `WARN-003` : Server from unknown source {#warn-003}
-
+#### `WARN-003` : Server from unknown source {#warn-003 .warn-title}
 *Origin: official documentation (verify the trust given to each server).*
 
 ::: warning Attention
@@ -180,8 +177,7 @@ A stdio server runs with your user permissions; a remote server sees everything 
 
 ---
 
-#### ⚠️ `WARN-004` : Expired token {#warn-004}
-
+#### `WARN-004` : Expired token {#warn-004 .warn-title}
 *Origin: general good practice (diagnosis with the official commands).*
 
 ::: warning Attention
@@ -196,8 +192,7 @@ A stdio server runs with your user permissions; a remote server sees everything 
 
 ---
 
-#### ⚠️ `WARN-005` : Forgetting --scope for team sharing {#warn-005}
-
+#### `WARN-005` : Forgetting --scope for team sharing {#warn-005 .warn-title}
 *Origin: official documentation (the default scope is `local`).*
 
 Without the `--scope project` flag, the MCP server remains local and invisible to other team members.

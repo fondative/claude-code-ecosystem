@@ -155,8 +155,7 @@ Details and sources: [official documentation — Permissions](https://code.claud
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001`: Overly broad permissions {#warn-001}
-
+#### `WARN-001`: Overly broad permissions {#warn-001 .warn-title}
 *Origin: official documentation (rules as close to the command as possible).*
 
 Allowing `Bash(*)` effectively disables all protection on shell commands.
@@ -179,8 +178,7 @@ Only allow the commands needed for the project's workflow. (In `auto` mode, Clau
 
 ---
 
-#### ⚠️ `WARN-002`: Missing write deny {#warn-002}
-
+#### `WARN-002`: Missing write deny {#warn-002 .warn-title}
 *Origin: project rule (the legacy code is read-only); experienced on this project: the legacy code was first protected by a rule alone, without `settings.json`.*
 
 Without an explicit `deny` rule, Claude can write to sensitive directories. See also [`CLAUDE.md` WARN-005](/en/concepts/claude-md#warn-005) on the difference between context and permissions.
@@ -203,8 +201,7 @@ Explicitly define write-protected directories via `deny` on `Edit(…)`. A `Writ
 
 ---
 
-#### ⚠️ `WARN-003`: Glob `*` vs `**` {#warn-003}
-
+#### `WARN-003`: Glob `*` vs `**` {#warn-003 .warn-title}
 *Origin: general good practice (gitignore syntax of file rules).*
 
 A single `*` [glob](/en/reference/glossary#glob) only protects the first directory level, leaving subdirectories exposed.
@@ -227,8 +224,7 @@ Use `**` for recursive protection across all subdirectory levels.
 
 ---
 
-#### ⚠️ `WARN-004`: MCP without permissions {#warn-004}
-
+#### `WARN-004`: MCP without permissions {#warn-004 .warn-title}
 *Origin: official documentation; this project declares no MCP server.*
 
 An [MCP](/en/concepts/mcp) server declared without `allow`/`deny` rules exposes all its tools to the default permission flow, with no granularity.
@@ -256,8 +252,7 @@ Explicitly list allowed MCP tools and block dangerous ones. `mcp__server` or `mc
 
 ---
 
-#### ⚠️ `WARN-005`: Project settings for personal preferences {#warn-005}
-
+#### `WARN-005`: Project settings for personal preferences {#warn-005 .warn-title}
 *Origin: official documentation ([scope](/en/reference/glossary#scope) of each settings file).*
 
 Putting personal preferences in `.claude/settings.json` imposes them on the whole team via git.
@@ -280,8 +275,7 @@ Use `settings.local.json` (in `.gitignore`) for individual preferences.
 
 ---
 
-#### ⚠️ `WARN-006`: Path `Write(…)` rules: a phantom protection {#warn-006}
-
+#### `WARN-006`: Path `Write(…)` rules: a phantom protection {#warn-006 .warn-title}
 *Origin: experienced on this project: `settings.json` held up to 4 `Write(…)` rules, all ignored, and didn't deny reading `.env` files; corrected form: only `Read(...)`/`Edit(...)`, `.env*` denied.*
 
 A `Write(path)` rule is accepted without a blocking error, but Claude Code never consults it: the protection only exists on paper.
@@ -308,8 +302,7 @@ The two `Write(…)` rules added nothing (`Edit(…)` already protected writes),
 
 ---
 
-#### ⚠️ `WARN-007`: Bare `"Read"` in `allow` {#warn-007}
-
+#### `WARN-007`: Bare `"Read"` in `allow` {#warn-007 .warn-title}
 *Origin: experienced on this project: present in an earlier version of `settings.json`, removed.*
 
 Allowing the `Read` tool without a path saves no confirmation inside the project, but removes them everywhere else.
@@ -332,8 +325,7 @@ For an external folder you really need, add it explicitly (`permissions.addition
 
 ---
 
-#### ⚠️ `WARN-008`: Taking `docker compose *` out of the sandbox {#warn-008}
-
+#### `WARN-008`: Taking `docker compose *` out of the sandbox {#warn-008 .warn-title}
 *Origin: official documentation ([sandboxing — excludedCommands](https://code.claude.com/docs/en/sandboxing#run-commands-outside-the-sandbox-with-excludedcommands)).*
 
 Excluding a command from the sandbox makes it run with your full access: a pattern that is too broad reopens what the sandbox closed.

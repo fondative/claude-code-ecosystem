@@ -135,8 +135,7 @@ Détails et sources : [documentation officielle — Skills](https://code.claude.
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Command et Skill avec le même nom {#warn-001}
-
+#### `WARN-001` : Command et Skill avec le même nom {#warn-001 .warn-title}
 *Origine : documentation officielle.*
 
 Avoir un command et un skill portant le même nom crée un conflit silencieux : le skill gagne toujours.
@@ -157,8 +156,7 @@ Choisir l'un ou l'autre, pas les deux. Si les deux existent, supprimer le comman
 
 ---
 
-#### ⚠️ `WARN-002` : Oubli des flags Docker (convention de ce projet) {#warn-002}
-
+#### `WARN-002` : Oubli des flags Docker (convention de ce projet) {#warn-002 .warn-title}
 *Origine : règle du projet (CLAUDE.md : « Toutes les commandes backend via Docker Compose »).*
 
 Quand les commandes passent par `docker compose exec`, l'absence de `-T` fait demander un TTY à Docker, ce qui bloque ou altère la sortie dans un contexte non interactif comme celui de Claude.
@@ -185,8 +183,7 @@ Le `CLAUDE.md` du projet impose la forme `cd <BACKEND_TARGET> && docker compose 
 
 ---
 
-#### ⚠️ `WARN-003` : Command sans description {#warn-003}
-
+#### `WARN-003` : Command sans description {#warn-003 .warn-title}
 *Origine : documentation officielle (la description sert au menu `/` et au choix par Claude).*
 
 Un command sans description n'apparaît pas correctement dans l'autocomplétion et Claude ne sait pas quand l'utiliser.
@@ -214,8 +211,7 @@ La description guide l'autocomplétion et la délégation automatique.
 
 ---
 
-#### ⚠️ `WARN-004` : Logique trop complexe {#warn-004}
-
+#### `WARN-004` : Logique trop complexe {#warn-004 .warn-title}
 *Origine : bonne pratique générale.*
 
 Un command avec du branching, des conditions et des centaines de lignes devient ingérable et difficile à maintenir.
@@ -253,8 +249,7 @@ Un command = un fichier unique. Si la logique déborde, c'est un skill.
 
 ---
 
-#### ⚠️ `WARN-005` : Dépendances cachées {#warn-005}
-
+#### `WARN-005` : Dépendances cachées {#warn-005 .warn-title}
 *Origine : bonne pratique générale.*
 
 Un command qui requiert des outils externes sans le documenter échoue silencieusement selon l'environnement.
@@ -286,8 +281,7 @@ La `description` sert au choix de la commande : on y dit ce qu'elle fait, pas se
 
 ---
 
-#### ⚠️ `WARN-006` : `name:` dans un command {#warn-006}
-
+#### `WARN-006` : `name:` dans un command {#warn-006 .warn-title}
 *Origine : vécu sur ce projet (les 8 commands ont déclaré `name:` ; forme corrigée : sans `name:`).*
 
 Le champ laisse croire que le nom de la commande est choisi dans le frontmatter. Il ne l'est pas : seul le chemin compte.
@@ -314,8 +308,7 @@ Pour un nom indépendant du chemin, migrer en skill (`.claude/skills/dev-commit/
 
 ---
 
-#### ⚠️ `WARN-007` : Vérifications réservées à l'utilisateur {#warn-007}
-
+#### `WARN-007` : Vérifications réservées à l'utilisateur {#warn-007 .warn-title}
 *Origine : vécu sur ce projet (`php-test`, `php-lint`, `front-test`, `front-lint` ont été en `disable-model-invocation: true` ; forme corrigée : sans ce champ).*
 
 Une commande de tests ou de lint en invocation manuelle uniquement prive Claude du moyen de vérifier son propre travail, et ne peut pas être lancée par une tâche planifiée (`/loop`, `/schedule`). Anthropic recommande au contraire de donner à Claude une vérification qu'il peut lancer lui-même (« Give Claude a check it can run: tests, a build… », [Best practices](https://code.claude.com/docs/en/best-practices#give-claude-a-way-to-verify-its-work)).
@@ -343,8 +336,7 @@ Sans `disable-model-invocation`, Claude peut lancer les tests et itérer jusqu'a
 
 ---
 
-#### ⚠️ `WARN-008` : Documenter une invocation qui n'existe pas {#warn-008}
-
+#### `WARN-008` : Documenter une invocation qui n'existe pas {#warn-008 .warn-title}
 *Origine : vécu sur ce projet (CLAUDE.md, rule `git` et `commit.md` ont écrit `/dev/commit` ; forme corrigée : `/dev:commit`).*
 
 La consigne « TOUJOURS utiliser `/dev/commit` » renvoie à un nom que Claude Code n'expose pas : dans le menu `/` comme pour Claude, la commande s'appelle `/dev:commit`.

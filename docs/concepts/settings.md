@@ -155,8 +155,7 @@ Détails et sources : [documentation officielle — Permissions](https://code.cl
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Permissions trop larges {#warn-001}
-
+#### `WARN-001` : Permissions trop larges {#warn-001 .warn-title}
 *Origine : documentation officielle (règles au plus près de la commande).*
 
 Autoriser `Bash(*)` revient à désactiver toute protection sur les commandes shell.
@@ -179,8 +178,7 @@ Autoriser uniquement les commandes nécessaires au workflow du projet. (En mode 
 
 ---
 
-#### ⚠️ `WARN-002` : Oubli du deny en écriture {#warn-002}
-
+#### `WARN-002` : Oubli du deny en écriture {#warn-002 .warn-title}
 *Origine : règle du projet (le legacy est en lecture seule) ; vécu sur ce projet : le legacy a d'abord été protégé par une rule seule, sans `settings.json`.*
 
 Sans règle `deny` explicite, Claude peut écrire dans des répertoires sensibles. Voir aussi [`CLAUDE.md` WARN-005](/concepts/claude-md#warn-005) sur la différence contexte vs permissions.
@@ -203,8 +201,7 @@ Définir explicitement les répertoires protégés en écriture via `deny` sur `
 
 ---
 
-#### ⚠️ `WARN-003` : Glob `*` vs `**` {#warn-003}
-
+#### `WARN-003` : Glob `*` vs `**` {#warn-003 .warn-title}
 *Origine : bonne pratique générale (syntaxe gitignore des règles de fichiers).*
 
 Un [glob](/reference/glossary#glob) avec `*` simple ne protège que le premier niveau de répertoire, laissant les sous-dossiers exposés.
@@ -227,8 +224,7 @@ Utiliser `**` pour une protection récursive sur tous les niveaux de sous-dossie
 
 ---
 
-#### ⚠️ `WARN-004` : MCP sans permissions {#warn-004}
-
+#### `WARN-004` : MCP sans permissions {#warn-004 .warn-title}
 *Origine : documentation officielle ; ce projet ne déclare aucun serveur MCP.*
 
 Un serveur [MCP](/concepts/mcp) déclaré sans règles `allow`/`deny` expose tous ses outils au flux de permissions par défaut, sans granularité.
@@ -256,8 +252,7 @@ Lister explicitement les outils MCP autorisés et bloquer les outils dangereux. 
 
 ---
 
-#### ⚠️ `WARN-005` : Settings projet pour des préférences personnelles {#warn-005}
-
+#### `WARN-005` : Settings projet pour des préférences personnelles {#warn-005 .warn-title}
 *Origine : documentation officielle ([portée](/reference/glossary#scope) de chaque fichier de settings).*
 
 Mettre des préférences personnelles dans `.claude/settings.json` les impose à toute l'équipe via git.
@@ -280,8 +275,7 @@ Utiliser `settings.local.json` (dans `.gitignore`) pour les préférences indivi
 
 ---
 
-#### ⚠️ `WARN-006` : Règles de chemin `Write(…)` : une protection fantôme {#warn-006}
-
+#### `WARN-006` : Règles de chemin `Write(…)` : une protection fantôme {#warn-006 .warn-title}
 *Origine : vécu sur ce projet : le `settings.json` a compté jusqu'à 4 règles `Write(…)`, toutes ignorées, et ne refusait pas la lecture des `.env` ; forme corrigée : uniquement `Read(...)`/`Edit(...)`, `.env*` refusés.*
 
 Une règle `Write(chemin)` est acceptée sans erreur bloquante, mais Claude Code ne la consulte jamais : la protection n'existe que sur le papier.
@@ -308,8 +302,7 @@ Les deux `Write(…)` n'ajoutaient rien (`Edit(…)` protégeait déjà l'écrit
 
 ---
 
-#### ⚠️ `WARN-007` : `"Read"` nu en `allow` {#warn-007}
-
+#### `WARN-007` : `"Read"` nu en `allow` {#warn-007 .warn-title}
 *Origine : vécu sur ce projet : présent dans une ancienne version du `settings.json`, retiré.*
 
 Autoriser l'outil `Read` sans chemin ne fait gagner aucune confirmation dans le projet, mais en supprime partout ailleurs.
@@ -332,8 +325,7 @@ Pour un dossier externe réellement utile, l'ajouter explicitement (`permissions
 
 ---
 
-#### ⚠️ `WARN-008` : Sortir `docker compose *` du sandbox {#warn-008}
-
+#### `WARN-008` : Sortir `docker compose *` du sandbox {#warn-008 .warn-title}
 *Origine : documentation officielle ([sandboxing — excludedCommands](https://code.claude.com/docs/en/sandboxing#run-commands-outside-the-sandbox-with-excludedcommands)).*
 
 Exclure une commande du sandbox la fait tourner avec tous vos droits : un motif trop large rouvre ce que le sandbox fermait.

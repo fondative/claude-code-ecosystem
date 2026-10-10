@@ -109,7 +109,7 @@ Alias utilisables dans `model` (settings, agents, skills) : `fable`, `opus`, `so
 
 ## Anti-patterns à éviter
 
-| ❌ Ne pas faire | ✅ Faire |
+| <Icone nom="x" /> Ne pas faire | <Icone nom="check" /> Faire |
 |----------------|---------|
 | Prompts vagues ("fix this") | Préciser fichier, ligne, comportement attendu |
 | Accepter sans lire le diff | Toujours relire les changements (`/diff`) |

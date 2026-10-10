@@ -125,8 +125,7 @@ Détails et sources : [documentation officielle — MCP](https://code.claude.com
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Token hardcodé {#warn-001}
-
+#### `WARN-001` : Token hardcodé {#warn-001 .warn-title}
 *Origine : bonne pratique générale ; ordre OAuth → `headersHelper` → variables tiré de la documentation officielle.*
 
 Inscrire un token en clair dans un fichier de configuration expose les credentials dans l'historique git.
@@ -158,8 +157,7 @@ jq -nc --arg t "$(pass show mcp/example)" '{Authorization: ("Bearer " + $t)}'
 
 ---
 
-#### ⚠️ `WARN-002` : Pas de deny pour les actions destructrices {#warn-002}
-
+#### `WARN-002` : Pas de deny pour les actions destructrices {#warn-002 .warn-title}
 *Origine : bonne pratique générale, appuyée sur la syntaxe officielle des permissions MCP.*
 
 Un `allow` qui couvre tous les outils d'un serveur (`mcp__github__*`) auto-approuve aussi ses écritures et ses actions irréversibles (merge, suppression).
@@ -170,8 +168,7 @@ Un `allow` qui couvre tous les outils d'un serveur (`mcp__github__*`) auto-appro
 
 ---
 
-#### ⚠️ `WARN-003` : Serveur de source inconnue {#warn-003}
-
+#### `WARN-003` : Serveur de source inconnue {#warn-003 .warn-title}
 *Origine : documentation officielle (vérifier la confiance accordée à chaque serveur).*
 
 ::: warning Attention
@@ -180,8 +177,7 @@ Un serveur stdio s'exécute avec vos droits utilisateur ; un serveur distant voi
 
 ---
 
-#### ⚠️ `WARN-004` : Token expiré {#warn-004}
-
+#### `WARN-004` : Token expiré {#warn-004 .warn-title}
 *Origine : bonne pratique générale (diagnostic avec les commandes officielles).*
 
 ::: warning Attention
@@ -196,8 +192,7 @@ Un serveur stdio s'exécute avec vos droits utilisateur ; un serveur distant voi
 
 ---
 
-#### ⚠️ `WARN-005` : Oublier --scope pour le partage équipe {#warn-005}
-
+#### `WARN-005` : Oublier --scope pour le partage équipe {#warn-005 .warn-title}
 *Origine : documentation officielle (le scope par défaut est `local`).*
 
 Sans le flag `--scope project`, le serveur MCP reste local et invisible pour les autres membres de l'équipe.

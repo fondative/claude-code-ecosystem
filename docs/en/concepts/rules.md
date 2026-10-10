@@ -123,16 +123,14 @@ Details and sources: [official documentation — Memory (rules)](https://code.cl
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001`: Glob `*` vs `**` {#warn-001}
-
+#### `WARN-001`: Glob `*` vs `**` {#warn-001 .warn-title}
 *Origin: general good practice (glob semantics).*
 
 Same pitfall as for permissions, detailed in [Settings — WARN-003](/en/concepts/settings#warn-003): in `paths`, `"php-legacy/*"` only covers the first level; write `"php-legacy/**"` to include subfolders.
 
 ---
 
-#### ⚠️ `WARN-002`: Rule without settings enforcement {#warn-002}
-
+#### `WARN-002`: Rule without settings enforcement {#warn-002 .warn-title}
 *Origin: experienced on this project ([Methodology — Phase 0](/en/guide/methodology#phase-0-build-the-infrastructure): "A rule alone can be bypassed"); the legacy code was first protected by the rule alone, before a `settings.json` was added.*
 
 A "read only" rule is only text: it doesn't prevent Claude from writing. The block comes from an `Edit(/php-legacy/**)` `deny` in `settings.json` — full example in [Settings — WARN-002](/en/concepts/settings#warn-002), same pitfall on the CLAUDE.md side in [CLAUDE.md — WARN-005](/en/concepts/claude-md#warn-005).
@@ -141,8 +139,7 @@ This `deny` covers Claude's write tools **and** the Bash writes Claude Code reco
 
 ---
 
-#### ⚠️ `WARN-003`: Rule too long {#warn-003}
-
+#### `WARN-003`: Rule too long {#warn-003 .warn-title}
 *Origin: experienced on this project: `symfony-api` went from 29 to 14 lines by delegating its conventions to skills (commit `e0b87b5`).*
 
 Once loaded, a rule stays in context for the rest of the session — a large rule permanently pollutes the context.
@@ -164,8 +161,7 @@ The rule recalls the essentials, the skill carries the detail. No duplication.
 
 ---
 
-#### ⚠️ `WARN-004`: Glob `**` alone {#warn-004}
-
+#### `WARN-004`: Glob `**` alone {#warn-004 .warn-title}
 *Origin: general good practice.*
 
 A `**` glob without a folder prefix is almost the same as a global rule, only less readable.
@@ -188,8 +184,7 @@ Targeting a specific folder limits injection to files that are actually relevant
 
 ---
 
-#### ⚠️ `WARN-005`: Obsolete path {#warn-005}
-
+#### `WARN-005`: Obsolete path {#warn-005 .warn-title}
 *Origin: experienced on this project: when it was created, `legacy-readonly` targeted `php-classified-ads-legacy/**` while CLAUDE.md declared `./php-legacy` (fixed, commit `847ccc2`).*
 
 If the targeted folder is renamed, the glob matches nothing — with no error message.

@@ -62,7 +62,7 @@ Les deux se combinent. Les conventions sont des **skills**, et elles sont **pré
 |---|---|---|
 | Comment | Claude Code lance `phpcbf` juste après chaque modification d'un `.php` | La skill dit à Claude : « après avoir modifié du PHP, lance `phpcbf` » |
 | Si Claude oublie ? | Impossible : ce n'est pas Claude qui le lance | Possible : le fichier reste mal formaté |
-| Bon choix ? | ✅ C'est toujours la même commande | ❌ |
+| Bon choix ? | <Icone nom="check" /> C'est toujours la même commande | <Icone nom="x" /> |
 
 À l'inverse, « corriger un test qui échoue » demande de lire l'erreur, d'en comprendre la cause et de choisir quoi modifier : un script ne peut pas le faire, c'est une **skill**.
 

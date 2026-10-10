@@ -150,8 +150,7 @@ Détails et sources : [documentation officielle — Sub-agents](https://code.cla
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Agent fourre-tout {#warn-001}
-
+#### `WARN-001` : Agent fourre-tout {#warn-001 .warn-title}
 *Origine : principe de la documentation officielle (une responsabilité par agent), appliqué aux 11 agents du projet.*
 
 Un agent qui fait tout perd le focus et coûte plus cher en tokens.
@@ -182,8 +181,7 @@ Chaque agent a une seule responsabilité claire.
 
 ---
 
-#### ⚠️ `WARN-002` : Trop d'outils {#warn-002}
-
+#### `WARN-002` : Trop d'outils {#warn-002 .warn-title}
 *Origine : règle du projet (le legacy est en lecture seule), alignée sur la documentation officielle.*
 
 Donner trop d'outils à un agent augmente le risque d'actions inattendues ou destructives.
@@ -210,8 +208,7 @@ L'agent réel `legacy-technical-analyzer` ([exemple 1](#exemple-1-agent-d-analys
 
 ---
 
-#### ⚠️ `WARN-003` : Opus partout {#warn-003}
-
+#### `WARN-003` : Opus partout {#warn-003 .warn-title}
 *Origine : vécu sur ce projet (`legacy-functional-analyzer` repassé d'Opus à Sonnet).*
 
 Utiliser Opus pour toutes les tâches multiplie les coûts sans gain de qualité sur les tâches structurées.
@@ -234,8 +231,7 @@ Haiku est beaucoup moins cher et plus rapide pour les tâches simples ; vérifie
 
 ---
 
-#### ⚠️ `WARN-004` : Pas de checkpoint {#warn-004}
-
+#### `WARN-004` : Pas de checkpoint {#warn-004 .warn-title}
 *Origine : conception du pipeline de ce projet (chaque étape vérifie la sortie de la précédente).*
 
 Sans vérification entre étapes, un échec en amont fait tourner les agents suivants à vide.
@@ -260,8 +256,7 @@ Le pipeline s'arrête proprement si une étape échoue.
 
 ---
 
-#### ⚠️ `WARN-005` : Agents parallèles qui écrivent le même fichier {#warn-005}
-
+#### `WARN-005` : Agents parallèles qui écrivent le même fichier {#warn-005 .warn-title}
 *Origine : vécu sur ce projet (lancement en parallèle de 13 `legacy-feature-analyzer`).*
 
 Lancés en parallèle, des agents qui mettent tous à jour un fichier partagé (un index, un fichier de statut) s'écrasent mutuellement et gaspillent leurs tours à recommencer.
@@ -286,8 +281,7 @@ Règle : **un fichier = un seul écrivain**. Les fichiers partagés appartiennen
 
 ---
 
-#### ⚠️ `WARN-006` : `maxTurns` sous-dimensionné {#warn-006}
-
+#### `WARN-006` : `maxTurns` sous-dimensionné {#warn-006 .warn-title}
 *Origine : vécu sur ce projet (specs produites par `legacy-feature-analyzer`).*
 
 Un agent coupé par `maxTurns` ne plante pas : il rend une sortie **partielle**. Claude Code la marque comme partielle (v2.1.246 et suivantes), mais sans vérification elle passe facilement pour un résultat complet.

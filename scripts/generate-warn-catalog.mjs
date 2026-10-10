@@ -35,7 +35,7 @@ const LANG = {
   fr: {
     dir: 'concepts', out: 'guide/warns.md', prefix: '',
     originLabel: /^\*Origine\s*:\s*(.*)\*$/,
-    severity: { S: '🔴 Sécurité', F: '🟠 Fiabilité', C: '🟡 Coût & contexte', M: '🔵 Maintenabilité' },
+    severity: { S: 'Sécurité', F: 'Fiabilité', C: 'Coût & contexte', M: 'Maintenabilité' },
     severityHelp: {
       S: 'une protection qui ne protège pas, un secret exposé, une action destructrice possible',
       F: 'un comportement différent de celui attendu, souvent sans message d\'erreur',
@@ -44,11 +44,11 @@ const LANG = {
     },
     livedRe: /vécu/i,
     origin: [
-      [/règle du projet|conception du pipeline|de l'équipe/i, '📐 Règle du projet'],
-      [/documentation officielle/i, '📘 Doc officielle'],
-      [/bonne pratique/i, '🧭 Bonne pratique']
+      [/règle du projet|conception du pipeline|de l'équipe/i, '<Icone nom="ruler" /> Règle du projet'],
+      [/documentation officielle/i, '<Icone nom="book" /> Doc officielle'],
+      [/bonne pratique/i, '<Icone nom="compass" /> Bonne pratique']
     ],
-    livedLabel: '🧪 Constaté sur le projet',
+    livedLabel: '<Icone nom="flask" /> Constaté sur le projet',
     header: (n, counts) => `# Catalogue des pièges
 
 ::: tip Page générée
@@ -61,18 +61,18 @@ Cette page rassemble les **${n} erreurs fréquentes** (WARN) décrites dans les 
 |---------|----------|--------|
 ${counts}
 
-**Origine** : 🧪 constaté sur le projet de modernisation (audit, historique git, méthodologie) · 📐 règle du projet · 📘 documentation officielle · 🧭 bonne pratique générale.
+**Origine** : <Icone nom="flask" /> constaté sur le projet de modernisation (audit, historique git, méthodologie) · <Icone nom="ruler" /> règle du projet · <Icone nom="book" /> documentation officielle · <Icone nom="compass" /> bonne pratique générale.
 `,
     cols: '| Piège | Brique | Origine |\n|-------|--------|---------|',
     byBrick: '## Par brique',
-    byBrickCols: '| Brique | 🔴 | 🟠 | 🟡 | 🔵 | Total |\n|--------|----|----|----|----|-------|',
+    byBrickCols: '| Brique | <Icone nom="shield" /> | <Icone nom="wrench" /> | <Icone nom="coins" /> | <Icone nom="puzzle" /> | Total |\n|--------|----|----|----|----|-------|',
     lived: '## Les pièges constatés sur le projet',
     livedIntro: 'Les pièges qui se sont réellement produits sur le projet de modernisation ou dans ce wiki : ce sont ceux qui ont le plus de chances de vous arriver.'
   },
   en: {
     dir: 'en/concepts', out: 'en/guide/warns.md', prefix: '/en',
     originLabel: /^\*Origin\s*:\s*(.*)\*$/,
-    severity: { S: '🔴 Security', F: '🟠 Reliability', C: '🟡 Cost & context', M: '🔵 Maintainability' },
+    severity: { S: 'Security', F: 'Reliability', C: 'Cost & context', M: 'Maintainability' },
     severityHelp: {
       S: 'a protection that does not protect, an exposed secret, a destructive action left possible',
       F: 'a behavior different from what you expect, often with no error message',
@@ -81,11 +81,11 @@ ${counts}
     },
     livedRe: /experienced|lived/i,
     origin: [
-      [/project rule|design of this project|the team/i, '📐 Project rule'],
-      [/official doc/i, '📘 Official docs'],
-      [/good practice/i, '🧭 Good practice']
+      [/project rule|design of this project|the team/i, '<Icone nom="ruler" /> Project rule'],
+      [/official doc/i, '<Icone nom="book" /> Official docs'],
+      [/good practice/i, '<Icone nom="compass" /> Good practice']
     ],
-    livedLabel: '🧪 Seen on the project',
+    livedLabel: '<Icone nom="flask" /> Seen on the project',
     header: (n, counts) => `# Pitfall catalog
 
 ::: tip Generated page
@@ -98,11 +98,11 @@ This page gathers the **${n} common mistakes** (WARN) described in the [Concepts
 |----------|-------|-------|
 ${counts}
 
-**Origin**: 🧪 seen on the modernization project (audit, git history, methodology) · 📐 project rule · 📘 official documentation · 🧭 general good practice.
+**Origin**: <Icone nom="flask" /> seen on the modernization project (audit, git history, methodology) · <Icone nom="ruler" /> project rule · <Icone nom="book" /> official documentation · <Icone nom="compass" /> general good practice.
 `,
     cols: '| Pitfall | Building block | Origin |\n|---------|----------------|--------|',
     byBrick: '## By building block',
-    byBrickCols: '| Building block | 🔴 | 🟠 | 🟡 | 🔵 | Total |\n|----------------|----|----|----|----|-------|',
+    byBrickCols: '| Building block | <Icone nom="shield" /> | <Icone nom="wrench" /> | <Icone nom="coins" /> | <Icone nom="puzzle" /> | Total |\n|----------------|----|----|----|----|-------|',
     lived: '## Pitfalls seen on the project',
     livedIntro: 'The pitfalls that actually happened on the modernization project or in this wiki: the ones most likely to happen to you.'
   }
@@ -113,7 +113,7 @@ function parsePage(lang, slug) {
   const lines = readFileSync(join(DOCS, L.dir, `${slug}.md`), 'utf8').split('\n')
   const warns = []
   lines.forEach((line, i) => {
-    const m = line.match(/^#### ⚠️ `WARN-(\d{3})`\s*:?\s*(.*?)\s*\{#(warn-\d{3})\}\s*$/)
+    const m = line.match(/^#### (?:⚠️ )?`WARN-(\d{3})`\s*:?\s*(.*?)\s*\{#(warn-\d{3})(?:\s+\.warn-title)?\}\s*$/)
     if (!m) return
     const [, id, title, anchor] = m
     const originLine = lines.slice(i + 1, i + 4).find((l) => L.originLabel.test(l.trim())) || ''
@@ -141,17 +141,19 @@ function render(lang) {
   const link = (w) => `[${PAGE_NAME[w.slug]} · WARN-${w.id} · ${w.title}](${L.prefix}/concepts/${w.slug}#${w.anchor})`
   const row = (w) => `| ${link(w)} | ${PAGE_NAME[w.slug]} | ${w.origin} |`
 
+  const SEV_ICON = { S: 'shield', F: 'wrench', C: 'coins', M: 'puzzle' }
+  const SEV_ID = { S: 'securite', F: 'fiabilite', C: 'cout-contexte', M: 'maintenabilite' }
   const counts = Object.keys(L.severity)
-    .map((k) => `| ${L.severity[k]} | ${L.severityHelp[k]} | ${all.filter((w) => w.sev === k).length} |`)
+    .map((k) => `| <Icone nom="${SEV_ICON[k]}" /> ${L.severity[k]} | ${L.severityHelp[k]} | ${all.filter((w) => w.sev === k).length} |`)
     .join('\n')
 
   let out = L.header(all.length, counts)
   for (const k of Object.keys(L.severity)) {
     const list = all.filter((w) => w.sev === k)
-    if (list.length) out += `\n## ${L.severity[k]}\n\n${L.cols}\n${list.map(row).join('\n')}\n`
+    if (list.length) out += `\n## ${L.severity[k]} {#${SEV_ID[k]} .sev-${k.toLowerCase()}}\n\n${L.cols}\n${list.map(row).join('\n')}\n`
   }
 
-  const lived = all.filter((w) => w.origin.startsWith('🧪'))
+  const lived = all.filter((w) => w.origin === L.livedLabel)
   out += `\n${L.lived}\n\n${L.livedIntro}\n\n${L.cols}\n${lived.map(row).join('\n')}\n`
 
   out += `\n${L.byBrick}\n\n${L.byBrickCols}\n`

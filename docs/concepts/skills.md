@@ -95,9 +95,9 @@ La skill contient-elle des INSTRUCTIONS D'EXÉCUTION ?
 
 | Configuration | Utilisateur voit `/nom` | Claude charge auto | Cas d'usage |
 |---------------|--------------------------|-------------------|-------------|
-| (défaut) | ✅ | ✅ | Skill polyvalente |
-| `disable-model-invocation: true` | ✅ | ❌ | Déploiement, commit, actions à risque |
-| `user-invocable: false` | ❌ | ✅ | Conventions, contexte métier |
+| (défaut) | <Icone nom="check" /> | <Icone nom="check" /> | Skill polyvalente |
+| `disable-model-invocation: true` | <Icone nom="check" /> | <Icone nom="x" /> | Déploiement, commit, actions à risque |
+| `user-invocable: false` | <Icone nom="x" /> | <Icone nom="check" /> | Conventions, contexte métier |
 
 ::: warning Skill appelée par un pipeline
 Une skill lancée par une autre skill ne doit **pas** avoir `disable-model-invocation: true` : Claude ne pourrait plus l'invoquer depuis le pipeline. <span class="chez-nous">Chez nous</span> `mod-generate-visualization` est appelée par `mod-analyze-legacy`, `mod-generate-docs` par `mod-migrate-feature`.
@@ -178,8 +178,7 @@ Une skill se teste comme du code : on vérifie qu'elle **change** le comportemen
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Skill trop longue {#warn-001}
-
+#### `WARN-001` : Skill trop longue {#warn-001 .warn-title}
 *Origine : documentation officielle (règle des 500 lignes), appliquée aux 12 skills du projet.*
 
 Au-delà de 500 lignes, `SKILL.md` sature le contexte à chaque invocation — même pour les parties non pertinentes.
@@ -214,8 +213,7 @@ Claude charge les fichiers de référence à la demande, uniquement quand le con
 
 ---
 
-#### ⚠️ `WARN-002` : Description vague ou manquante {#warn-002}
-
+#### `WARN-002` : Description vague ou manquante {#warn-002 .warn-title}
 *Origine : documentation officielle (Skill authoring best practices).*
 
 Claude utilise la `description` pour décider automatiquement quand charger une skill passive — sans description précise, la skill n'est jamais déclenchée.
@@ -245,8 +243,7 @@ La description est injectée dans le prompt système : Anthropic recommande d'y 
 
 ---
 
-#### ⚠️ `WARN-003` : Launcher sans protection {#warn-003}
-
+#### `WARN-003` : Launcher sans protection {#warn-003 .warn-title}
 *Origine : documentation officielle ; règle du projet (`mod-analyze-legacy` et `mod-migrate-feature` sont en `disable-model-invocation: true`).*
 
 Sans `disable-model-invocation: true`, Claude peut déclencher une skill launcher de manière autonome — y compris des actions à effets de bord.
@@ -276,8 +273,7 @@ Avec `disable-model-invocation: true`, la skill ne peut être invoquée que par 
 
 ---
 
-#### ⚠️ `WARN-004` : Duplication skill / [rule](/concepts/rules) {#warn-004}
-
+#### `WARN-004` : Duplication skill / [rule](/concepts/rules) {#warn-004 .warn-title}
 *Origine : règle du projet (les rules `symfony-api` et `frontend` renvoient aux skills au lieu de recopier les conventions).*
 
 Maintenir le même contenu dans une [rule](/concepts/rules) et une skill crée deux sources de vérité qui divergent lors des mises à jour.
@@ -302,8 +298,7 @@ La rule pointe vers la skill. Un seul endroit à maintenir pour le contenu déta
 
 ---
 
-#### ⚠️ `WARN-005` : Budget de contexte dépassé {#warn-005}
-
+#### `WARN-005` : Budget de contexte dépassé {#warn-005 .warn-title}
 *Origine : documentation officielle.*
 
 Claude Code charge la liste des noms et descriptions de skills dans un budget d'environ 1 % de la fenêtre de contexte. Quand la liste déborde, il retire les descriptions des skills les moins utilisées : leurs noms restent listés, mais sans les mots-clés qui permettent à Claude de les déclencher automatiquement.
@@ -318,8 +313,7 @@ Une skill passive ne se déclenche plus, et aucun message n'apparaît dans la se
 
 ---
 
-#### ⚠️ `WARN-006` : Conventions écrites dans le prompt d'un agent {#warn-006}
-
+#### `WARN-006` : Conventions écrites dans le prompt d'un agent {#warn-006 .warn-title}
 *Origine : vécu sur ce projet ([Méthodologie — Phase 0](/guide/methodology#phase-0-construire-l-infrastructure)).*
 
 Des conventions recopiées dans le corps d'un agent sont mal suivies, et doivent être maintenues dans chaque agent qui en a besoin.

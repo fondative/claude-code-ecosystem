@@ -62,7 +62,7 @@ The two combine. Conventions are **skills**, **preloaded** into the **agents** t
 |---|---|---|
 | How | Claude Code runs `phpcbf` right after every change to a `.php` file | The skill tells Claude: "after editing PHP, run `phpcbf`" |
 | If Claude forgets? | Impossible: Claude is not the one running it | Possible: the file stays badly formatted |
-| Right choice? | ✅ It is always the same command | ❌ |
+| Right choice? | <Icone nom="check" /> It is always the same command | <Icone nom="x" /> |
 
 Conversely, "fix a failing test" means reading the error, understanding its cause and choosing what to change: a script cannot do that, it is a **skill**.
 

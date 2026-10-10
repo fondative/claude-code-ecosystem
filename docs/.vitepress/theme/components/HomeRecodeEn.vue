@@ -17,7 +17,7 @@ const workflows = [
       <div>
         <p class="home-eyebrow">2 · The recommended tool</p>
         <div class="home-title-row"><HomeIcon name="plugin" /><h2 class="home-title">recode: the method, ready to use</h2></div>
-        <p class="home-desc">The Claude Code plugin that applies the method, from a need or a legacy codebase to delivered code. Install it once; you launch and validate every step. Its documentation is in French.</p>
+        <p class="home-desc">The Claude Code plugin that applies the method, from a need or a legacy codebase to delivered code. Install it once. Each step is launched and followed by a human with the required skills. Its documentation is in French.</p>
       </div>
       <a class="home-link" :href="withBase('/recode/')">Discover recode (FR) →</a>
     </div>

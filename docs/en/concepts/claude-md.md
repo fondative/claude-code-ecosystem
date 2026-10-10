@@ -53,7 +53,7 @@ Four facts change how you design a CLAUDE.md:
 
 For each line, ask: **"Would removing this cause Claude to make mistakes?"** If not, cut it ([best practices](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)).
 
-| ✅ Include | ❌ Exclude |
+| <Icone nom="check" /> Include | <Icone nom="x" /> Exclude |
 |-----------|-----------|
 | Bash commands Claude can't guess | Anything Claude can figure out by reading code |
 | Code style rules that differ from defaults | Standard language conventions |
@@ -117,8 +117,7 @@ Details and sources: [official documentation — Memory](https://code.claude.com
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001`: File too long / monolithic {#warn-001}
-
+#### `WARN-001`: File too long / monolithic {#warn-001 .warn-title}
 *Origin: official documentation (target under 200 lines per file).*
 
 A 200+ line CLAUDE.md drowns essential information and reduces Claude's adherence.
@@ -145,8 +144,7 @@ Keep CLAUDE.md **short and factual** (< 200 lines). Delegate details to skills (
 
 ---
 
-#### ⚠️ `WARN-002`: Hardcoded paths in agents {#warn-002}
-
+#### `WARN-002`: Hardcoded paths in agents {#warn-002 .warn-title}
 *Origin: project rule (PATHS section); experienced on this project: hardcoded paths had to be removed from the `documentation-generator` agent (commit `847ccc2`).*
 
 If a folder is renamed, you have to update every agent one by one. <span class="chez-nous">In our project</span> agents read the path aliases from CLAUDE.md.
@@ -167,8 +165,7 @@ The agent reads the path from CLAUDE.md. If the folder is renamed, **only one pl
 
 ---
 
-#### ⚠️ `WARN-003`: Duplicated conventions {#warn-003}
-
+#### `WARN-003`: Duplicated conventions {#warn-003 .warn-title}
 *Origin: experienced on this project: the Docker command, written in both CLAUDE.md and the `symfony-api` rule, diverged: the `-T` flag was missing from CLAUDE.md for a long time (commits `e0b87b5`, `dfb52db`).*
 
 The same conventions written in two places will inevitably diverge.
@@ -194,8 +191,7 @@ The duplicate **is resolved**: the Docker command is written only in CLAUDE.md, 
 
 ---
 
-#### ⚠️ `WARN-004`: Temporary instructions {#warn-004}
-
+#### `WARN-004`: Temporary instructions {#warn-004 .warn-title}
 *Origin: official documentation (exclude information that changes frequently).*
 
 CLAUDE.md is loaded at **every session**. In-progress tasks don't belong here.
@@ -215,8 +211,7 @@ Track in-progress tasks in a **plan file** in the repo (e.g. `PLAN.md`, read on 
 
 ---
 
-#### ⚠️ `WARN-005`: Confusing CLAUDE.md with permissions {#warn-005}
-
+#### `WARN-005`: Confusing CLAUDE.md with permissions {#warn-005 .warn-title}
 *Origin: official documentation (CLAUDE.md is not enforced); the project backs its instructions with a `deny` ([Methodology — Phase 0](/en/guide/methodology#phase-0-build-the-infrastructure)).*
 
 CLAUDE.md is **context**, not a blocking mechanism.
@@ -243,8 +238,7 @@ CLAUDE.md provides the **why**, settings.json enforces the **block**.
 
 ---
 
-#### ⚠️ `WARN-006`: Believing an `@` import lightens the context {#warn-006}
-
+#### `WARN-006`: Believing an `@` import lightens the context {#warn-006 .warn-title}
 *Origin: experienced on this wiki: it wrongly presented `@` imports as a way to reduce context.*
 
 Splitting CLAUDE.md into imported files makes it more readable, not lighter.

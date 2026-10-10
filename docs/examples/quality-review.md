@@ -51,8 +51,7 @@ L'exemple de job de la [documentation GitLab CI/CD](https://code.claude.com/docs
 
 ## Erreurs fréquentes à éviter
 
-#### ⚠️ `WARN-001` : Prendre un outil pour un autre {#warn-001}
-
+#### `WARN-001` : Prendre un outil pour un autre {#warn-001 .warn-title}
 *Origine : conception du pipeline de ce projet (trois contrôles aux références différentes).*
 
 ::: danger Problème
@@ -63,8 +62,7 @@ L'exemple de job de la [documentation GitLab CI/CD](https://code.claude.com/docs
 Choisir l'outil d'après la question (tableau [En bref](#en-bref)) et, pour une feature migrée, passer les trois.
 :::
 
-#### ⚠️ `WARN-002` : Juger les tests sans les exécuter {#warn-002}
-
+#### `WARN-002` : Juger les tests sans les exécuter {#warn-002 .warn-title}
 *Origine : règle du projet (skill `mod-conformity-conventions`, règle 7 « Exécution réelle des tests »).*
 
 ::: danger Problème

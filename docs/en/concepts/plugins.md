@@ -244,8 +244,7 @@ Details and sources: [official documentation — Plugins reference](https://code
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001` : Copying the same `.claude/` into every project {#warn-001}
-
+#### `WARN-001` : Copying the same `.claude/` into every project {#warn-001 .warn-title}
 *Origin: the team's design choice, motivation of the recode plugin ("instead of copies of `.claude/` that drift apart from one project to the next", [Architecture choices](/recode/#choix-d-architecture), in French).*
 
 Tooling meant for several projects, copied into each one's `.claude/`, evolves differently in every copy.
@@ -272,8 +271,7 @@ Keep `.claude/` for what is specific to the project (conventions, rules, permiss
 
 ---
 
-#### ⚠️ `WARN-002` : Components stored in `.claude-plugin/` or in the wrong place {#warn-002}
-
+#### `WARN-002` : Components stored in `.claude-plugin/` or in the wrong place {#warn-002 .warn-title}
 *Origin: official documentation; experienced on this wiki (mistake found in this page: a plugin's MCP servers placed in `mcp/mcp.json`).*
 
 Claude Code only looks for components at their standard location: a misplaced folder is not loaded.

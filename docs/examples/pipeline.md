@@ -323,8 +323,7 @@ MODE BATCH — Feature : User_Authentication
 
 Aucun agent du projet n'utilise `isolation: worktree`. Les agents parallèles (analyse des features) n'en ont pas besoin : le MODE BATCH suffit, puisqu'ils écrivent chacun dans un fichier différent.
 
-#### ⚠️ `WARN-001` : Migrer deux features en parallèle {#warn-001}
-
+#### `WARN-001` : Migrer deux features en parallèle {#warn-001 .warn-title}
 *Origine : conséquence de la configuration du projet (un seul `OPENAPI_SPEC` déclaré dans CLAUDE.md, une seule stack Docker), même mécanisme que le conflit entre agents parallèles ([Agents — WARN-005](/concepts/agents#warn-005)).*
 
 Le MODE BATCH protège l'analyse, pas la migration. Deux `/mod-migrate-feature` en même temps lancent deux `backend-tasks-executor` qui mettent tous deux à jour **le même** `api-rest-symfony-target/docs/openapi.yaml` et lancent leurs tests dans **le même** conteneur `app`.
@@ -348,8 +347,7 @@ puis migrer en séquence : attendre la fin du pipeline d'une feature
 ```
 :::
 
-#### ⚠️ `WARN-002` : Isoler un executor en worktree alors que les tests tournent dans Docker {#warn-002}
-
+#### `WARN-002` : Isoler un executor en worktree alors que les tests tournent dans Docker {#warn-002 .warn-title}
 *Origine : bonne pratique déduite de la configuration du projet (toutes les commandes backend via `docker compose exec`).*
 
 Un worktree est un **nouveau checkout**, dans `.claude/worktrees/`. Les conteneurs d'une stack de développement montent en général le checkout principal : `docker compose exec -T app …` lancé depuis le worktree s'exécute dans un conteneur qui voit **l'autre** copie du code.

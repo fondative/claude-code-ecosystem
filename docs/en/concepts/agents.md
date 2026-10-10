@@ -150,8 +150,7 @@ Details and sources: [official documentation — Sub-agents](https://code.claude
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001`: Catch-all agent {#warn-001}
-
+#### `WARN-001`: Catch-all agent {#warn-001 .warn-title}
 *Origin: a principle of the official documentation (one responsibility per agent), applied to the project's 11 agents.*
 
 An agent that does everything loses focus and costs more tokens.
@@ -182,8 +181,7 @@ Each agent has one clear responsibility.
 
 ---
 
-#### ⚠️ `WARN-002`: Too many tools {#warn-002}
-
+#### `WARN-002`: Too many tools {#warn-002 .warn-title}
 *Origin: a project rule (the legacy is read-only), aligned with the official documentation.*
 
 Giving an agent too many tools increases the risk of unexpected or destructive actions.
@@ -210,8 +208,7 @@ The real `legacy-technical-analyzer` agent ([example 1](#example-1-analysis-agen
 
 ---
 
-#### ⚠️ `WARN-003`: Opus everywhere {#warn-003}
-
+#### `WARN-003`: Opus everywhere {#warn-003 .warn-title}
 *Origin: experienced on this project (`legacy-functional-analyzer` moved back from Opus to Sonnet).*
 
 Using Opus for every task multiplies costs with no quality gain on structured tasks.
@@ -234,8 +231,7 @@ Haiku is much cheaper and faster for simple tasks; check quality on a few runs b
 
 ---
 
-#### ⚠️ `WARN-004`: No checkpoint {#warn-004}
-
+#### `WARN-004`: No checkpoint {#warn-004 .warn-title}
 *Origin: the design of this project's pipeline (each step checks the previous step's output).*
 
 Without verification between steps, a failure upstream causes downstream agents to run idle.
@@ -260,8 +256,7 @@ The pipeline stops cleanly if a step fails.
 
 ---
 
-#### ⚠️ `WARN-005`: Parallel agents writing the same file {#warn-005}
-
+#### `WARN-005`: Parallel agents writing the same file {#warn-005 .warn-title}
 *Origin: experienced on this project (13 `legacy-feature-analyzer` run in parallel).*
 
 Launched in parallel, agents that all update a shared file (an index, a status file) overwrite each other and waste their turns starting over.
@@ -286,8 +281,7 @@ Rule: **one file = one writer**. Shared files belong to the [orchestrator](/en/r
 
 ---
 
-#### ⚠️ `WARN-006`: Undersized `maxTurns` {#warn-006}
-
+#### `WARN-006`: Undersized `maxTurns` {#warn-006 .warn-title}
 *Origin: experienced on this project (specs produced by `legacy-feature-analyzer`).*
 
 An agent cut off by `maxTurns` does not crash: it returns **partial** output. Claude Code marks it as partial (v2.1.246 and later), but without a check it easily passes for a complete result.

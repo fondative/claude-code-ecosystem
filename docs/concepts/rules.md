@@ -123,16 +123,14 @@ Détails et sources : [documentation officielle — Memory (rules)](https://code
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Glob `*` vs `**` {#warn-001}
-
+#### `WARN-001` : Glob `*` vs `**` {#warn-001 .warn-title}
 *Origine : bonne pratique générale (sémantique des globs).*
 
 Même piège que pour les permissions, détaillé dans [Settings — WARN-003](/concepts/settings#warn-003) : dans `paths`, `"php-legacy/*"` ne couvre que le premier niveau ; écrire `"php-legacy/**"` pour inclure les sous-dossiers.
 
 ---
 
-#### ⚠️ `WARN-002` : Rule sans renfort settings {#warn-002}
-
+#### `WARN-002` : Rule sans renfort settings {#warn-002 .warn-title}
 *Origine : vécu sur ce projet ([Méthodologie — Phase 0](/guide/methodology#phase-0-construire-l-infrastructure) : « Une rule seule peut être contournée ») ; le legacy a d'abord été protégé par la rule seule, avant l'ajout d'un `settings.json`.*
 
 Une rule « lecture seule » n'est que du texte : elle n'empêche pas Claude d'écrire. Le blocage vient d'un `deny` `Edit(/php-legacy/**)` dans `settings.json` — exemple complet dans [Settings — WARN-002](/concepts/settings#warn-002), même piège côté CLAUDE.md dans [CLAUDE.md — WARN-005](/concepts/claude-md#warn-005).
@@ -141,8 +139,7 @@ Ce `deny` couvre les outils d'écriture de Claude **et** les écritures Bash que
 
 ---
 
-#### ⚠️ `WARN-003` : Rule trop longue {#warn-003}
-
+#### `WARN-003` : Rule trop longue {#warn-003 .warn-title}
 *Origine : vécu sur ce projet : `symfony-api` est passée de 29 à 14 lignes en déléguant ses conventions aux skills (commit `e0b87b5`).*
 
 Une fois chargée, une rule reste dans le contexte pour toute la suite de la session — une rule volumineuse pollue le contexte en permanence.
@@ -164,8 +161,7 @@ La rule rappelle l'essentiel, la skill porte le détail. Pas de duplication.
 
 ---
 
-#### ⚠️ `WARN-004` : Glob `**` seul {#warn-004}
-
+#### `WARN-004` : Glob `**` seul {#warn-004 .warn-title}
 *Origine : bonne pratique générale.*
 
 Un glob `**` sans préfixe de dossier revient presque à une rule globale, en moins lisible.
@@ -188,8 +184,7 @@ Cibler un dossier précis limite l'injection aux fichiers réellement concernés
 
 ---
 
-#### ⚠️ `WARN-005` : Path obsolète {#warn-005}
-
+#### `WARN-005` : Path obsolète {#warn-005 .warn-title}
 *Origine : vécu sur ce projet : à sa création, `legacy-readonly` ciblait `php-classified-ads-legacy/**` alors que le CLAUDE.md déclarait `./php-legacy` (corrigé, commit `847ccc2`).*
 
 Si le dossier ciblé est renommé, le glob ne matche plus rien — sans aucun message d'erreur.

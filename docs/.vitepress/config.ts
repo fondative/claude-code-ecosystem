@@ -115,7 +115,7 @@ export default withMermaid(defineConfig({
     }]
   },
 
-  title: 'Claude Code Ecosystem',
+  title: 'AI Coding Workflows',
   // Pas de « Dernière mise à jour » en bas des pages (le tampon de version suffit)
   lastUpdated: false,
 

@@ -53,7 +53,7 @@ Quatre faits changent la façon de concevoir un CLAUDE.md :
 
 Pour chaque ligne, se demander : **« La supprimer ferait-elle faire une erreur à Claude ? »** Si non, la couper ([best practices](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)).
 
-| ✅ À inclure | ❌ À exclure |
+| <Icone nom="check" /> À inclure | <Icone nom="x" /> À exclure |
 |-------------|-------------|
 | Commandes Bash que Claude ne peut pas deviner | Ce que Claude déduit en lisant le code |
 | Règles de style qui diffèrent des défauts | Conventions standard du langage |
@@ -117,8 +117,7 @@ Détails et sources : [documentation officielle — Memory](https://code.claude.
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Fichier trop long / monolithique {#warn-001}
-
+#### `WARN-001` : Fichier trop long / monolithique {#warn-001 .warn-title}
 *Origine : documentation officielle (viser moins de 200 lignes par fichier).*
 
 Un CLAUDE.md de 200+ lignes noie les informations essentielles et réduit l'adhérence de Claude.
@@ -145,8 +144,7 @@ Garder CLAUDE.md **court et factuel** (< 200 lignes). Déléguer le détail aux 
 
 ---
 
-#### ⚠️ `WARN-002` : Chemins hardcodés dans les agents {#warn-002}
-
+#### `WARN-002` : Chemins hardcodés dans les agents {#warn-002 .warn-title}
 *Origine : règle du projet (section PATHS) ; vécu sur ce projet : des chemins écrits en dur ont dû être retirés de l'agent `documentation-generator` (commit `847ccc2`).*
 
 Si un dossier est renommé, il faut modifier chaque agent un par un. <span class="chez-nous">Chez nous</span> les agents lisent les alias de chemins de CLAUDE.md.
@@ -167,8 +165,7 @@ L'agent lit le chemin depuis CLAUDE.md. Si le dossier est renommé, **un seul en
 
 ---
 
-#### ⚠️ `WARN-003` : Conventions dupliquées {#warn-003}
-
+#### `WARN-003` : Conventions dupliquées {#warn-003 .warn-title}
 *Origine : vécu sur ce projet : la commande Docker, écrite à la fois dans CLAUDE.md et dans la rule `symfony-api`, a divergé : le flag `-T` a longtemps manqué dans CLAUDE.md (commits `e0b87b5`, `dfb52db`).*
 
 Les mêmes conventions écrites à deux endroits divergent inévitablement.
@@ -194,8 +191,7 @@ Le doublon est **résolu** : la commande Docker n'est écrite que dans CLAUDE.md
 
 ---
 
-#### ⚠️ `WARN-004` : Instructions temporaires {#warn-004}
-
+#### `WARN-004` : Instructions temporaires {#warn-004 .warn-title}
 *Origine : documentation officielle (exclure les informations qui changent souvent).*
 
 CLAUDE.md est chargé à **chaque session**. Les tâches en cours n'ont pas leur place ici.
@@ -215,8 +211,7 @@ Suivre les tâches en cours dans un **fichier de plan** du dépôt (ex. `PLAN.md
 
 ---
 
-#### ⚠️ `WARN-005` : Confondre CLAUDE.md et permissions {#warn-005}
-
+#### `WARN-005` : Confondre CLAUDE.md et permissions {#warn-005 .warn-title}
 *Origine : documentation officielle (CLAUDE.md n'est pas contraignant) ; le projet double ses consignes d'un `deny` ([Méthodologie — Phase 0](/guide/methodology#phase-0-construire-l-infrastructure)).*
 
 CLAUDE.md est du **contexte**, pas un mécanisme de blocage.
@@ -243,8 +238,7 @@ CLAUDE.md fournit le **pourquoi**, settings.json applique le **blocage**.
 
 ---
 
-#### ⚠️ `WARN-006` : Croire qu'un import `@` allège le contexte {#warn-006}
-
+#### `WARN-006` : Croire qu'un import `@` allège le contexte {#warn-006 .warn-title}
 *Origine : vécu sur ce wiki : il présentait à tort les imports `@` comme un moyen de réduire le contexte.*
 
 Découper CLAUDE.md en fichiers importés le rend plus lisible, pas plus léger.

@@ -21,7 +21,7 @@ const doc = lane('doc')
           </span>
           <h2 class="hr-title">recode : la méthode, prête à l'emploi</h2>
         </div>
-        <p class="hr-desc">Le plugin Claude Code qui applique la méthode, du besoin ou du legacy jusqu'au code livré. On l'installe une fois ; chaque étape est lancée et validée par vous.</p>
+        <p class="hr-desc">Le plugin Claude Code qui applique la méthode, du besoin ou du legacy jusqu'au code livré. On l'installe une fois. Chaque étape est lancée et suivie par un humain disposant des compétences requises.</p>
       </div>
       <a class="hr-link" :href="withBase('/recode/')">Découvrir recode →</a>
     </div>

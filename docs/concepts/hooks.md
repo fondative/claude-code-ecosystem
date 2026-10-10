@@ -147,8 +147,7 @@ Détails et sources : [documentation officielle — Hooks](https://code.claude.c
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Oubli du exit 0 {#warn-001}
-
+#### `WARN-001` : Oubli du exit 0 {#warn-001 .warn-title}
 *Origine : documentation officielle (sémantique des codes de sortie).*
 
 Sans `exit` explicite, un script shell renvoie le code de sortie de **sa dernière commande**. Si c'est un `grep -q` qui ne trouve rien (exit 1), le hook est traité comme une **erreur non bloquante** : l'action continue, mais une notice `hook error` pollue le transcript.
@@ -175,8 +174,7 @@ Un `exit 0` explicite signifie « pas de décision » : le flux de permission no
 
 ---
 
-#### ⚠️ `WARN-002` : Hook trop lent {#warn-002}
-
+#### `WARN-002` : Hook trop lent {#warn-002 .warn-title}
 *Origine : bonne pratique générale (chaque appel d'outil attend ses hooks `PreToolUse`).*
 
 Un hook PreToolUse bloquant doit répondre rapidement pour ne pas pénaliser chaque action de Claude.
@@ -204,8 +202,7 @@ Chaque appel d'outil attend la fin des hooks `PreToolUse` concernés : garder ce
 
 ---
 
-#### ⚠️ `WARN-003` : Script non exécutable {#warn-003}
-
+#### `WARN-003` : Script non exécutable {#warn-003 .warn-title}
 *Origine : bonne pratique générale.*
 
 Un script sans permission d'exécution échoue silencieusement ou lève une erreur cryptique.
@@ -229,8 +226,7 @@ Toujours vérifier les permissions après création d'un hook.
 
 ---
 
-#### ⚠️ `WARN-004` : Matcher trop large {#warn-004}
-
+#### `WARN-004` : Matcher trop large {#warn-004 .warn-title}
 *Origine : bonne pratique générale.*
 
 Un matcher trop permissif déclenche le hook sur toutes les actions, y compris celles qui n'en ont pas besoin.
@@ -253,8 +249,7 @@ Utiliser une regex précise pour cibler uniquement les outils concernés.
 
 ---
 
-#### ⚠️ `WARN-005` : Mixer exit code et JSON {#warn-005}
-
+#### `WARN-005` : Mixer exit code et JSON {#warn-005 .warn-title}
 *Origine : documentation officielle (le blocage d'un exit 2 ne peut pas être annulé par le JSON).*
 
 Un hook peut décider de deux façons : par son code de sortie, ou par un JSON écrit sur stdout avec exit 0. Ce JSON place les champs propres à l'événement dans `hookSpecificOutput` ; pour `PreToolUse`, `permissionDecision` vaut `allow`, `deny` ou `ask` :
@@ -287,8 +282,7 @@ Choisir une seule méthode par hook : exit code (simple) ou JSON stdout + exit 0
 
 ---
 
-#### ⚠️ `WARN-006` : `|` non échappé dans un motif `grep -E` {#warn-006}
-
+#### `WARN-006` : `|` non échappé dans un motif `grep -E` {#warn-006 .warn-title}
 *Origine : vécu sur ce wiki (bug trouvé dans le hook `security-gate.sh` de l'exemple 1).*
 
 Dans `grep -E`, `|` est l'**alternance**, pas un pipe littéral. Un motif censé bloquer `curl … | bash` bloque en réalité toute commande qui contient ` bash` ou ` sh`, y compris les commandes légitimes du projet.
@@ -319,8 +313,7 @@ Un hook de sécurité se teste comme du code : sur ce qu'il doit bloquer **et** 
 
 ---
 
-#### ⚠️ `WARN-007` : Chercher une injection de prompt en `PreToolUse` {#warn-007}
-
+#### `WARN-007` : Chercher une injection de prompt en `PreToolUse` {#warn-007 .warn-title}
 *Origine : documentation officielle ([hooks](https://code.claude.com/docs/en/hooks)).*
 
 Un hook censé repérer une [injection de prompt](/reference/glossary#injection-de-prompt) dans ce que Claude lit ne voit rien s'il est branché avant l'outil.
@@ -335,8 +328,7 @@ Scanner en `PostToolUse` sur `Read|WebFetch` ([exemple 10](#exemple-10-hook-anti
 
 ---
 
-#### ⚠️ `WARN-008` : Lancer `claude -p` en CI sans choisir entre `--bare` et la configuration du dépôt {#warn-008}
-
+#### `WARN-008` : Lancer `claude -p` en CI sans choisir entre `--bare` et la configuration du dépôt {#warn-008 .warn-title}
 *Origine : documentation officielle ([headless — bare mode](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode), [permissions — what runs before you trust a folder](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder)).*
 
 En mode non interactif, soit la configuration du dépôt n'est pas chargée du tout, soit elle s'exécute sans dialogue de confiance.

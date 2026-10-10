@@ -178,8 +178,7 @@ Test a skill like code: check that it **changes** Claude's behavior, and in the 
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001`: Skill too long {#warn-001}
-
+#### `WARN-001`: Skill too long {#warn-001 .warn-title}
 *Origin: official documentation (500-line rule), applied to the project's 12 skills.*
 
 Beyond 500 lines, `SKILL.md` saturates the context on every invocation — even for parts that are not relevant.
@@ -214,8 +213,7 @@ Claude loads reference files on demand, only when the context requires it.
 
 ---
 
-#### ⚠️ `WARN-002`: Vague or missing description {#warn-002}
-
+#### `WARN-002`: Vague or missing description {#warn-002 .warn-title}
 *Origin: official documentation (Skill authoring best practices).*
 
 Claude uses the `description` to automatically decide when to load a passive skill — without a precise description, the skill is never triggered.
@@ -245,8 +243,7 @@ The description is injected into the system prompt: Anthropic recommends stating
 
 ---
 
-#### ⚠️ `WARN-003`: Launcher without protection {#warn-003}
-
+#### `WARN-003`: Launcher without protection {#warn-003 .warn-title}
 *Origin: official documentation; a project rule (`mod-analyze-legacy` and `mod-migrate-feature` use `disable-model-invocation: true`).*
 
 Without `disable-model-invocation: true`, Claude can trigger a launcher skill autonomously — including actions with side effects.
@@ -276,8 +273,7 @@ With `disable-model-invocation: true`, the skill can only be invoked explicitly 
 
 ---
 
-#### ⚠️ `WARN-004`: Skill / [rule](/en/concepts/rules) duplication {#warn-004}
-
+#### `WARN-004`: Skill / [rule](/en/concepts/rules) duplication {#warn-004 .warn-title}
 *Origin: a project rule (the `symfony-api` and `frontend` rules point to the skills instead of copying the conventions).*
 
 Maintaining the same content in both a [rule](/en/concepts/rules) and a skill creates two sources of truth that diverge during updates.
@@ -302,8 +298,7 @@ The rule points to the skill. One single place to maintain for detailed content.
 
 ---
 
-#### ⚠️ `WARN-005`: Context budget exceeded {#warn-005}
-
+#### `WARN-005`: Context budget exceeded {#warn-005 .warn-title}
 *Origin: official documentation.*
 
 Claude Code loads the list of skill names and descriptions within a budget of about 1% of the context window. When the list overflows, it drops the descriptions of the least used skills: their names stay listed, but without the keywords Claude needs to trigger them automatically.
@@ -318,8 +313,7 @@ A passive skill stops triggering, and no message appears in the session: the war
 
 ---
 
-#### ⚠️ `WARN-006`: Conventions written in an agent's prompt {#warn-006}
-
+#### `WARN-006`: Conventions written in an agent's prompt {#warn-006 .warn-title}
 *Origin: experienced on this project ([Methodology — Phase 0](/en/guide/methodology#phase-0-build-the-infrastructure)).*
 
 Conventions copied into an agent's body are poorly followed, and must be maintained in every agent that needs them.

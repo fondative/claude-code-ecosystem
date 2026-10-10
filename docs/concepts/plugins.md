@@ -244,8 +244,7 @@ Détails et sources : [documentation officielle — Plugins reference](https://c
 
 → Les pièges de toutes les briques, classés par gravité : [Catalogue des pièges](/guide/warns).
 
-#### ⚠️ `WARN-001` : Recopier le même `.claude/` dans chaque projet {#warn-001}
-
+#### `WARN-001` : Recopier le même `.claude/` dans chaque projet {#warn-001 .warn-title}
 *Origine : choix de conception de l'équipe, motivation du plugin recode (« au lieu de copies de `.claude/` qui divergent d'un projet à l'autre », [Choix d'architecture](/recode/#choix-d-architecture)).*
 
 Un outillage destiné à plusieurs projets, recopié dans le `.claude/` de chacun, évolue différemment dans chaque copie.
@@ -272,8 +271,7 @@ Réserver `.claude/` à ce qui est propre au projet (conventions, rules, permiss
 
 ---
 
-#### ⚠️ `WARN-002` : Composants rangés dans `.claude-plugin/` ou au mauvais endroit {#warn-002}
-
+#### `WARN-002` : Composants rangés dans `.claude-plugin/` ou au mauvais endroit {#warn-002 .warn-title}
 *Origine : documentation officielle ; vécu sur ce wiki (erreur trouvée dans cette page : serveurs MCP d'un plugin placés dans `mcp/mcp.json`).*
 
 Claude Code ne cherche les composants qu'à leur emplacement standard : un dossier mal placé n'est pas chargé.

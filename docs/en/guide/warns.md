@@ -8,86 +8,86 @@ This page gathers the **54 common mistakes** (WARN) described in the [Concepts](
 
 | Severity | Means | Count |
 |----------|-------|-------|
-| 🔴 Security | a protection that does not protect, an exposed secret, a destructive action left possible | 15 |
-| 🟠 Reliability | a behavior different from what you expect, often with no error message | 21 |
-| 🟡 Cost & context | tokens, context or time spent for nothing | 9 |
-| 🔵 Maintainability | a configuration that drifts or becomes hard to evolve | 9 |
+| <Icone nom="shield" /> Security | a protection that does not protect, an exposed secret, a destructive action left possible | 15 |
+| <Icone nom="wrench" /> Reliability | a behavior different from what you expect, often with no error message | 21 |
+| <Icone nom="coins" /> Cost & context | tokens, context or time spent for nothing | 9 |
+| <Icone nom="puzzle" /> Maintainability | a configuration that drifts or becomes hard to evolve | 9 |
 
-**Origin**: 🧪 seen on the modernization project (audit, git history, methodology) · 📐 project rule · 📘 official documentation · 🧭 general good practice.
+**Origin**: <Icone nom="flask" /> seen on the modernization project (audit, git history, methodology) · <Icone nom="ruler" /> project rule · <Icone nom="book" /> official documentation · <Icone nom="compass" /> general good practice.
 
-## 🔴 Security
-
-| Pitfall | Building block | Origin |
-|---------|----------------|--------|
-| [CLAUDE.md · WARN-005 · Confusing CLAUDE.md with permissions](/en/concepts/claude-md#warn-005) | CLAUDE.md | 📘 Official docs |
-| [Settings · WARN-001 · Overly broad permissions](/en/concepts/settings#warn-001) | Settings | 📘 Official docs |
-| [Settings · WARN-002 · Missing write deny](/en/concepts/settings#warn-002) | Settings | 🧪 Seen on the project |
-| [Settings · WARN-003 · Glob `*` vs `**`](/en/concepts/settings#warn-003) | Settings | 🧭 Good practice |
-| [Settings · WARN-004 · MCP without permissions](/en/concepts/settings#warn-004) | Settings | 📘 Official docs |
-| [Settings · WARN-006 · Path `Write(…)` rules: a phantom protection](/en/concepts/settings#warn-006) | Settings | 🧪 Seen on the project |
-| [Settings · WARN-007 · Bare `"Read"` in `allow`](/en/concepts/settings#warn-007) | Settings | 🧪 Seen on the project |
-| [Settings · WARN-008 · Taking `docker compose *` out of the sandbox](/en/concepts/settings#warn-008) | Settings | 📘 Official docs |
-| [Rules · WARN-002 · Rule without settings enforcement](/en/concepts/rules#warn-002) | Rules | 🧪 Seen on the project |
-| [Agents · WARN-002 · Too many tools](/en/concepts/agents#warn-002) | Agents | 📐 Project rule |
-| [Hooks · WARN-007 · Looking for prompt injection in `PreToolUse`](/en/concepts/hooks#warn-007) | Hooks | 📘 Official docs |
-| [Hooks · WARN-008 · Running `claude -p` in CI without choosing between `--bare` and the repository's configuration](/en/concepts/hooks#warn-008) | Hooks | 📘 Official docs |
-| [MCP · WARN-001 · Hardcoded token](/en/concepts/mcp#warn-001) | MCP | 🧭 Good practice |
-| [MCP · WARN-002 · No deny for destructive actions](/en/concepts/mcp#warn-002) | MCP | 🧭 Good practice |
-| [MCP · WARN-003 · Server from unknown source](/en/concepts/mcp#warn-003) | MCP | 📘 Official docs |
-
-## 🟠 Reliability
+## Security {#securite .sev-s}
 
 | Pitfall | Building block | Origin |
 |---------|----------------|--------|
-| [Rules · WARN-001 · Glob `*` vs `**`](/en/concepts/rules#warn-001) | Rules | 🧭 Good practice |
-| [Rules · WARN-005 · Obsolete path](/en/concepts/rules#warn-005) | Rules | 🧪 Seen on the project |
-| [Skills · WARN-002 · Vague or missing description](/en/concepts/skills#warn-002) | Skills | 📘 Official docs |
-| [Skills · WARN-003 · Launcher without protection](/en/concepts/skills#warn-003) | Skills | 📘 Official docs |
-| [Skills · WARN-006 · Conventions written in an agent's prompt](/en/concepts/skills#warn-006) | Skills | 🧪 Seen on the project |
-| [Agents · WARN-004 · No checkpoint](/en/concepts/agents#warn-004) | Agents | 📐 Project rule |
-| [Agents · WARN-005 · Parallel agents writing the same file](/en/concepts/agents#warn-005) | Agents | 🧪 Seen on the project |
-| [Agents · WARN-006 · Undersized `maxTurns`](/en/concepts/agents#warn-006) | Agents | 🧪 Seen on the project |
-| [Hooks · WARN-001 · Forgetting exit 0](/en/concepts/hooks#warn-001) | Hooks | 📘 Official docs |
-| [Hooks · WARN-003 · Script not executable](/en/concepts/hooks#warn-003) | Hooks | 🧭 Good practice |
-| [Hooks · WARN-005 · Mixing exit code and JSON](/en/concepts/hooks#warn-005) | Hooks | 📘 Official docs |
-| [Hooks · WARN-006 · Unescaped `\|` in a `grep -E` pattern](/en/concepts/hooks#warn-006) | Hooks | 🧪 Seen on the project |
-| [MCP · WARN-004 · Expired token](/en/concepts/mcp#warn-004) | MCP | 🧭 Good practice |
-| [Plugins · WARN-002 · Components stored in `.claude-plugin/` or in the wrong place](/en/concepts/plugins#warn-002) | Plugins | 🧪 Seen on the project |
-| [Commands · WARN-001 · Command and Skill with the same name](/en/concepts/commands#warn-001) | Commands | 📘 Official docs |
-| [Commands · WARN-002 · Forgetting Docker flags (this project's convention)](/en/concepts/commands#warn-002) | Commands | 📐 Project rule |
-| [Commands · WARN-003 · Command without description](/en/concepts/commands#warn-003) | Commands | 📘 Official docs |
-| [Commands · WARN-005 · Hidden dependencies](/en/concepts/commands#warn-005) | Commands | 🧭 Good practice |
-| [Commands · WARN-006 · `name:` in a command](/en/concepts/commands#warn-006) | Commands | 🧪 Seen on the project |
-| [Commands · WARN-007 · Checks reserved for the user](/en/concepts/commands#warn-007) | Commands | 🧪 Seen on the project |
-| [Commands · WARN-008 · Documenting an invocation that doesn't exist](/en/concepts/commands#warn-008) | Commands | 🧪 Seen on the project |
+| [CLAUDE.md · WARN-005 · Confusing CLAUDE.md with permissions](/en/concepts/claude-md#warn-005) | CLAUDE.md | <Icone nom="book" /> Official docs |
+| [Settings · WARN-001 · Overly broad permissions](/en/concepts/settings#warn-001) | Settings | <Icone nom="book" /> Official docs |
+| [Settings · WARN-002 · Missing write deny](/en/concepts/settings#warn-002) | Settings | <Icone nom="flask" /> Seen on the project |
+| [Settings · WARN-003 · Glob `*` vs `**`](/en/concepts/settings#warn-003) | Settings | <Icone nom="compass" /> Good practice |
+| [Settings · WARN-004 · MCP without permissions](/en/concepts/settings#warn-004) | Settings | <Icone nom="book" /> Official docs |
+| [Settings · WARN-006 · Path `Write(…)` rules: a phantom protection](/en/concepts/settings#warn-006) | Settings | <Icone nom="flask" /> Seen on the project |
+| [Settings · WARN-007 · Bare `"Read"` in `allow`](/en/concepts/settings#warn-007) | Settings | <Icone nom="flask" /> Seen on the project |
+| [Settings · WARN-008 · Taking `docker compose *` out of the sandbox](/en/concepts/settings#warn-008) | Settings | <Icone nom="book" /> Official docs |
+| [Rules · WARN-002 · Rule without settings enforcement](/en/concepts/rules#warn-002) | Rules | <Icone nom="flask" /> Seen on the project |
+| [Agents · WARN-002 · Too many tools](/en/concepts/agents#warn-002) | Agents | <Icone nom="ruler" /> Project rule |
+| [Hooks · WARN-007 · Looking for prompt injection in `PreToolUse`](/en/concepts/hooks#warn-007) | Hooks | <Icone nom="book" /> Official docs |
+| [Hooks · WARN-008 · Running `claude -p` in CI without choosing between `--bare` and the repository's configuration](/en/concepts/hooks#warn-008) | Hooks | <Icone nom="book" /> Official docs |
+| [MCP · WARN-001 · Hardcoded token](/en/concepts/mcp#warn-001) | MCP | <Icone nom="compass" /> Good practice |
+| [MCP · WARN-002 · No deny for destructive actions](/en/concepts/mcp#warn-002) | MCP | <Icone nom="compass" /> Good practice |
+| [MCP · WARN-003 · Server from unknown source](/en/concepts/mcp#warn-003) | MCP | <Icone nom="book" /> Official docs |
 
-## 🟡 Cost & context
+## Reliability {#fiabilite .sev-f}
 
 | Pitfall | Building block | Origin |
 |---------|----------------|--------|
-| [CLAUDE.md · WARN-001 · File too long / monolithic](/en/concepts/claude-md#warn-001) | CLAUDE.md | 📘 Official docs |
-| [CLAUDE.md · WARN-006 · Believing an `@` import lightens the context](/en/concepts/claude-md#warn-006) | CLAUDE.md | 🧪 Seen on the project |
-| [Rules · WARN-003 · Rule too long](/en/concepts/rules#warn-003) | Rules | 🧪 Seen on the project |
-| [Rules · WARN-004 · Glob `**` alone](/en/concepts/rules#warn-004) | Rules | 🧭 Good practice |
-| [Skills · WARN-001 · Skill too long](/en/concepts/skills#warn-001) | Skills | 📘 Official docs |
-| [Skills · WARN-005 · Context budget exceeded](/en/concepts/skills#warn-005) | Skills | 📘 Official docs |
-| [Agents · WARN-003 · Opus everywhere](/en/concepts/agents#warn-003) | Agents | 🧪 Seen on the project |
-| [Hooks · WARN-002 · Hook too slow](/en/concepts/hooks#warn-002) | Hooks | 🧭 Good practice |
-| [Hooks · WARN-004 · Matcher too broad](/en/concepts/hooks#warn-004) | Hooks | 🧭 Good practice |
+| [Rules · WARN-001 · Glob `*` vs `**`](/en/concepts/rules#warn-001) | Rules | <Icone nom="compass" /> Good practice |
+| [Rules · WARN-005 · Obsolete path](/en/concepts/rules#warn-005) | Rules | <Icone nom="flask" /> Seen on the project |
+| [Skills · WARN-002 · Vague or missing description](/en/concepts/skills#warn-002) | Skills | <Icone nom="book" /> Official docs |
+| [Skills · WARN-003 · Launcher without protection](/en/concepts/skills#warn-003) | Skills | <Icone nom="book" /> Official docs |
+| [Skills · WARN-006 · Conventions written in an agent's prompt](/en/concepts/skills#warn-006) | Skills | <Icone nom="flask" /> Seen on the project |
+| [Agents · WARN-004 · No checkpoint](/en/concepts/agents#warn-004) | Agents | <Icone nom="ruler" /> Project rule |
+| [Agents · WARN-005 · Parallel agents writing the same file](/en/concepts/agents#warn-005) | Agents | <Icone nom="flask" /> Seen on the project |
+| [Agents · WARN-006 · Undersized `maxTurns`](/en/concepts/agents#warn-006) | Agents | <Icone nom="flask" /> Seen on the project |
+| [Hooks · WARN-001 · Forgetting exit 0](/en/concepts/hooks#warn-001) | Hooks | <Icone nom="book" /> Official docs |
+| [Hooks · WARN-003 · Script not executable](/en/concepts/hooks#warn-003) | Hooks | <Icone nom="compass" /> Good practice |
+| [Hooks · WARN-005 · Mixing exit code and JSON](/en/concepts/hooks#warn-005) | Hooks | <Icone nom="book" /> Official docs |
+| [Hooks · WARN-006 · Unescaped `\|` in a `grep -E` pattern](/en/concepts/hooks#warn-006) | Hooks | <Icone nom="flask" /> Seen on the project |
+| [MCP · WARN-004 · Expired token](/en/concepts/mcp#warn-004) | MCP | <Icone nom="compass" /> Good practice |
+| [Plugins · WARN-002 · Components stored in `.claude-plugin/` or in the wrong place](/en/concepts/plugins#warn-002) | Plugins | <Icone nom="flask" /> Seen on the project |
+| [Commands · WARN-001 · Command and Skill with the same name](/en/concepts/commands#warn-001) | Commands | <Icone nom="book" /> Official docs |
+| [Commands · WARN-002 · Forgetting Docker flags (this project's convention)](/en/concepts/commands#warn-002) | Commands | <Icone nom="ruler" /> Project rule |
+| [Commands · WARN-003 · Command without description](/en/concepts/commands#warn-003) | Commands | <Icone nom="book" /> Official docs |
+| [Commands · WARN-005 · Hidden dependencies](/en/concepts/commands#warn-005) | Commands | <Icone nom="compass" /> Good practice |
+| [Commands · WARN-006 · `name:` in a command](/en/concepts/commands#warn-006) | Commands | <Icone nom="flask" /> Seen on the project |
+| [Commands · WARN-007 · Checks reserved for the user](/en/concepts/commands#warn-007) | Commands | <Icone nom="flask" /> Seen on the project |
+| [Commands · WARN-008 · Documenting an invocation that doesn't exist](/en/concepts/commands#warn-008) | Commands | <Icone nom="flask" /> Seen on the project |
 
-## 🔵 Maintainability
+## Cost & context {#cout-contexte .sev-c}
 
 | Pitfall | Building block | Origin |
 |---------|----------------|--------|
-| [CLAUDE.md · WARN-002 · Hardcoded paths in agents](/en/concepts/claude-md#warn-002) | CLAUDE.md | 🧪 Seen on the project |
-| [CLAUDE.md · WARN-003 · Duplicated conventions](/en/concepts/claude-md#warn-003) | CLAUDE.md | 🧪 Seen on the project |
-| [CLAUDE.md · WARN-004 · Temporary instructions](/en/concepts/claude-md#warn-004) | CLAUDE.md | 📘 Official docs |
-| [Settings · WARN-005 · Project settings for personal preferences](/en/concepts/settings#warn-005) | Settings | 📘 Official docs |
-| [Skills · WARN-004 · Skill / rule duplication](/en/concepts/skills#warn-004) | Skills | 📐 Project rule |
-| [Agents · WARN-001 · Catch-all agent](/en/concepts/agents#warn-001) | Agents | 📘 Official docs |
-| [MCP · WARN-005 · Forgetting --scope for team sharing](/en/concepts/mcp#warn-005) | MCP | 📘 Official docs |
-| [Plugins · WARN-001 · Copying the same `.claude/` into every project](/en/concepts/plugins#warn-001) | Plugins | 📐 Project rule |
-| [Commands · WARN-004 · Logic too complex](/en/concepts/commands#warn-004) | Commands | 🧭 Good practice |
+| [CLAUDE.md · WARN-001 · File too long / monolithic](/en/concepts/claude-md#warn-001) | CLAUDE.md | <Icone nom="book" /> Official docs |
+| [CLAUDE.md · WARN-006 · Believing an `@` import lightens the context](/en/concepts/claude-md#warn-006) | CLAUDE.md | <Icone nom="flask" /> Seen on the project |
+| [Rules · WARN-003 · Rule too long](/en/concepts/rules#warn-003) | Rules | <Icone nom="flask" /> Seen on the project |
+| [Rules · WARN-004 · Glob `**` alone](/en/concepts/rules#warn-004) | Rules | <Icone nom="compass" /> Good practice |
+| [Skills · WARN-001 · Skill too long](/en/concepts/skills#warn-001) | Skills | <Icone nom="book" /> Official docs |
+| [Skills · WARN-005 · Context budget exceeded](/en/concepts/skills#warn-005) | Skills | <Icone nom="book" /> Official docs |
+| [Agents · WARN-003 · Opus everywhere](/en/concepts/agents#warn-003) | Agents | <Icone nom="flask" /> Seen on the project |
+| [Hooks · WARN-002 · Hook too slow](/en/concepts/hooks#warn-002) | Hooks | <Icone nom="compass" /> Good practice |
+| [Hooks · WARN-004 · Matcher too broad](/en/concepts/hooks#warn-004) | Hooks | <Icone nom="compass" /> Good practice |
+
+## Maintainability {#maintenabilite .sev-m}
+
+| Pitfall | Building block | Origin |
+|---------|----------------|--------|
+| [CLAUDE.md · WARN-002 · Hardcoded paths in agents](/en/concepts/claude-md#warn-002) | CLAUDE.md | <Icone nom="flask" /> Seen on the project |
+| [CLAUDE.md · WARN-003 · Duplicated conventions](/en/concepts/claude-md#warn-003) | CLAUDE.md | <Icone nom="flask" /> Seen on the project |
+| [CLAUDE.md · WARN-004 · Temporary instructions](/en/concepts/claude-md#warn-004) | CLAUDE.md | <Icone nom="book" /> Official docs |
+| [Settings · WARN-005 · Project settings for personal preferences](/en/concepts/settings#warn-005) | Settings | <Icone nom="book" /> Official docs |
+| [Skills · WARN-004 · Skill / rule duplication](/en/concepts/skills#warn-004) | Skills | <Icone nom="ruler" /> Project rule |
+| [Agents · WARN-001 · Catch-all agent](/en/concepts/agents#warn-001) | Agents | <Icone nom="book" /> Official docs |
+| [MCP · WARN-005 · Forgetting --scope for team sharing](/en/concepts/mcp#warn-005) | MCP | <Icone nom="book" /> Official docs |
+| [Plugins · WARN-001 · Copying the same `.claude/` into every project](/en/concepts/plugins#warn-001) | Plugins | <Icone nom="ruler" /> Project rule |
+| [Commands · WARN-004 · Logic too complex](/en/concepts/commands#warn-004) | Commands | <Icone nom="compass" /> Good practice |
 
 ## Pitfalls seen on the project
 
@@ -95,28 +95,28 @@ The pitfalls that actually happened on the modernization project or in this wiki
 
 | Pitfall | Building block | Origin |
 |---------|----------------|--------|
-| [CLAUDE.md · WARN-002 · Hardcoded paths in agents](/en/concepts/claude-md#warn-002) | CLAUDE.md | 🧪 Seen on the project |
-| [CLAUDE.md · WARN-003 · Duplicated conventions](/en/concepts/claude-md#warn-003) | CLAUDE.md | 🧪 Seen on the project |
-| [CLAUDE.md · WARN-006 · Believing an `@` import lightens the context](/en/concepts/claude-md#warn-006) | CLAUDE.md | 🧪 Seen on the project |
-| [Settings · WARN-002 · Missing write deny](/en/concepts/settings#warn-002) | Settings | 🧪 Seen on the project |
-| [Settings · WARN-006 · Path `Write(…)` rules: a phantom protection](/en/concepts/settings#warn-006) | Settings | 🧪 Seen on the project |
-| [Settings · WARN-007 · Bare `"Read"` in `allow`](/en/concepts/settings#warn-007) | Settings | 🧪 Seen on the project |
-| [Rules · WARN-002 · Rule without settings enforcement](/en/concepts/rules#warn-002) | Rules | 🧪 Seen on the project |
-| [Rules · WARN-003 · Rule too long](/en/concepts/rules#warn-003) | Rules | 🧪 Seen on the project |
-| [Rules · WARN-005 · Obsolete path](/en/concepts/rules#warn-005) | Rules | 🧪 Seen on the project |
-| [Skills · WARN-006 · Conventions written in an agent's prompt](/en/concepts/skills#warn-006) | Skills | 🧪 Seen on the project |
-| [Agents · WARN-003 · Opus everywhere](/en/concepts/agents#warn-003) | Agents | 🧪 Seen on the project |
-| [Agents · WARN-005 · Parallel agents writing the same file](/en/concepts/agents#warn-005) | Agents | 🧪 Seen on the project |
-| [Agents · WARN-006 · Undersized `maxTurns`](/en/concepts/agents#warn-006) | Agents | 🧪 Seen on the project |
-| [Hooks · WARN-006 · Unescaped `\|` in a `grep -E` pattern](/en/concepts/hooks#warn-006) | Hooks | 🧪 Seen on the project |
-| [Plugins · WARN-002 · Components stored in `.claude-plugin/` or in the wrong place](/en/concepts/plugins#warn-002) | Plugins | 🧪 Seen on the project |
-| [Commands · WARN-006 · `name:` in a command](/en/concepts/commands#warn-006) | Commands | 🧪 Seen on the project |
-| [Commands · WARN-007 · Checks reserved for the user](/en/concepts/commands#warn-007) | Commands | 🧪 Seen on the project |
-| [Commands · WARN-008 · Documenting an invocation that doesn't exist](/en/concepts/commands#warn-008) | Commands | 🧪 Seen on the project |
+| [CLAUDE.md · WARN-002 · Hardcoded paths in agents](/en/concepts/claude-md#warn-002) | CLAUDE.md | <Icone nom="flask" /> Seen on the project |
+| [CLAUDE.md · WARN-003 · Duplicated conventions](/en/concepts/claude-md#warn-003) | CLAUDE.md | <Icone nom="flask" /> Seen on the project |
+| [CLAUDE.md · WARN-006 · Believing an `@` import lightens the context](/en/concepts/claude-md#warn-006) | CLAUDE.md | <Icone nom="flask" /> Seen on the project |
+| [Settings · WARN-002 · Missing write deny](/en/concepts/settings#warn-002) | Settings | <Icone nom="flask" /> Seen on the project |
+| [Settings · WARN-006 · Path `Write(…)` rules: a phantom protection](/en/concepts/settings#warn-006) | Settings | <Icone nom="flask" /> Seen on the project |
+| [Settings · WARN-007 · Bare `"Read"` in `allow`](/en/concepts/settings#warn-007) | Settings | <Icone nom="flask" /> Seen on the project |
+| [Rules · WARN-002 · Rule without settings enforcement](/en/concepts/rules#warn-002) | Rules | <Icone nom="flask" /> Seen on the project |
+| [Rules · WARN-003 · Rule too long](/en/concepts/rules#warn-003) | Rules | <Icone nom="flask" /> Seen on the project |
+| [Rules · WARN-005 · Obsolete path](/en/concepts/rules#warn-005) | Rules | <Icone nom="flask" /> Seen on the project |
+| [Skills · WARN-006 · Conventions written in an agent's prompt](/en/concepts/skills#warn-006) | Skills | <Icone nom="flask" /> Seen on the project |
+| [Agents · WARN-003 · Opus everywhere](/en/concepts/agents#warn-003) | Agents | <Icone nom="flask" /> Seen on the project |
+| [Agents · WARN-005 · Parallel agents writing the same file](/en/concepts/agents#warn-005) | Agents | <Icone nom="flask" /> Seen on the project |
+| [Agents · WARN-006 · Undersized `maxTurns`](/en/concepts/agents#warn-006) | Agents | <Icone nom="flask" /> Seen on the project |
+| [Hooks · WARN-006 · Unescaped `\|` in a `grep -E` pattern](/en/concepts/hooks#warn-006) | Hooks | <Icone nom="flask" /> Seen on the project |
+| [Plugins · WARN-002 · Components stored in `.claude-plugin/` or in the wrong place](/en/concepts/plugins#warn-002) | Plugins | <Icone nom="flask" /> Seen on the project |
+| [Commands · WARN-006 · `name:` in a command](/en/concepts/commands#warn-006) | Commands | <Icone nom="flask" /> Seen on the project |
+| [Commands · WARN-007 · Checks reserved for the user](/en/concepts/commands#warn-007) | Commands | <Icone nom="flask" /> Seen on the project |
+| [Commands · WARN-008 · Documenting an invocation that doesn't exist](/en/concepts/commands#warn-008) | Commands | <Icone nom="flask" /> Seen on the project |
 
 ## By building block
 
-| Building block | 🔴 | 🟠 | 🟡 | 🔵 | Total |
+| Building block | <Icone nom="shield" /> | <Icone nom="wrench" /> | <Icone nom="coins" /> | <Icone nom="puzzle" /> | Total |
 |----------------|----|----|----|----|-------|
 | [CLAUDE.md](/en/concepts/claude-md) | 1 | · | 2 | 3 | 6 |
 | [Settings](/en/concepts/settings) | 7 | · | · | 1 | 8 |

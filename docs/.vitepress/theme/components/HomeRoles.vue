@@ -10,14 +10,17 @@ const p = computed(() => (en.value ? '/en' : ''))
 type Step = { label: string; link: string; external?: boolean }
 type Role = { key: string; name: string; tagline: string; steps: Step[] }
 
-const t = computed<{ eyebrow: string; title: string; desc: string; roles: Role[] }>(() => {
+const t = computed<{ eyebrow: string; title: string; desc: string; highlight: string; after: string; note: string; roles: Role[] }>(() => {
   const m = `${p.value}/guide/methodology`
   const example: Step = { label: en.value ? 'Real use case' : "Cas d'usage réel", link: '/exemple-wiki-legacy/', external: true }
   return en.value
     ? {
-        eyebrow: '4 · Your role',
-        title: 'Your role in the modernisation',
-        desc: 'A numbered reading path for each role, so nothing is missed.',
+        eyebrow: '4 · Roles',
+        title: 'The scope of each stakeholder',
+        desc: 'The method requires three complementary roles, which can be combined in a single ',
+        highlight: '"Product Engineer"',
+        after: ' profile.',
+        note: 'When modernising a legacy project, involving the client (real users or designers) in the steps that validate how the existing system works is strongly recommended.',
         roles: [
           { key: 'archi', name: 'Architect', tagline: 'Guardian of the method and the technical choices', steps: [
             { label: 'Methodology', link: m },
@@ -37,9 +40,12 @@ const t = computed<{ eyebrow: string; title: string; desc: string; roles: Role[]
         ]
       }
     : {
-        eyebrow: '4 · Votre rôle',
-        title: 'Votre rôle dans la modernisation',
-        desc: 'Un parcours de lecture numéroté par rôle, pour ne rien rater.',
+        eyebrow: '4 · Rôles',
+        title: 'Le périmètre de chaque intervenant',
+        desc: 'La méthode requiert trois rôles complémentaires, pouvant être réunis dans un seul profil ',
+        highlight: '« Ingénieur Produit » (Product Engineer)',
+        after: '.',
+        note: "Dans le cas de modernisation d'un projet legacy, l'implication du client (utilisateurs réels ou concepteurs) dans les étapes de validation du fonctionnement de l'existant est très recommandée.",
         roles: [
           { key: 'archi', name: 'Architecte', tagline: 'Garant de la méthode et des choix techniques', steps: [
             { label: 'Méthodologie', link: m },
@@ -67,7 +73,8 @@ const t = computed<{ eyebrow: string; title: string; desc: string; roles: Role[]
       <div>
         <p class="home-eyebrow">{{ t.eyebrow }}</p>
         <div class="home-title-row"><HomeIcon name="roles" /><h2 class="home-title">{{ t.title }}</h2></div>
-        <p class="home-desc">{{ t.desc }}</p>
+        <p class="home-desc hro-desc">{{ t.desc }}<strong class="hro-highlight">{{ t.highlight }}</strong>{{ t.after }}</p>
+        <p class="home-desc hro-note">{{ t.note }}</p>
       </div>
     </div>
     <div class="hro-grid">
@@ -86,6 +93,24 @@ const t = computed<{ eyebrow: string; title: string; desc: string; roles: Role[]
 </template>
 
 <style scoped>
+.hro-desc {
+  max-width: none !important;
+}
+
+/* Profil « Ingénieur Produit » mis en valeur : gras, rose Fondative (sans fond), lisible en clair et en sombre */
+.hro-highlight {
+  font-weight: 700;
+  color: var(--fondative-pink);
+}
+
+.hro-note {
+  max-width: none !important;
+  font-size: 14px !important;
+  margin-top: 8px !important;
+  padding-left: 12px;
+  border-left: 3px solid var(--fondative-pink);
+}
+
 .hro-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

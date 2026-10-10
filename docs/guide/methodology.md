@@ -10,6 +10,8 @@ import { withBase } from 'vitepress'
 
 Cette méthodologie est **agnostique de la technologie source**. Elle s'applique à toute migration legacy, quelle que soit la stack d'origine.
 
+<div class="harness-note"><span class="hn-icon" aria-hidden="true"></span><div><strong class="hn-title">Harnais de modernisation</strong><p>Nous disposons de harnais de modernisation pour les technologies cibles listées ci-dessous.</p><p class="hn-sub">D'autres technologies peuvent également être prises en charge, sous réserve d'une étape préalable d'adaptation ou de développement du harnais approprié.</p></div></div>
+
 | Cible | Stack type |
 |-------|-----------|
 | **React** | SPA web avec TypeScript, Vite, Tailwind |
@@ -186,7 +188,7 @@ Le wiki VitePress généré par `/mod-generate-docs` (dossier `WIKI_TARGET`) est
   <CasUsageCard page="modernisation/index.html#modernisation-—-vue-d-ensemble" title="Tableau de bord" desc="Avancement par feature : tâches faites, à faire, bloquées" />
   <CasUsageCard page="modernisation/index.html#resultats-verifies" title="Résultats vérifiés" desc="Tests et scores de conformité, mesurés" />
   <CasUsageCard page="mapping/index.html#cartographie-de-la-migration" title="Cartographie" desc="Graphe de dépendances, vagues de migration, arbre fonctionnel" />
-  <CasUsageCard page="modernisation/regions.html#timeline" title="Timeline Régions" desc="Chaque lot de 3 tâches, testé puis commité" />
+  <CasUsageCard page="modernisation/regions.html#timeline" title="Timeline du module Régions" desc="Chaque lot de 3 tâches, testé puis commité" />
 </CasUsageCards>
 
 ---
@@ -473,24 +475,24 @@ graph LR
 
 #### Les 14 sections de la spec {#sections-de-la-spec}
 
-Les 14 sections (titres `## N. Titre` du gabarit de `legacy-feature-analyzer`) couvrent **tous les angles** d'une feature. La spec Régions du cas d'usage sert d'exemple pour chacune :
+Les 14 sections (titres `## N. Titre` du gabarit de `legacy-feature-analyzer`) couvrent **tous les angles** d'une feature. La spec du module Régions du cas d'usage sert d'exemple pour chacune :
 
 | N° | Section | Ce qu'elle contient | Exemple réel |
 |----|---------|---------------------|--------------|
-| 1 | Vue d'Ensemble | Objectif et valeur métier, périmètre, rôles utilisateurs, hypothèses d'analyse | <CasUsage page="docs/features/regions.html#sec-1">Régions</CasUsage> |
-| 2 | Référence à l'Implémentation Source | Stack legacy, fichiers source, dépendances internes et externes, modèles de données | <CasUsage page="docs/features/regions.html#sec-2">Régions</CasUsage> |
-| 3 | Scénarios Utilisateur | Par scénario : acteur, préconditions, flux principal, flux alternatifs, postconditions | <CasUsage page="docs/features/regions.html#sec-3">Régions</CasUsage> |
-| 4 | Points d'Interaction | Composants UI (champs, boutons, comportements) et endpoints API, contrat transposé du legacy (T-01, T-02, T-05) | <CasUsage page="docs/features/regions.html#sec-4">Régions</CasUsage> |
-| 5 | Règles Métier | Par règle : description, condition, application, gestion des violations, exemple | <CasUsage page="docs/features/regions.html#sec-5">Régions</CasUsage> |
-| 6 | Règles de Validation des Données | Contraintes et messages d'erreur par champ, unicité, intégrité référentielle | <CasUsage page="docs/features/regions.html#sec-6">Régions</CasUsage> |
-| 7 | Gestion de l'État | État applicatif, transitions d'état, état persistant (quoi, où, quand) | <CasUsage page="docs/features/regions.html#sec-7">Régions</CasUsage> |
-| 8 | Contrôle d'Accès & Autorisation | Permissions par action, règles de visibilité, accès aux données (lecture, création, mise à jour, suppression) | <CasUsage page="docs/features/regions.html#sec-8">Régions</CasUsage> |
-| 9 | Gestion des Erreurs | Erreurs visibles (message, cause, récupération) et erreurs système | <CasUsage page="docs/features/regions.html#sec-9">Régions</CasUsage> |
-| 10 | Cas Limites & Scénarios Spéciaux | Par cas : déclencheur, comportement attendu, implémentation legacy actuelle | <CasUsage page="docs/features/regions.html#sec-10">Régions</CasUsage> |
-| 11 | Points d'Intégration | Intégrations internes (autres features) et externes (services) | <CasUsage page="docs/features/regions.html#sec-11">Régions</CasUsage> |
-| 12 | Considérations pour les Tests | Scénarios critiques, conditions limites, cas négatifs, données de test | <CasUsage page="docs/features/regions.html#sec-12">Régions</CasUsage> |
-| 13 | Notes de Migration | Transpositions T-01 à T-07 appliquées, **tableau « Écarts au Legacy »** (colonne `Décision`, arbitrée par l'humain), défis techniques, patterns propres au legacy | <CasUsage page="docs/features/regions.html#sec-13">Régions</CasUsage> |
-| 14 | Annexe | Glossaire, features liées, sous-fonctionnalités identifiées (versées dans `0-features-tree.json`), références au code source | <CasUsage page="docs/features/regions.html#sec-14">Régions</CasUsage> |
+| 1 | Vue d'Ensemble | Objectif et valeur métier, périmètre, rôles utilisateurs, hypothèses d'analyse | <CasUsage page="docs/features/regions.html#sec-1">module Régions</CasUsage> |
+| 2 | Référence à l'Implémentation Source | Stack legacy, fichiers source, dépendances internes et externes, modèles de données | <CasUsage page="docs/features/regions.html#sec-2">module Régions</CasUsage> |
+| 3 | Scénarios Utilisateur | Par scénario : acteur, préconditions, flux principal, flux alternatifs, postconditions | <CasUsage page="docs/features/regions.html#sec-3">module Régions</CasUsage> |
+| 4 | Points d'Interaction | Composants UI (champs, boutons, comportements) et endpoints API, contrat transposé du legacy (T-01, T-02, T-05) | <CasUsage page="docs/features/regions.html#sec-4">module Régions</CasUsage> |
+| 5 | Règles Métier | Par règle : description, condition, application, gestion des violations, exemple | <CasUsage page="docs/features/regions.html#sec-5">module Régions</CasUsage> |
+| 6 | Règles de Validation des Données | Contraintes et messages d'erreur par champ, unicité, intégrité référentielle | <CasUsage page="docs/features/regions.html#sec-6">module Régions</CasUsage> |
+| 7 | Gestion de l'État | État applicatif, transitions d'état, état persistant (quoi, où, quand) | <CasUsage page="docs/features/regions.html#sec-7">module Régions</CasUsage> |
+| 8 | Contrôle d'Accès & Autorisation | Permissions par action, règles de visibilité, accès aux données (lecture, création, mise à jour, suppression) | <CasUsage page="docs/features/regions.html#sec-8">module Régions</CasUsage> |
+| 9 | Gestion des Erreurs | Erreurs visibles (message, cause, récupération) et erreurs système | <CasUsage page="docs/features/regions.html#sec-9">module Régions</CasUsage> |
+| 10 | Cas Limites & Scénarios Spéciaux | Par cas : déclencheur, comportement attendu, implémentation legacy actuelle | <CasUsage page="docs/features/regions.html#sec-10">module Régions</CasUsage> |
+| 11 | Points d'Intégration | Intégrations internes (autres features) et externes (services) | <CasUsage page="docs/features/regions.html#sec-11">module Régions</CasUsage> |
+| 12 | Considérations pour les Tests | Scénarios critiques, conditions limites, cas négatifs, données de test | <CasUsage page="docs/features/regions.html#sec-12">module Régions</CasUsage> |
+| 13 | Notes de Migration | Transpositions T-01 à T-07 appliquées, **tableau « Écarts au Legacy »** (colonne `Décision`, arbitrée par l'humain), défis techniques, patterns propres au legacy | <CasUsage page="docs/features/regions.html#sec-13">module Régions</CasUsage> |
+| 14 | Annexe | Glossaire, features liées, sous-fonctionnalités identifiées (versées dans `0-features-tree.json`), références au code source | <CasUsage page="docs/features/regions.html#sec-14">module Régions</CasUsage> |
 
 Une section sans objet n'est pas supprimée : elle contient « Non applicable » et sa justification. Le launcher vérifie que les 14 sections sont présentes, dans l'ordre.
 
@@ -508,7 +510,7 @@ Une section sans objet n'est pas supprimée : elle contient « Non applicable »
 </div>
 
 <CasUsageCards>
-  <CasUsageCard page="docs/features/regions.html#sec-1" title="Spec Régions" desc="14 sections tirées du code legacy" />
+  <CasUsageCard page="docs/features/regions.html#sec-1" title="Spec du module Régions" desc="14 sections tirées du code legacy" />
   <CasUsageCard page="docs/features/regions.html#sec-13" title="Écarts arbitrés" desc="Section 13 : écarts au legacy et décisions" />
 </CasUsageCards>
 
@@ -570,9 +572,9 @@ Les conventions ne sont pas recopiées tâche par tâche : planners et executors
 </div>
 
 <CasUsageCards>
-  <CasUsageCard page="modernisation/api/regions.html#liste-des-taches-backend" title="Tâches backend Régions" desc="Tâches numérotées, dépendances, statut" />
+  <CasUsageCard page="modernisation/api/regions.html#liste-des-taches-backend" title="Tâches backend du module Régions" desc="Tâches numérotées, dépendances, statut" />
   <CasUsageCard page="modernisation/api/regions.html#specification-openapi" title="Contrat OpenAPI" desc="Endpoints planifiés, base du frontend" />
-  <CasUsageCard page="modernisation/frontend/regions.html#liste-des-taches-frontend" title="Tâches frontend Régions" desc="Tâches numérotées, dépendances, statut" />
+  <CasUsageCard page="modernisation/frontend/regions.html#liste-des-taches-frontend" title="Tâches frontend du module Régions" desc="Tâches numérotées, dépendances, statut" />
 </CasUsageCards>
 
 ---
@@ -642,7 +644,7 @@ Les agents ne commitent jamais eux-mêmes : le pipeline commite chaque lot véri
 :::
 
 <CasUsageCards>
-  <CasUsageCard page="modernisation/regions.html#timeline" title="Timeline Régions" desc="Chaque lot de 3 tâches, testé puis commité" />
+  <CasUsageCard page="modernisation/regions.html#timeline" title="Timeline du module Régions" desc="Chaque lot de 3 tâches, testé puis commité" />
   <CasUsageCard page="modernisation/changelog.html#journal-de-modernisation" title="Journal" desc="Les étapes de la migration, dans l'ordre" />
 </CasUsageCards>
 
@@ -692,7 +694,7 @@ Chaque section du rapport part de **100 points**. On retire des points pour chaq
 **Les rapports ne sont jamais écrasés** : V1 après l'implémentation, V2 après la passe de correction. Le pipeline s'arrête à V2.
 
 <CasUsageCards>
-  <CasUsageCard page="modernisation/conformity-categories.html#score-global" title="Score de conformité" desc="Rapport Catégories : score global" />
+  <CasUsageCard page="modernisation/conformity-categories.html#score-global" title="Score de conformité" desc="Rapport du module Catégories : score global" />
   <CasUsageCard page="modernisation/conformity-categories.html#tableau-de-bord" title="Scores par section" desc="Détail du barème du rapport" />
 </CasUsageCards>
 

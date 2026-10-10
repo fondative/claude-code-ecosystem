@@ -51,8 +51,7 @@ The example job in the [GitLab CI/CD documentation](https://code.claude.com/docs
 
 ## Common mistakes to avoid
 
-#### ⚠️ `WARN-001`: Mistaking one tool for another {#warn-001}
-
+#### `WARN-001`: Mistaking one tool for another {#warn-001 .warn-title}
 *Origin: design of this project's pipeline (three checks with different references).*
 
 ::: danger Problem
@@ -63,8 +62,7 @@ The example job in the [GitLab CI/CD documentation](https://code.claude.com/docs
 Choose the tool from the question ([In short](#in-short) table) and, for a migrated feature, run all three.
 :::
 
-#### ⚠️ `WARN-002`: Judging tests without running them {#warn-002}
-
+#### `WARN-002`: Judging tests without running them {#warn-002 .warn-title}
 *Origin: project rule (`mod-conformity-conventions` skill, rule 7 "Actual test execution").*
 
 ::: danger Problem

@@ -147,8 +147,7 @@ Details and sources: [official documentation — Hooks](https://code.claude.com/
 
 → Pitfalls from every building block, sorted by severity: [Pitfall catalog](/en/guide/warns).
 
-#### ⚠️ `WARN-001` : Forgetting exit 0 {#warn-001}
-
+#### `WARN-001` : Forgetting exit 0 {#warn-001 .warn-title}
 *Origin: official documentation (exit code semantics).*
 
 Without an explicit `exit`, a shell script returns the exit code of **its last command**. If that is a `grep -q` that finds nothing (exit 1), the hook is treated as a **non-blocking error**: the action proceeds, but a `hook error` notice clutters the transcript.
@@ -175,8 +174,7 @@ An explicit `exit 0` means "no decision": the normal permission flow applies (ex
 
 ---
 
-#### ⚠️ `WARN-002` : Hook too slow {#warn-002}
-
+#### `WARN-002` : Hook too slow {#warn-002 .warn-title}
 *Origin: general good practice (every tool call waits for its `PreToolUse` hooks).*
 
 A blocking PreToolUse hook must respond quickly to avoid penalizing every Claude action.
@@ -204,8 +202,7 @@ Every tool call waits for the matching `PreToolUse` hooks to finish: keep these 
 
 ---
 
-#### ⚠️ `WARN-003` : Script not executable {#warn-003}
-
+#### `WARN-003` : Script not executable {#warn-003 .warn-title}
 *Origin: general good practice.*
 
 A script without execute permission fails silently or raises a cryptic error.
@@ -229,8 +226,7 @@ Always check permissions after creating a hook.
 
 ---
 
-#### ⚠️ `WARN-004` : Matcher too broad {#warn-004}
-
+#### `WARN-004` : Matcher too broad {#warn-004 .warn-title}
 *Origin: general good practice.*
 
 An overly permissive matcher triggers the hook on every action, including those that don't need it.
@@ -253,8 +249,7 @@ Use a precise regex to target only the relevant tools.
 
 ---
 
-#### ⚠️ `WARN-005` : Mixing exit code and JSON {#warn-005}
-
+#### `WARN-005` : Mixing exit code and JSON {#warn-005 .warn-title}
 *Origin: official documentation (an exit 2 block cannot be cancelled by the JSON).*
 
 A hook can decide in two ways: through its exit code, or through JSON written to stdout with exit 0. That JSON puts the event-specific fields in `hookSpecificOutput`; for `PreToolUse`, `permissionDecision` is `allow`, `deny` or `ask`:
@@ -287,8 +282,7 @@ Choose a single method per hook: exit code (simple) or JSON stdout + exit 0 (fin
 
 ---
 
-#### ⚠️ `WARN-006` : Unescaped `|` in a `grep -E` pattern {#warn-006}
-
+#### `WARN-006` : Unescaped `|` in a `grep -E` pattern {#warn-006 .warn-title}
 *Origin: experienced on this wiki (bug found in the `security-gate.sh` hook of example 1).*
 
 In `grep -E`, `|` means **alternation**, not a literal pipe. A pattern meant to block `curl … | bash` actually blocks any command containing ` bash` or ` sh`, including the project's legitimate commands.
@@ -319,8 +313,7 @@ Test a security hook like code: on what it must block **and** on the project's e
 
 ---
 
-#### ⚠️ `WARN-007`: Looking for prompt injection in `PreToolUse` {#warn-007}
-
+#### `WARN-007`: Looking for prompt injection in `PreToolUse` {#warn-007 .warn-title}
 *Origin: official documentation ([hooks](https://code.claude.com/docs/en/hooks)).*
 
 A hook meant to spot a [prompt injection](/en/reference/glossary#injection-de-prompt) in what Claude reads sees nothing if it runs before the tool.
@@ -335,8 +328,7 @@ Scan in `PostToolUse` on `Read|WebFetch` ([example 10](#example-10-anti-injectio
 
 ---
 
-#### ⚠️ `WARN-008`: Running `claude -p` in CI without choosing between `--bare` and the repository's configuration {#warn-008}
-
+#### `WARN-008`: Running `claude -p` in CI without choosing between `--bare` and the repository's configuration {#warn-008 .warn-title}
 *Origin: official documentation ([headless — bare mode](https://code.claude.com/docs/en/headless#start-faster-with-bare-mode), [permissions — what runs before you trust a folder](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder)).*
 
 In non-interactive mode, the repository's configuration is either not loaded at all, or run without a trust dialog.

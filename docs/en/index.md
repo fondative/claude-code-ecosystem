@@ -34,8 +34,8 @@ import HomeBricks from '../.vitepress/theme/components/HomeBricks.vue'
 <CasUsageCards>
   <CasUsageCard page="modernisation/index.html#modernisation-—-vue-d-ensemble" title="Dashboard" desc="Progress per feature" />
   <CasUsageCard page="mapping/index.html#cartographie-de-la-migration" title="Mapping" desc="Dependencies, migration waves" />
-  <CasUsageCard page="docs/features/regions.html#sec-1" title="Regions spec" desc="14 sections drawn from the legacy" />
-  <CasUsageCard page="docs/features/categories.html#sec-1" title="Categories spec" desc="Another feature, same structure" />
+  <CasUsageCard page="docs/features/regions.html#sec-1" title="Regions module spec" desc="14 sections drawn from the legacy" />
+  <CasUsageCard page="docs/features/categories.html#sec-1" title="Categories module spec" desc="Another feature, same structure" />
   <CasUsageCard page="modernisation/conformity-categories.html#score-global" title="Conformity report" desc="Score and decision" />
 </CasUsageCards>
 </HomeCaseStudy>
